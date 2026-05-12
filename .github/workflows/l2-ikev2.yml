@@ -79,17 +79,48 @@ jobs:
           IKEV2_SERVER_IP: 164.90.212.148
         run: |
           set -euxo pipefail
+          # Enable verbose charon logging to /var/log/charon.log
+          mkdir -p /etc/strongswan.d
+          cat > /etc/strongswan.d/charon-logging.conf <<'CFG'
+          charon {
+              filelog {
+                  charon {
+                      path = /var/log/charon.log
+                      time_format = %b %e %T
+                      ike_name = yes
+                      append = no
+                      default = 2
+                      flush_line = yes
+                  }
+              }
+              # NAT-T detection is mandatory for GHA runners
+              cisco_unity = yes
+          }
+          CFG
+
           # Start the IPsec daemon (starter spawns charon)
           ipsec start || true
-          sleep 2
+          sleep 3
           ipsec status || true
+          ipsec statusall || true
 
+          # Run tests with -s so conftest's print() reaches the log
           pytest ./test-suites/src/amnezia_tests/suites/l2_ikev2/ \
-            -v \
+            -v -s \
             --junit-xml=ikev2-results.xml \
             --tb=short \
-            --reruns 2 \
+            --reruns 1 \
             --reruns-delay 3
+
+      - name: Dump charon log on failure
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo '=== /var/log/charon.log ==='
+          [ -f /var/log/charon.log ] && tail -200 /var/log/charon.log || echo '(no charon.log)'
+          echo '=== /var/log/syslog (ipsec/charon lines) ==='
+          [ -f /var/log/syslog ] && grep -iE 'ipsec|charon' /var/log/syslog | tail -100 || echo '(no syslog)'
 
       # 6. Upload test results as artifact
       - name: Upload test results
