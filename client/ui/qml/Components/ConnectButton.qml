@@ -10,6 +10,7 @@ import Style 1.0
 
 Button {
     id: root
+    objectName: "connectButton"
 
     property string defaultButtonColor: AmneziaStyle.color.paleGray
     property string progressButtonColor: AmneziaStyle.color.paleGray

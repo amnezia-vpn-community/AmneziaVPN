@@ -177,6 +177,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
+                objectName: "configSourceKeyButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
