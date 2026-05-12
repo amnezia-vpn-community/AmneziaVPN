@@ -4,6 +4,7 @@ name: L4 Performance Tests (Weekly)
 #
 # Single workflow, matrix over protocols:
 #   * wireguard  — throughput + latency + stability + DO Spaces baseline
+#   * awg        — throughput + latency through awg0 (10.9.0.0/24)
 #   * openvpn    — throughput + latency through tun0 (10.10.0.0/24)
 #   * ikev2      — throughput + latency through IPsec XFRM (10.8.0.0/24)
 #
@@ -14,6 +15,9 @@ name: L4 Performance Tests (Weekly)
 # Phase 14 (2026-05-12): consolidated previously separate
 # `l4-openvpn.yml` and `l4-ikev2.yml` into this matrix; kept WireGuard as
 # the canonical baseline-comparison leg (DO Spaces upload only on WG).
+#
+# Phase 15 (2026-05-12): added AmneziaWG (`awg`) as a 4th matrix leg.
+# AWG uses port 51821 and subnet 10.9.0.0/24 on the same VPN host.
 
 on:
   schedule:
@@ -21,9 +25,9 @@ on:
   workflow_dispatch:
     inputs:
       protocols:
-        description: 'Comma-separated subset of protocols to run (default = all 3)'
+        description: 'Comma-separated subset of protocols to run (default = all 4)'
         required: false
-        default: 'wireguard,openvpn,ikev2'
+        default: 'wireguard,awg,openvpn,ikev2'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,7 +46,7 @@ jobs:
       # "server is busy running a test".
       max-parallel: 1
       matrix:
-        protocol: [wireguard, openvpn, ikev2]
+        protocol: [wireguard, awg, openvpn, ikev2]
 
     container:
       image: ghcr.io/amnezia-vpn-community/linux-runner:latest
@@ -104,6 +108,33 @@ jobs:
           sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' \
               /tmp/wg0-client.conf
 
+      - name: (AWG) Write AmneziaWG config
+        if: matrix.protocol == 'awg'
+        shell: bash
+        env:
+          AWG_CLIENT_CONFIG_B64: ${{ secrets.AWG_CLIENT_CONFIG_B64 }}
+        run: |
+          set -euxo pipefail
+          if [ -z "${AWG_CLIENT_CONFIG_B64:-}" ]; then
+            echo "::error::AWG_CLIENT_CONFIG_B64 secret is empty"
+            exit 1
+          fi
+          # Same sanitisation as the WG step (and as the python fixture):
+          #   - strip DNS line (no systemd-resolved in container)
+          #   - narrow AllowedIPs to AWG subnet (no iptables in container)
+          echo "$AWG_CLIENT_CONFIG_B64" | base64 -d \
+            | grep -v '^DNS' \
+            | sed 's|^AllowedIPs *=.*|AllowedIPs = 10.9.0.0/24|' \
+            > /tmp/awg0-client.conf
+          chmod 600 /tmp/awg0-client.conf
+          echo "AWG_CLIENT_CONFIG_B64=$AWG_CLIENT_CONFIG_B64" >> "$GITHUB_ENV"
+          echo "--- AWG config (sanitized, secrets redacted) ---"
+          sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' \
+              /tmp/awg0-client.conf
+          echo "--- awg/awg-quick versions ---"
+          awg --version 2>&1 | head -1 || true
+          which awg-quick
+
       - name: (OpenVPN) Install iptables (routing)
         if: matrix.protocol == 'openvpn'
         shell: bash
@@ -160,6 +191,10 @@ jobs:
           SPACES_ENDPOINT: https://fra1.digitaloceanspaces.com
           SPACES_REGION: fra1
           SPACES_BUCKET: amnezia-test-artifacts-fra1
+          # AmneziaWG
+          AWG_CLIENT_CONFIG_B64: ${{ secrets.AWG_CLIENT_CONFIG_B64 }}
+          AWG_SERVER_INTERNAL_IP: 10.9.0.1
+          AWG_SUBNET: 10.9.0.0/24
           # OpenVPN
           OVPN_CONFIG_B64: ${{ secrets.OVPN_CONFIG_B64 }}
           OVPN_SERVER_TUN_IP: 10.10.0.1
@@ -177,6 +212,11 @@ jobs:
                 ./test-suites/src/amnezia_tests/suites/l4_performance/test_latency.py
                 ./test-suites/src/amnezia_tests/suites/l4_performance/test_stability.py
                 ./test-suites/src/amnezia_tests/suites/l4_performance/test_performance_regression.py
+              )
+              ;;
+            awg)
+              TARGETS=(
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_awg_performance.py
               )
               ;;
             openvpn)
@@ -197,6 +237,24 @@ jobs:
             --reruns 1 --reruns-delay 5
 
       # ── Diagnostics on failure ───────────────────────────────────────────
+
+      - name: (AWG) Dump awg state on failure
+        if: failure() && matrix.protocol == 'awg'
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo '--- ip link ---'
+          ip link show || true
+          echo '--- ip addr (awg0) ---'
+          ip addr show awg0 || echo '(no awg0)'
+          echo '--- ip route ---'
+          ip route show || true
+          echo '--- awg show ---'
+          awg show 2>&1 || true
+          echo '--- awg config (REDACTED) ---'
+          [ -f /tmp/awg0-client.conf ] && \
+            sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/awg0-client.conf \
+            || echo '(no awg config file)'
 
       - name: (OpenVPN) Dump openvpn log on failure
         if: failure() && matrix.protocol == 'openvpn'
