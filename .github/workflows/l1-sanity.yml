@@ -24,8 +24,9 @@ jobs:
       - name: Download AmneziaVPN binary
         run: |
           wget -q -O AmneziaVPN_linux.tar "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
-          tar xf AmneziaVPN_linux.tar
-          BIN=$(find . -name "*.bin" | head -1)
+          mkdir -p amnezia_bin
+          tar xf AmneziaVPN_linux.tar -C amnezia_bin
+          BIN=$(find amnezia_bin -name "*.bin" | head -1)
           chmod +x "$BIN"
           mv "$BIN" AmneziaVPN_Linux_Installer.bin
           echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
