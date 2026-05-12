@@ -4,77 +4,66 @@ on:
   push:
     branches: [main, dev]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
+  workflow_dispatch:  # manual trigger
 
 jobs:
   l1-sanity:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
+      # 1. Checkout test-suites (private repo)
+      - name: Checkout test-suites
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          repository: amnezia-vpn-community/test-suites
+          token: ${{ secrets.GHCR_PAT }}
+          path: test-suites
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            xvfb \
-            x11-utils \
-            libx11-6 \
-            libxext6 \
-            libxcb1 \
-            libxcb-icccm4 \
-            libxcb-image0 \
-            libxcb-keysyms1 \
-            libxcb-randr0 \
-            libxcb-render-util0 \
-            libxcb-xinerama0 \
-            libxcb-xkb1 \
-            libxkbcommon-x11-0 \
-            p7zip-full \
-            xdotool
-
+      # 2. Download AmneziaVPN binary
       - name: Download AmneziaVPN binary
         run: |
-          # Get latest release URL for Linux .bin or .tar
-          RELEASE_URL=$(curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/latest \
-            | python3 -c "
-          import json, sys
-          r = json.load(sys.stdin)
-          assets = r.get('assets', [])
-          # Try .tar first (newer releases), then .bin
-          for a in assets:
-            name = a['name'].lower()
-            if ('linux' in name or 'x64' in name) and (name.endswith('.tar') or name.endswith('.bin')):
-              print(a['browser_download_url'])
-              break
-          ")
-          echo "Downloading: $RELEASE_URL"
-          curl -L "$RELEASE_URL" -o amnezia_artifact
-          ls -lh amnezia_artifact
+          wget -q -O AmneziaVPN_linux.tar "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
+          tar xf AmneziaVPN_linux.tar
+          BIN=$(find . -name "*.bin" | head -1)
+          chmod +x "$BIN"
+          mv "$BIN" AmneziaVPN_Linux_Installer.bin
+          echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
 
-      - name: Install test dependencies
-        run: |
-          cd .github/test-runner
-          pip install --quiet -r requirements.txt
+      # 3. Log in to GHCR for linux-runner image
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u amneziabot --password-stdin
 
+      # 4. Run L1 tests via linux-runner Docker image
       - name: Run L1 sanity tests
         run: |
-          cd .github/test-runner
-          export AMNEZIA_BUILD_URL="${{ github.workspace }}/amnezia_artifact"
-          pytest amnezia_tests/suites/l1_sanity/ -v --tb=short \
-            --timeout=120
+          docker run --rm \
+            --privileged \
+            -v "${{ github.workspace }}/test-suites:/workspace" \
+            -v "${{ github.workspace }}/AmneziaVPN_Linux_Installer.bin:/workspace/AmneziaVPN_Linux_Installer.bin" \
+            -e AMNEZIABIN=/workspace/AmneziaVPN_Linux_Installer.bin \
+            -e DISPLAY=:99 \
+            ghcr.io/amnezia-vpn-community/linux-runner:latest \
+            pytest tests/l1/ -v --junitxml=/workspace/results.xml --tb=short
 
-      - name: Upload test artifacts
+      # 5. Upload results
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: l1-sanity-artifacts
-          path: /tmp/amnezia-artifacts/
-          if-no-files-found: ignore
+          name: l1-results
+          path: test-suites/results.xml
+
+      # 6. Notify orchestrator (best-effort)
+      - name: Notify orchestrator
+        if: always()
+        continue-on-error: true
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
+          curl -sf -X POST https://104-248-29-142.sslip.io/api/v1/runs \
+            -u "$ORCH_USER:$ORCH_PASS" \
+            -H 'Content-Type: application/json' \
+            -d "{\"level\":\"L1\",\"suite\":\"build-sanity\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"${STATUS}\",\"priority\":10}" || true
+        env:
+          ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
+          ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
