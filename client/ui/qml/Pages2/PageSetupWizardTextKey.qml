@@ -57,6 +57,7 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: textKey
+                objectName: "configKeyInput"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -79,6 +80,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
+                objectName: "configKeyContinueButton"
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
