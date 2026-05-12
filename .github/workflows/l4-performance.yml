@@ -32,9 +32,14 @@ jobs:
         env:
           WG_CLIENT_CONFIG_B64: ${{ secrets.WG_CLIENT_CONFIG_B64 }}
         run: |
-          echo "$WG_CLIENT_CONFIG_B64" | base64 -d > /tmp/wg0-client.conf
+          # Decode and strip the DNS= line — resolvconf in container falls
+          # back to systemd-resolved DBus which isn't available, causing
+          # `sd_bus_open_system: No such file or directory` and wg-quick rc=1.
+          echo "$WG_CLIENT_CONFIG_B64" | base64 -d | grep -v '^DNS' > /tmp/wg0-client.conf
           chmod 600 /tmp/wg0-client.conf
           echo "WG_CONFIG_PATH=/tmp/wg0-client.conf" >> $GITHUB_ENV
+          echo "--- WG config (sanitized, secrets redacted) ---"
+          sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/wg0-client.conf
 
       - name: Run L4 performance tests
         run: |
