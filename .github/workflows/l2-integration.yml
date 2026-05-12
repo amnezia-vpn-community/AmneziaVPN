@@ -40,11 +40,11 @@ jobs:
           mv "$BIN" AmneziaVPN_Linux_Installer.bin
           echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
 
-      # 4. Install AmneziaVPN
+      # 4. Install AmneziaVPN (root /opt/AmneziaVPN required — Qt IFW needs absolute path)
       - name: Install AmneziaVPN
         run: |
           chmod +x AmneziaVPN_Linux_Installer.bin
-          ./AmneziaVPN_Linux_Installer.bin --root --accept-licenses --confirm-command install
+          ./AmneziaVPN_Linux_Installer.bin --root /opt/AmneziaVPN --accept-licenses --confirm-command install
 
       # 5. Write VPN config from secret
       - name: Write VPN config
