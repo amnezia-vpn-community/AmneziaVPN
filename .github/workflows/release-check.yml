@@ -18,11 +18,8 @@ jobs:
         run: |
           UPSTREAM_REPO="${UPSTREAM_REPO:-amnezia-vpn/amnezia-client}"
           echo "Checking upstream repo: $UPSTREAM_REPO"
-          LATEST=$(curl -sSf \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest" \
-            | jq -r '.tag_name')
+          # Use gh api — token stays in env, never appears in process args (§4.3)
+          LATEST=$(gh api "repos/${UPSTREAM_REPO}/releases/latest" --jq '.tag_name')
           if [ -z "$LATEST" ] || [ "$LATEST" = "null" ]; then
             echo "::error::Could not fetch latest release from $UPSTREAM_REPO"
             exit 1
@@ -80,11 +77,10 @@ jobs:
         run: |
           VERSION="${{ steps.upstream.outputs.version }}"
           echo "Triggering l1-sanity.yml for version $VERSION"
-          curl -sSf -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/l1-sanity.yml/dispatches" \
-            -d "{\"ref\":\"dev\",\"inputs\":{}}"
+          # Use gh workflow run — token stays in env, never in process args (§4.3)
+          gh workflow run l1-sanity.yml \
+            --repo "${{ github.repository }}" \
+            --ref dev
           echo "l1-sanity.yml triggered"
 
       - name: Trigger L2 integration tests
@@ -94,11 +90,10 @@ jobs:
         run: |
           VERSION="${{ steps.upstream.outputs.version }}"
           echo "Triggering l2-integration.yml for version $VERSION"
-          curl -sSf -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/l2-integration.yml/dispatches" \
-            -d "{\"ref\":\"dev\",\"inputs\":{}}"
+          # Use gh workflow run — token stays in env, never in process args (§4.3)
+          gh workflow run l2-integration.yml \
+            --repo "${{ github.repository }}" \
+            --ref dev
           echo "l2-integration.yml triggered"
 
       - name: Log result
