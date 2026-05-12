@@ -64,10 +64,10 @@ jobs:
 
     steps:
       - name: Checkout AmneziaVPN
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout test-suites
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: amnezia-vpn-community/test-suites
           token: ${{ secrets.GHCR_PAT }}
@@ -276,10 +276,10 @@ jobs:
 
     steps:
       - name: Checkout AmneziaVPN
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout test-suites (private)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: amnezia-vpn-community/test-suites
           token: ${{ secrets.GHCR_PAT }}
@@ -301,7 +301,7 @@ jobs:
           lsmod | grep amneziawg
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 

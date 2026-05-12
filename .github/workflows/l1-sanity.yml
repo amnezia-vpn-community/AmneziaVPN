@@ -37,7 +37,7 @@ jobs:
     steps:
       # 1. Checkout test-suites (private repo)
       - name: Checkout test-suites
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: amnezia-vpn-community/test-suites
           token: ${{ secrets.GHCR_PAT }}
