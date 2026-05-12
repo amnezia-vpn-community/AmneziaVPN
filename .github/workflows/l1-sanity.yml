@@ -1,0 +1,74 @@
+name: L1 Sanity Tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  l1-sanity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            x11-utils \
+            libx11-6 \
+            libxext6 \
+            p7zip-full \
+            xdotool
+
+      - name: Download AmneziaVPN binary
+        run: |
+          # Get latest release URL for Linux .bin
+          RELEASE_URL=$(curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/latest \
+            | python3 -c "
+          import json, sys
+          r = json.load(sys.stdin)
+          assets = r.get('assets', [])
+          # Try .tar first (newer releases), then .bin
+          for a in assets:
+            name = a['name'].lower()
+            if ('linux' in name or 'x64' in name) and (name.endswith('.tar') or name.endswith('.bin')):
+              print(a['browser_download_url'])
+              break
+          ")
+          echo "Downloading: $RELEASE_URL"
+          curl -L "$RELEASE_URL" -o amnezia_artifact
+          ls -lh amnezia_artifact
+
+      - name: Install test dependencies
+        run: |
+          cd .github/test-runner
+          pip install --quiet -r requirements.txt
+
+      - name: Run L1 sanity tests
+        env:
+          AMNEZIA_BUILD_URL: "file://${{ github.workspace }}/amnezia_artifact"
+        run: |
+          cd .github/test-runner
+          # Set AMNEZIA_BUILD_URL to local file path
+          export AMNEZIA_BUILD_URL="${{ github.workspace }}/amnezia_artifact"
+          pytest amnezia_tests/suites/l1_sanity/ -v --tb=short -m l1 \
+            --timeout=120
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l1-sanity-artifacts
+          path: /tmp/amnezia-artifacts/
+          if-no-files-found: ignore
