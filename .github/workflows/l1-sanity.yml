@@ -11,6 +11,25 @@ jobs:
   l1-sanity:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        # Three most recent upstream AmneziaVPN releases. Keep in sync with
+        # test-suites/src/amnezia_tests/versions.py::VERSIONS.
+        version: ["4.8.15.4", "4.8.15.0", "4.8.14.5"]
+        include:
+          # SHA-256 of AmneziaVPN_Linux_Installer.bin (post-extraction from
+          # the upstream linux_x64.tar). Empty string => SHA-256 test skips.
+          # Only pin known-good hashes here; unknown versions skip the check.
+          - version: "4.8.15.4"
+            build_sha256: "a74f82c08f10d53b95697142d06053e0496e5508ea1ef50e72273ec818521737"
+          - version: "4.8.15.0"
+            build_sha256: ""
+          - version: "4.8.14.5"
+            build_sha256: ""
+
+    name: l1-sanity (${{ matrix.version }})
+
     steps:
       # 1. Checkout test-suites (private repo)
       - name: Checkout test-suites
@@ -20,10 +39,15 @@ jobs:
           token: ${{ secrets.GHCR_PAT }}
           path: test-suites
 
-      # 2. Download AmneziaVPN binary
-      - name: Download AmneziaVPN binary
+      # 2. Download AmneziaVPN binary for this matrix version
+      - name: Download AmneziaVPN binary (${{ matrix.version }})
+        env:
+          AMNEZIA_VERSION: ${{ matrix.version }}
         run: |
-          wget -q -O AmneziaVPN_linux.tar "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
+          set -euo pipefail
+          URL="https://github.com/amnezia-vpn/amnezia-client/releases/download/${AMNEZIA_VERSION}/AmneziaVPN_${AMNEZIA_VERSION}_linux_x64.tar"
+          echo "Downloading: $URL"
+          wget -q -O AmneziaVPN_linux.tar "$URL"
           mkdir -p amnezia_bin
           tar xf AmneziaVPN_linux.tar -C amnezia_bin
           BIN=$(find amnezia_bin -name "*.bin" | head -1)
@@ -36,17 +60,18 @@ jobs:
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u amneziabot --password-stdin
 
       # 4. Run L1 tests via linux-runner Docker image
-      - name: Run L1 sanity tests
+      - name: Run L1 sanity tests (${{ matrix.version }})
         env:
-          # SHA256 of AmneziaVPN_Linux_Installer.bin extracted from
-          # AmneziaVPN_4.8.15.4_linux_x64.tar (hardcoded, update on version bump)
-          AMNEZIA_BUILD_SHA256: a74f82c08f10d53b95697142d06053e0496e5508ea1ef50e72273ec818521737
+          AMNEZIA_TEST_VERSION: ${{ matrix.version }}
+          # Empty string for unpinned versions => SHA-256 test cleanly skips.
+          AMNEZIA_BUILD_SHA256: ${{ matrix.build_sha256 }}
         run: |
           docker run --rm \
             --privileged \
             -v "${{ github.workspace }}/test-suites:/workspace" \
             -v "${{ github.workspace }}/AmneziaVPN_Linux_Installer.bin:/workspace/AmneziaVPN_Linux_Installer.bin" \
             -e AMNEZIABIN=/workspace/AmneziaVPN_Linux_Installer.bin \
+            -e AMNEZIA_TEST_VERSION="$AMNEZIA_TEST_VERSION" \
             -e AMNEZIA_BUILD_SHA256="$AMNEZIA_BUILD_SHA256" \
             -e DISPLAY=:99 \
             ghcr.io/amnezia-vpn-community/linux-runner:latest \
@@ -57,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: l1-results
+          name: l1-results-${{ matrix.version }}
           path: test-suites/results.xml
 
       # 6. Notify orchestrator (best-effort)
@@ -69,7 +94,7 @@ jobs:
           curl -sf -X POST https://104-248-29-142.sslip.io/api/v1/runs \
             -u "$ORCH_USER:$ORCH_PASS" \
             -H 'Content-Type: application/json' \
-            -d "{\"level\":\"L1\",\"suite\":\"build-sanity\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"${STATUS}\",\"priority\":10}" || true
+            -d "{\"level\":\"L1\",\"suite\":\"build-sanity\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"${STATUS}\",\"priority\":10,\"metadata\":{\"amnezia_version\":\"${{ matrix.version }}\"}}" || true
         env:
           ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
           ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
