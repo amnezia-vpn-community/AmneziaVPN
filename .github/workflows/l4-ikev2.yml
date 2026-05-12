@@ -42,6 +42,7 @@ jobs:
           path: test-suites
 
       - name: Install strongSwan
+        shell: bash
         run: |
           set -euxo pipefail
           apt-get update -qq
@@ -55,6 +56,7 @@ jobs:
         run: pip install -e ./test-suites -q
 
       - name: Configure verbose charon logging
+        shell: bash
         run: |
           mkdir -p /etc/strongswan.d
           cat > /etc/strongswan.d/charon-logging.conf <<'CFG'
@@ -77,6 +79,7 @@ jobs:
           ipsec status || true
 
       - name: Run L4 IKEv2 performance tests
+        shell: bash
         env:
           VPN_IKEV2_PSK: ${{ secrets.VPN_IKEV2_PSK }}
           IKEV2_SERVER_IP: 164.90.212.148

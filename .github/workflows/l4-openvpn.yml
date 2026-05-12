@@ -44,11 +44,13 @@ jobs:
         run: pip install -e ./test-suites -q
 
       - name: Install iptables (openvpn routing)
+        shell: bash
         run: |
           apt-get update -qq
           apt-get install -y -qq iptables iproute2 2>&1 | tail -3
 
       - name: Run L4 OpenVPN performance tests
+        shell: bash
         env:
           OVPN_CONFIG_B64: ${{ secrets.OVPN_CONFIG_B64 }}
           OVPN_SERVER_TUN_IP: 10.10.0.1
