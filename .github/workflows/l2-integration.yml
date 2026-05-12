@@ -29,7 +29,14 @@ jobs:
           token: ${{ secrets.GHCR_PAT }}
           path: test-suites
 
-      # 3. Download AmneziaVPN binary
+      # 3. Install system dependencies for wg-quick
+      - name: Install wg-quick dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq iptables iproute2 2>&1 | tail -5
+          echo "iptables: $(iptables --version)"
+
+      # 4. Download AmneziaVPN binary
       - name: Download AmneziaVPN binary
         run: |
           wget -q -O AmneziaVPN_linux.tar "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
@@ -40,32 +47,29 @@ jobs:
           mv "$BIN" AmneziaVPN_Linux_Installer.bin
           echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
 
-      # 4. Install AmneziaVPN (--root requires absolute path for Qt IFW)
+      # 5. Install AmneziaVPN (--root requires absolute path for Qt IFW)
       - name: Install AmneziaVPN
         run: |
           chmod +x AmneziaVPN_Linux_Installer.bin
           ./AmneziaVPN_Linux_Installer.bin --root /opt/AmneziaVPN --accept-licenses --confirm-command install
 
-      # 5. Write VPN config from secret
+      # 6. Write VPN config from secret
       - name: Write VPN config
         run: |
           mkdir -p /workspace/vpn-config
           echo "${{ secrets.WG_CLIENT_CONFIG_B64 }}" | base64 -d > /workspace/vpn-config/wg0-client.conf
           chmod 600 /workspace/vpn-config/wg0-client.conf
           # Remove DNS= directive: wg-quick calls resolvconf for DNS which requires
-          # systemd/D-Bus — unavailable in GitHub Actions containers. DNS tests verify
-          # resolution works while tunnel is up (container default resolver suffices).
+          # systemd/D-Bus — unavailable in GitHub Actions containers.
           sed -i '/^DNS\s*=/Id' /workspace/vpn-config/wg0-client.conf
           echo "VPN config written: $(wc -l < /workspace/vpn-config/wg0-client.conf) lines"
-          echo "Config preview (no secrets):"
-          grep -v "PrivateKey\|PublicKey\|PresharedKey" /workspace/vpn-config/wg0-client.conf || true
 
-      # 6. Install test dependencies
+      # 7. Install test dependencies
       - name: Install test dependencies
         run: |
           pip install -e ./test-suites -q
 
-      # 7. Run L2 integration tests
+      # 8. Run L2 integration tests
       - name: Run L2 integration tests
         env:
           VPN_CONFIG_PATH: /workspace/vpn-config/wg0-client.conf
@@ -75,7 +79,7 @@ jobs:
             --junit-xml=results.xml \
             --tb=short
 
-      # 8. Upload results as artifact
+      # 9. Upload results as artifact
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -83,7 +87,7 @@ jobs:
           name: l2-results
           path: results.xml
 
-      # 9. Notify orchestrator (best-effort)
+      # 10. Notify orchestrator (best-effort)
       - name: Notify orchestrator
         if: always()
         continue-on-error: true
