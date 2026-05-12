@@ -115,6 +115,39 @@ jobs:
           name: l1-results-${{ matrix.version }}
           path: test-suites/results.xml
 
+      # 5b. Upload coverage report to DO Spaces (best-effort)
+      # Only run once per matrix (first version) to avoid clobbering.
+      - name: Upload coverage report to DO Spaces
+        if: always() && matrix.version == '4.8.15.4'
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_DEFAULT_REGION: fra1
+          SPACES_BUCKET: ${{ secrets.SPACES_BUCKET }}
+        run: |
+          set -euo pipefail
+          if [ ! -f test-suites/coverage.xml ]; then
+            echo "coverage.xml not produced — skipping upload"; exit 0
+          fi
+          DEST="s3://${SPACES_BUCKET}/artifacts/coverage/l1/${{ github.run_id }}/"
+          aws s3 cp test-suites/coverage.xml "${DEST}coverage.xml" \
+            --endpoint-url https://fra1.digitaloceanspaces.com
+          if [ -f test-suites/coverage.json ]; then
+            aws s3 cp test-suites/coverage.json "${DEST}coverage.json" \
+              --endpoint-url https://fra1.digitaloceanspaces.com
+          fi
+          echo "Coverage uploaded: ${DEST}coverage.xml"
+
+      - name: Upload coverage report as artifact
+        if: always() && matrix.version == '4.8.15.4'
+        uses: actions/upload-artifact@v4
+        with:
+          name: l1-coverage
+          path: |
+            test-suites/coverage.xml
+            test-suites/coverage.json
+
       # 6. Parse test results for PR comment
       - name: Parse test results for PR comment
         if: always() && github.event_name == 'pull_request'

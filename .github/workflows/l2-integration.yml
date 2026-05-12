@@ -119,6 +119,55 @@ jobs:
           name: l2-results
           path: results.xml
 
+      # 9b. Upload coverage report to DO Spaces (best-effort)
+      - name: Upload coverage report to DO Spaces
+        if: always()
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          SPACES_BUCKET: ${{ secrets.SPACES_BUCKET }}
+          GH_RUN_ID: ${{ github.run_id }}
+          COVERAGE_SUITE: l2
+        run: |
+          set -euo pipefail
+          if [ ! -f coverage.xml ]; then
+            echo "coverage.xml not produced — skipping upload"; exit 0
+          fi
+          # boto3 is already installed via test-suites (pip install -e ./test-suites)
+          python3 - <<'PYEOF'
+          import os, sys
+          import boto3
+          from botocore.client import Config
+          bucket = os.environ['SPACES_BUCKET']
+          run_id = os.environ['GH_RUN_ID']
+          suite  = os.environ['COVERAGE_SUITE']
+          session = boto3.session.Session()
+          client = session.client('s3',
+              region_name='fra1',
+              endpoint_url='https://fra1.digitaloceanspaces.com',
+              aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+              config=Config(s3={'addressing_style': 'virtual'}),
+          )
+          prefix = f'artifacts/coverage/{suite}/{run_id}/'
+          for fname in ('coverage.xml', 'coverage.json'):
+              if os.path.exists(fname):
+                  key = prefix + fname
+                  ctype = 'application/xml' if fname.endswith('.xml') else 'application/json'
+                  client.upload_file(fname, bucket, key, ExtraArgs={'ContentType': ctype})
+                  print(f'Uploaded s3://{bucket}/{key}')
+          PYEOF
+
+      - name: Upload coverage report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l2-coverage
+          path: |
+            coverage.xml
+            coverage.json
+
       # 10. Parse test results for PR comment
       - name: Parse test results for PR comment
         if: always() && github.event_name == 'pull_request'
