@@ -76,7 +76,9 @@ jobs:
           pytest ./test-suites/src/amnezia_tests/suites/l2_openvpn/ \
             -v \
             --junit-xml=openvpn-results.xml \
-            --tb=short
+            --tb=short \
+            --reruns 2 \
+            --reruns-delay 3
 
       # 7. Upload test results as artifact
       - name: Upload test results

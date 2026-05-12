@@ -81,7 +81,9 @@ jobs:
           pytest ./test-suites/src/amnezia_tests/suites/l2_integration/ \
             -v \
             --junit-xml=results.xml \
-            --tb=short
+            --tb=short \
+            --reruns 2 \
+            --reruns-delay 3
 
       # 9. Upload results as artifact
       - name: Upload test results

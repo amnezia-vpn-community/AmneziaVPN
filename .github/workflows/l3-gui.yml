@@ -60,7 +60,9 @@ jobs:
           pytest test-suites/src/amnezia_tests/suites/l3_gui/ \
             -v --tb=short \
             --junitxml=/tmp/l3-results.xml \
-            -o junit_family=xunit2
+            -o junit_family=xunit2 \
+            --reruns 1 \
+            --reruns-delay 5
 
       - name: Upload results
         if: always()

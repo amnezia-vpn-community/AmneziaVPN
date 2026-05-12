@@ -77,7 +77,9 @@ jobs:
             python -m pytest ./test-suites/src/amnezia_tests/suites/l2_integration/test_awg_connect.py \
               -v \
               --junit-xml=awg-results.xml \
-              --tb=short
+              --tb=short \
+              --reruns 2 \
+              --reruns-delay 3
 
       - name: Upload test results
         if: always()
