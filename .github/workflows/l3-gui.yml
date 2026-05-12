@@ -1,0 +1,68 @@
+name: L3 GUI Tests (Nightly)
+on:
+  schedule:
+    - cron: '0 2 * * *'   # daily at 02:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/l3-gui.yml'
+
+jobs:
+  l3-gui:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/amnezia-vpn-community/linux-runner:latest
+      credentials:
+        username: amneziabot
+        password: ${{ secrets.GHCR_PAT }}
+      options: >-
+        --cap-add NET_ADMIN
+        --device /dev/net/tun
+
+    steps:
+      - name: Checkout test-suites
+        uses: actions/checkout@v4
+        with:
+          repository: amnezia-vpn-community/test-suites
+          token: ${{ secrets.GHCR_PAT }}
+          path: test-suites
+
+      - name: Install test dependencies
+        run: pip install -q -e test-suites/
+
+      - name: Download AmneziaVPN installer
+        run: |
+          curl -fsSL -o /tmp/AmneziaVPN.bin \
+            "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux.bin"
+          chmod +x /tmp/AmneziaVPN.bin
+          echo "AMNEZIA_BIN=/tmp/AmneziaVPN.bin" >> $GITHUB_ENV
+
+      - name: Run L3 GUI tests
+        run: |
+          pytest test-suites/src/amnezia_tests/suites/l3_gui/ \
+            -v --tb=short \
+            --junitxml=/tmp/l3-results.xml \
+            -o junit_family=xunit2
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l3-gui-results
+          path: |
+            /tmp/l3-results.xml
+            /tmp/amnezia-artifacts/
+
+      - name: Notify orchestrator
+        if: always()
+        env:
+          ORCH_URL: https://104-248-29-142.sslip.io
+          ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
+          ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
+          curl -sf -u "$ORCH_USER:$ORCH_PASS" \
+            -X POST "$ORCH_URL/api/v1/runs" \
+            -H "Content-Type: application/json" \
+            -d "{\"suite\":\"l3_gui\",\"status\":\"$STATUS\",\"commit\":\"${{ github.sha }}\"}" || true
