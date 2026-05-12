@@ -57,12 +57,33 @@ jobs:
           sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/wg0-client.conf
 
       - name: Run L4 performance tests
+        env:
+          SPACES_KEY: ${{ secrets.DO_SPACES_KEY }}
+          SPACES_SECRET: ${{ secrets.DO_SPACES_SECRET }}
+          SPACES_ENDPOINT: https://fra1.digitaloceanspaces.com
+          SPACES_REGION: fra1
+          SPACES_BUCKET: amnezia-test-artifacts-fra1
         run: |
           pytest test-suites/src/amnezia_tests/suites/l4_performance/ \
             -v --tb=short \
             --junitxml=/tmp/l4-results.xml \
             -o junit_family=xunit2 \
             -s
+
+      - name: Add baseline summary
+        if: always()
+        run: |
+          {
+            echo "## L4 Performance Results"
+            echo ""
+            if [ -f /tmp/l4_metrics.txt ]; then
+              echo '```'
+              cat /tmp/l4_metrics.txt
+              echo '```'
+            else
+              echo "_No metrics file produced (regression test skipped or failed early)._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload results
         if: always()
