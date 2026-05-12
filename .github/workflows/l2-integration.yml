@@ -81,9 +81,35 @@ jobs:
           pytest ./test-suites/src/amnezia_tests/suites/l2_integration/ \
             -v \
             --junit-xml=results.xml \
+            --cov=amnezia_tests \
+            --cov-report=xml:coverage.xml \
             --tb=short \
             --reruns 2 \
             --reruns-delay 3
+
+      # 8b. Upload coverage.xml to DigitalOcean Spaces (best-effort)
+      - name: Upload coverage to DO Spaces
+        if: always()
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_DEFAULT_REGION: fra1
+        run: |
+          set -euo pipefail
+          if [ ! -f coverage.xml ]; then
+            echo "::warning::coverage.xml not found — skipping upload"
+            exit 0
+          fi
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::warning::DO_SPACES_KEY/SECRET not configured — skipping upload"
+            exit 0
+          fi
+          pip install --quiet awscli
+          aws --endpoint-url https://fra1.digitaloceanspaces.com \
+            s3 cp coverage.xml \
+            s3://amnezia-test-artifacts-fra1/coverage/l2/coverage.xml \
+            --acl private
 
       # 9. Upload results as artifact
       - name: Upload test results
