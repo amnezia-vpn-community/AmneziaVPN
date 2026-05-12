@@ -79,7 +79,7 @@ jobs:
             -e AMNEZIA_BUILD_SHA256="$AMNEZIA_BUILD_SHA256" \
             -e DISPLAY=:99 \
             ghcr.io/amnezia-vpn-community/linux-runner:latest \
-            bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ -v --junitxml=/workspace/results.xml --cov=amnezia_tests --cov-report=xml:/workspace/coverage.xml --tb=short"
+            bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ tests/ -v --junitxml=/workspace/results.xml --cov=amnezia_tests --cov-report=xml:/workspace/coverage.xml --cov-report=json:/workspace/coverage.json --tb=short"
 
       # 4b. Upload coverage.xml to DigitalOcean Spaces (canonical matrix entry only)
       #     The bucket key is fixed per suite, so only upload from one matrix
