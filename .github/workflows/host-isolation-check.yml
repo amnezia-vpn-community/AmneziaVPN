@@ -1,0 +1,92 @@
+name: Host Isolation Check
+
+# Ensures that no workflow in .github/workflows/ uses `runs-on: self-hosted`
+# without an explicit `do-managed` label. This prevents tests from accidentally
+# running on the OpenClaw runtime host or any unmanaged self-hosted runner.
+#
+# Rule: runs-on: self-hosted  →  FAIL (must use ubuntu-latest or a labeled DO pool)
+#       runs-on: [self-hosted, do-managed]  →  OK
+#       runs-on: ubuntu-latest  →  OK
+#       runs-on: <docker-image>  →  OK (handled via container: key, not runs-on)
+#
+# This workflow itself is lightweight — it runs only lint/static analysis,
+# no VPN stack, no AmneziaVPN runtime.
+
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - '.github/workflows/**'
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  host-isolation-lint:
+    name: Check workflow runner isolation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for unlabeled self-hosted runners
+        shell: python3 {0}
+        run: |
+          import sys
+          import re
+          from pathlib import Path
+
+          workflows_dir = Path('.github/workflows')
+          violations = []
+
+          for wf_file in sorted(workflows_dir.glob('*.yml')):
+              content = wf_file.read_text()
+              lines = content.splitlines()
+
+              for lineno, line in enumerate(lines, start=1):
+                  stripped = line.strip()
+
+                  # Match `runs-on: self-hosted` (bare, no labels)
+                  # Also catches `runs-on: [self-hosted]` (single-element list)
+                  bare_self_hosted = re.search(
+                      r'runs-on\s*:\s*(?:self-hosted|\[\s*self-hosted\s*\])',
+                      stripped,
+                  )
+                  if not bare_self_hosted:
+                      continue
+
+                  # Allow if `do-managed` label is present anywhere in the
+                  # same `runs-on` value (multi-line arrays collapse to one line
+                  # in most editors, but handle both forms).
+                  if 'do-managed' in line:
+                      continue
+
+                  # Check if this is a multi-line array — look ahead for
+                  # `do-managed` within the next 5 lines.
+                  context_window = lines[lineno - 1 : lineno + 4]
+                  if any('do-managed' in l for l in context_window):
+                      continue
+
+                  violations.append(
+                      f'{wf_file.name}:{lineno}: bare `self-hosted` runner '
+                      f'without `do-managed` label → {stripped!r}'
+                  )
+
+          if violations:
+              print('::error::Host isolation violations found:')
+              for v in violations:
+                  print(f'  ✗ {v}')
+              print()
+              print('Fix: either use `runs-on: ubuntu-latest` (GitHub-hosted)')
+              print('or add the `do-managed` label: `runs-on: [self-hosted, do-managed]`')
+              print()
+              print('Background: running test suites on unmanaged self-hosted runners')
+              print('can cause VPN tunnel setup on the OpenClaw runtime host, which is')
+              print('prohibited (see SOUL.md HOST ISOLATION rule).')
+              sys.exit(1)
+          else:
+              print(f'✅ All {len(list(workflows_dir.glob("*.yml")))} workflow(s) pass host isolation check.')
+              sys.exit(0)
