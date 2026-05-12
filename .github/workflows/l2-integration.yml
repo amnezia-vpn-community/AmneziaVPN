@@ -40,7 +40,7 @@ jobs:
           mv "$BIN" AmneziaVPN_Linux_Installer.bin
           echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
 
-      # 4. Install AmneziaVPN (root /opt/AmneziaVPN required — Qt IFW needs absolute path)
+      # 4. Install AmneziaVPN (--root requires absolute path for Qt IFW)
       - name: Install AmneziaVPN
         run: |
           chmod +x AmneziaVPN_Linux_Installer.bin
@@ -52,21 +52,13 @@ jobs:
           mkdir -p /workspace/vpn-config
           echo "${{ secrets.WG_CLIENT_CONFIG_B64 }}" | base64 -d > /workspace/vpn-config/wg0-client.conf
           chmod 600 /workspace/vpn-config/wg0-client.conf
+          # Remove DNS= directive: wg-quick calls resolvconf for DNS which requires
+          # systemd/D-Bus — unavailable in GitHub Actions containers. DNS tests verify
+          # resolution works while tunnel is up (container default resolver suffices).
+          sed -i '/^DNS\s*=/Id' /workspace/vpn-config/wg0-client.conf
           echo "VPN config written: $(wc -l < /workspace/vpn-config/wg0-client.conf) lines"
-
-      # 5b. Prepare container environment for wg-quick
-      - name: Prepare wg-quick environment
-        run: |
-          # GitHub Actions containers run without systemd/D-Bus.
-          # wg-quick calls resolvconf when DNS= is set in config, which fails with
-          # "sd_bus_open_system: No such file or directory". Stub it out for CI.
-          if ! command -v resolvconf > /dev/null 2>&1; then
-            printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/resolvconf
-            chmod +x /usr/local/bin/resolvconf
-            echo "Installed stub resolvconf"
-          else
-            echo "resolvconf already present: $(which resolvconf)"
-          fi
+          echo "Config preview (no secrets):"
+          grep -v "PrivateKey\|PublicKey\|PresharedKey" /workspace/vpn-config/wg0-client.conf || true
 
       # 6. Install test dependencies
       - name: Install test dependencies
