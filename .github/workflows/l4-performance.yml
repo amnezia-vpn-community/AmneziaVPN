@@ -1,0 +1,65 @@
+name: L4 Performance Tests (Weekly)
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Every Sunday at 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  l4-performance:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/amnezia-vpn-community/linux-runner:latest
+      credentials:
+        username: amneziabot
+        password: ${{ secrets.GHCR_PAT }}
+      options: >-
+        --cap-add NET_ADMIN
+        --device /dev/net/tun
+
+    steps:
+      - name: Checkout test-suites
+        uses: actions/checkout@v4
+        with:
+          repository: amnezia-vpn-community/test-suites
+          token: ${{ secrets.GHCR_PAT }}
+          path: test-suites
+
+      - name: Install test dependencies
+        run: pip install -q -e test-suites/
+
+      - name: Write WG config
+        env:
+          WG_CLIENT_CONFIG_B64: ${{ secrets.WG_CLIENT_CONFIG_B64 }}
+        run: |
+          echo "$WG_CLIENT_CONFIG_B64" | base64 -d > /tmp/wg0-client.conf
+          chmod 600 /tmp/wg0-client.conf
+          echo "WG_CONFIG_PATH=/tmp/wg0-client.conf" >> $GITHUB_ENV
+
+      - name: Run L4 performance tests
+        run: |
+          pytest test-suites/src/amnezia_tests/suites/l4_performance/ \
+            -v --tb=short \
+            --junitxml=/tmp/l4-results.xml \
+            -o junit_family=xunit2 \
+            -s
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l4-performance-results
+          path: /tmp/l4-results.xml
+
+      - name: Notify orchestrator
+        if: always()
+        env:
+          ORCH_URL: https://104-248-29-142.sslip.io
+          ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
+          ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
+          curl -sf -u "$ORCH_USER:$ORCH_PASS" \
+            -X POST "$ORCH_URL/api/v1/runs" \
+            -H "Content-Type: application/json" \
+            -d "{\"suite\":\"l4_performance\",\"status\":\"$STATUS\",\"commit\":\"${{ github.sha }}\"}" || true
