@@ -45,7 +45,7 @@ jobs:
             -e AMNEZIABIN=/workspace/AmneziaVPN_Linux_Installer.bin \
             -e DISPLAY=:99 \
             ghcr.io/amnezia-vpn-community/linux-runner:latest \
-            bash -c "cd /workspace && pip install -e . -q && pytest tests/l1/ -v --junitxml=/workspace/results.xml --tb=short"
+            bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ -v --junitxml=/workspace/results.xml --tb=short"
 
       # 5. Upload results
       - name: Upload test results
