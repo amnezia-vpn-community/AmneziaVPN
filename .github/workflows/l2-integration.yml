@@ -1,0 +1,91 @@
+name: L2 Integration Tests
+
+on:
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  l2-integration:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/amnezia-vpn-community/linux-runner:latest
+      credentials:
+        username: amneziabot
+        password: ${{ secrets.GHCR_PAT }}
+      options: "--cap-add NET_ADMIN --device /dev/net/tun"
+
+    steps:
+      # 1. Checkout AmneziaVPN fork
+      - name: Checkout AmneziaVPN
+        uses: actions/checkout@v4
+
+      # 2. Checkout test-suites (private repo)
+      - name: Checkout test-suites
+        uses: actions/checkout@v4
+        with:
+          repository: amnezia-vpn-community/test-suites
+          token: ${{ secrets.GHCR_PAT }}
+          path: test-suites
+
+      # 3. Download AmneziaVPN binary
+      - name: Download AmneziaVPN binary
+        run: |
+          wget -q -O AmneziaVPN_linux.tar "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
+          mkdir -p amnezia_bin
+          tar xf AmneziaVPN_linux.tar -C amnezia_bin
+          BIN=$(find amnezia_bin -name "*.bin" | head -1)
+          chmod +x "$BIN"
+          mv "$BIN" AmneziaVPN_Linux_Installer.bin
+          echo "Binary: $(ls -lh AmneziaVPN_Linux_Installer.bin)"
+
+      # 4. Install AmneziaVPN
+      - name: Install AmneziaVPN
+        run: |
+          chmod +x AmneziaVPN_Linux_Installer.bin
+          ./AmneziaVPN_Linux_Installer.bin --root --accept-licenses --confirm-command install
+
+      # 5. Write VPN config from secret
+      - name: Write VPN config
+        run: |
+          mkdir -p /workspace/vpn-config
+          echo "${{ secrets.WG_CLIENT_CONFIG_B64 }}" | base64 -d > /workspace/vpn-config/wg0-client.conf
+          echo "VPN config written: $(wc -l < /workspace/vpn-config/wg0-client.conf) lines"
+
+      # 6. Install test dependencies
+      - name: Install test dependencies
+        run: |
+          pip install -e ./test-suites -q
+
+      # 7. Run L2 integration tests
+      - name: Run L2 integration tests
+        env:
+          VPN_CONFIG_PATH: /workspace/vpn-config/wg0-client.conf
+        run: |
+          pytest ./test-suites/src/amnezia_tests/suites/l2_integration/ \
+            -v \
+            --junit-xml=results.xml \
+            --tb=short
+
+      # 8. Upload results as artifact
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l2-results
+          path: results.xml
+
+      # 9. Notify orchestrator (best-effort)
+      - name: Notify orchestrator
+        if: always()
+        continue-on-error: true
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
+          curl -sf -X POST https://104-248-29-142.sslip.io/api/v1/runs \
+            -u "$ORCH_USER:$ORCH_PASS" \
+            -H 'Content-Type: application/json' \
+            -d "{\"level\":\"L2\",\"suite\":\"integration\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"${STATUS}\",\"priority\":20}" || true
+        env:
+          ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
+          ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
