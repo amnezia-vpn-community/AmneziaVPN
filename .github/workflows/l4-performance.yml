@@ -37,6 +37,10 @@ jobs:
 
     strategy:
       fail-fast: false
+      # Serialise legs — there's only one iperf3 server on the test VPN host
+      # (164.90.212.148:5201) and concurrent runs fail with
+      # "server is busy running a test".
+      max-parallel: 1
       matrix:
         protocol: [wireguard, openvpn, ikev2]
 
