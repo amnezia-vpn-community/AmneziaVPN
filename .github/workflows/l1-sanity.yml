@@ -28,12 +28,21 @@ jobs:
             x11-utils \
             libx11-6 \
             libxext6 \
+            libxcb1 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1 \
+            libxkbcommon-x11-0 \
             p7zip-full \
             xdotool
 
       - name: Download AmneziaVPN binary
         run: |
-          # Get latest release URL for Linux .bin
+          # Get latest release URL for Linux .bin or .tar
           RELEASE_URL=$(curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/latest \
             | python3 -c "
           import json, sys
@@ -56,13 +65,10 @@ jobs:
           pip install --quiet -r requirements.txt
 
       - name: Run L1 sanity tests
-        env:
-          AMNEZIA_BUILD_URL: "file://${{ github.workspace }}/amnezia_artifact"
         run: |
           cd .github/test-runner
-          # Set AMNEZIA_BUILD_URL to local file path
           export AMNEZIA_BUILD_URL="${{ github.workspace }}/amnezia_artifact"
-          pytest amnezia_tests/suites/l1_sanity/ -v --tb=short -m l1 \
+          pytest amnezia_tests/suites/l1_sanity/ -v --tb=short \
             --timeout=120
 
       - name: Upload test artifacts
