@@ -32,10 +32,25 @@ jobs:
         env:
           WG_CLIENT_CONFIG_B64: ${{ secrets.WG_CLIENT_CONFIG_B64 }}
         run: |
-          # Decode and strip the DNS= line — resolvconf in container falls
-          # back to systemd-resolved DBus which isn't available, causing
-          # `sd_bus_open_system: No such file or directory` and wg-quick rc=1.
-          echo "$WG_CLIENT_CONFIG_B64" | base64 -d | grep -v '^DNS' > /tmp/wg0-client.conf
+          # Decode the WG client config and prepare it for the test container.
+          #
+          # Two adjustments are required for the linux-runner image:
+          #
+          # 1. Strip the `DNS = ...` directive. resolvconf inside the container
+          #    falls back to the systemd-resolved DBus, which isn't running,
+          #    producing `sd_bus_open_system: No such file or directory` and
+          #    aborting wg-quick with rc=1.
+          #
+          # 2. Narrow AllowedIPs from `0.0.0.0/0` to `10.8.0.0/24`. A default-
+          #    route tunnel makes wg-quick inject `iptables -t mangle` fwmark
+          #    rules, but iptables is not installed in the runner image
+          #    (rc=127). For L4 perf tests we only need to reach the server's
+          #    internal WG IP (10.8.0.1), so a /24 route is sufficient and
+          #    avoids the iptables path entirely.
+          echo "$WG_CLIENT_CONFIG_B64" | base64 -d \
+            | grep -v '^DNS' \
+            | sed 's|^AllowedIPs *=.*|AllowedIPs = 10.8.0.0/24|' \
+            > /tmp/wg0-client.conf
           chmod 600 /tmp/wg0-client.conf
           echo "WG_CONFIG_PATH=/tmp/wg0-client.conf" >> $GITHUB_ENV
           echo "--- WG config (sanitized, secrets redacted) ---"
