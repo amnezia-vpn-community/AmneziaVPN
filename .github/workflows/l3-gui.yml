@@ -55,7 +55,6 @@ jobs:
 
       - name: Run L3 GUI tests
         env:
-          WG_CLIENT_CONFIG_B64: ${{ secrets.WG_CLIENT_CONFIG_B64 }}
         run: |
           pytest test-suites/src/amnezia_tests/suites/l3_gui/ \
             -v --tb=short \
