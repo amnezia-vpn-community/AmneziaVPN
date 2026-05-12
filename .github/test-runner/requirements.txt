@@ -1,0 +1,11 @@
+pytest>=9.0.0
+pytest-timeout>=2.4.0
+requests>=2.32.0
+structlog>=24.4.0
+pydantic-settings>=2.7.0
+opencv-python-headless>=4.10.0
+pyautogui>=0.9.54
+Pillow>=11.0.0
+numpy>=2.0.0
+python-xlib>=0.33
+tenacity>=9.0.0
