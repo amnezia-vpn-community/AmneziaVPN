@@ -50,6 +50,7 @@ jobs:
 
       # 4. Write OpenVPN client config from secret
       - name: Write OpenVPN client config
+        shell: bash
         run: |
           set -euxo pipefail
           mkdir -p /workspace/vpn-config
@@ -67,6 +68,7 @@ jobs:
 
       # 6. Run L2 OpenVPN tests
       - name: Run L2 OpenVPN tests
+        shell: bash
         env:
           OVPN_CONFIG_B64: ${{ secrets.OVPN_CONFIG_B64 }}
         run: |
