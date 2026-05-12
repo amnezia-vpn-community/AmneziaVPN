@@ -1,0 +1,112 @@
+name: Release Check
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch latest upstream version
+        id: upstream
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          UPSTREAM_REPO: ${{ secrets.UPSTREAM_REPO }}
+        run: |
+          UPSTREAM_REPO="${UPSTREAM_REPO:-amnezia-vpn/amnezia-client}"
+          echo "Checking upstream repo: $UPSTREAM_REPO"
+          LATEST=$(curl -sSf \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest" \
+            | jq -r '.tag_name')
+          if [ -z "$LATEST" ] || [ "$LATEST" = "null" ]; then
+            echo "::error::Could not fetch latest release from $UPSTREAM_REPO"
+            exit 1
+          fi
+          echo "Latest upstream version: $LATEST"
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch stored version from DO Spaces
+        id: stored
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          SPACES_BUCKET: ${{ secrets.SPACES_BUCKET }}
+        run: |
+          STORED=$(aws s3 cp \
+            "s3://${SPACES_BUCKET}/release-check/last_version.txt" - \
+            --endpoint-url "https://fra1.digitaloceanspaces.com" 2>/dev/null || echo "")
+          STORED=$(echo "$STORED" | tr -d '[:space:]')
+          echo "Stored version: '${STORED}'"
+          echo "version=${STORED}" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.version }}"
+          STORED="${{ steps.stored.outputs.version }}"
+          echo "Upstream: $UPSTREAM"
+          echo "Stored:   $STORED"
+          if [ "$UPSTREAM" != "$STORED" ]; then
+            echo "new_version=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::New version detected: $UPSTREAM (was: $STORED)"
+          else
+            echo "new_version=false" >> "$GITHUB_OUTPUT"
+            echo "No new version. Stored and upstream both: $UPSTREAM"
+          fi
+
+      - name: Update stored version in DO Spaces
+        if: steps.compare.outputs.new_version == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          SPACES_BUCKET: ${{ secrets.SPACES_BUCKET }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+          echo -n "$VERSION" | aws s3 cp - \
+            "s3://${SPACES_BUCKET}/release-check/last_version.txt" \
+            --endpoint-url "https://fra1.digitaloceanspaces.com" \
+            --content-type "text/plain"
+          echo "Updated last_version.txt to $VERSION"
+
+      - name: Trigger L1 sanity tests
+        if: steps.compare.outputs.new_version == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+          echo "Triggering l1-sanity.yml for version $VERSION"
+          curl -sSf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/l1-sanity.yml/dispatches" \
+            -d "{\"ref\":\"dev\",\"inputs\":{}}"
+          echo "l1-sanity.yml triggered"
+
+      - name: Trigger L2 integration tests
+        if: steps.compare.outputs.new_version == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+          echo "Triggering l2-integration.yml for version $VERSION"
+          curl -sSf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/l2-integration.yml/dispatches" \
+            -d "{\"ref\":\"dev\",\"inputs\":{}}"
+          echo "l2-integration.yml triggered"
+
+      - name: Log result
+        run: |
+          VERSION="${{ steps.upstream.outputs.version }}"
+          NEW="${{ steps.compare.outputs.new_version }}"
+          if [ "$NEW" = "true" ]; then
+            echo "✅ New release $VERSION detected — L1+L2 tests dispatched."
+          else
+            echo "ℹ️  No new release. Current version: $VERSION"
+          fi
