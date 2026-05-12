@@ -56,6 +56,14 @@ jobs:
           echo "--- WG config (sanitized, secrets redacted) ---"
           sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/wg0-client.conf
 
+      - name: Bring up WireGuard tunnel
+        run: |
+          apt-get install -q -y iptables 2>/dev/null || true
+          wg-quick up /tmp/wg0-client.conf
+          sleep 2
+          wg show wg0
+          ping -c2 10.8.0.1
+
       - name: Run L4 performance tests
         run: |
           pytest test-suites/src/amnezia_tests/suites/l4_performance/ \
@@ -83,3 +91,7 @@ jobs:
             -X POST "$ORCH_URL/api/v1/runs" \
             -H "Content-Type: application/json" \
             -d "{\"suite\":\"l4_performance\",\"status\":\"$STATUS\",\"commit\":\"${{ github.sha }}\"}" || true
+
+      - name: Tear down WireGuard tunnel
+        if: always()
+        run: wg-quick down /tmp/wg0-client.conf || true
