@@ -37,12 +37,17 @@ jobs:
 
       # 4. Run L1 tests via linux-runner Docker image
       - name: Run L1 sanity tests
+        env:
+          # SHA256 of AmneziaVPN_Linux_Installer.bin extracted from
+          # AmneziaVPN_4.8.15.4_linux_x64.tar (hardcoded, update on version bump)
+          AMNEZIA_BUILD_SHA256: a74f82c08f10d53b95697142d06053e0496e5508ea1ef50e72273ec818521737
         run: |
           docker run --rm \
             --privileged \
             -v "${{ github.workspace }}/test-suites:/workspace" \
             -v "${{ github.workspace }}/AmneziaVPN_Linux_Installer.bin:/workspace/AmneziaVPN_Linux_Installer.bin" \
             -e AMNEZIABIN=/workspace/AmneziaVPN_Linux_Installer.bin \
+            -e AMNEZIA_BUILD_SHA256="$AMNEZIA_BUILD_SHA256" \
             -e DISPLAY=:99 \
             ghcr.io/amnezia-vpn-community/linux-runner:latest \
             bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ -v --junitxml=/workspace/results.xml --tb=short"
