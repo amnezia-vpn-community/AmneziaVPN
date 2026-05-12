@@ -33,9 +33,11 @@ jobs:
 
       - name: Download AmneziaVPN installer
         run: |
-          curl -fsSL -o /tmp/AmneziaVPN.bin \
-            "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux.bin"
-          chmod +x /tmp/AmneziaVPN.bin
+          curl -fsSL -o AmneziaVPN_linux.tar \
+            "https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.15.4/AmneziaVPN_4.8.15.4_linux_x64.tar"
+          mkdir -p amnezia_bin && tar xf AmneziaVPN_linux.tar -C amnezia_bin
+          BIN=$(find amnezia_bin -name "*.bin" | head -1)
+          chmod +x "$BIN" && mv "$BIN" /tmp/AmneziaVPN.bin
           echo "AMNEZIA_BIN=/tmp/AmneziaVPN.bin" >> $GITHUB_ENV
 
       - name: Run L3 GUI tests
