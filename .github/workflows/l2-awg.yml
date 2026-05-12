@@ -1,0 +1,100 @@
+name: L2 AmneziaWG Integration Tests
+
+# Phase 8 — AmneziaWG protocol coverage.
+#
+# Unlike the vanilla WireGuard L2 suite, AmneziaWG needs the `amneziawg`
+# kernel module loaded on the runner host (via DKMS). That means we cannot
+# use a containerised runner here — the AmneziaWG kernel module would have
+# to be built against the container's kernel, which is impractical. Instead
+# we install amneziawg + amneziawg-dkms directly on the GHA runner host.
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/l2-awg.yml'
+  workflow_dispatch:
+
+jobs:
+  l2-awg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout AmneziaVPN
+        uses: actions/checkout@v4
+
+      - name: Checkout test-suites (private)
+        uses: actions/checkout@v4
+        with:
+          repository: amnezia-vpn-community/test-suites
+          token: ${{ secrets.GHCR_PAT }}
+          path: test-suites
+
+      - name: Install AmneziaWG (PPA + DKMS)
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            software-properties-common gnupg2 python3-launchpadlib \
+            "linux-headers-$(uname -r)" \
+            iproute2 iptables iputils-ping dnsutils curl
+          sudo add-apt-repository -y ppa:amnezia/ppa
+          sudo apt-get install -y -qq amneziawg
+          awg --version
+          awg-quick --help 2>&1 | head -1
+          sudo modprobe amneziawg
+          lsmod | grep amneziawg
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          pip install -e ./test-suites -q
+
+      - name: Write AWG client config from secret
+        run: |
+          set -euxo pipefail
+          sudo mkdir -p /workspace/vpn-config
+          # Decode -> /tmp first so non-root sees it; pytest fixture creates
+          # its own copy under tmp_path_factory anyway.
+          echo "${{ secrets.AWG_CLIENT_CONFIG_B64 }}" | base64 -d > /tmp/awg0-client.conf
+          sudo cp /tmp/awg0-client.conf /workspace/vpn-config/awg0-client.conf
+          sudo chmod 600 /workspace/vpn-config/awg0-client.conf
+          # Strip DNS= line — resolvconf needs systemd/D-Bus in some CI envs
+          sudo sed -i '/^DNS\s*=/Id' /workspace/vpn-config/awg0-client.conf
+          sudo wc -l /workspace/vpn-config/awg0-client.conf
+
+      - name: Run L2 AmneziaWG tests
+        env:
+          AWG_CLIENT_CONFIG_B64: ${{ secrets.AWG_CLIENT_CONFIG_B64 }}
+        run: |
+          set -euxo pipefail
+          # awg-quick needs root; run pytest under sudo, preserving env.
+          sudo -E env "PATH=$PATH" "AWG_CLIENT_CONFIG_B64=$AWG_CLIENT_CONFIG_B64" \
+            python -m pytest ./test-suites/src/amnezia_tests/suites/l2_integration/test_awg_connect.py \
+              -v \
+              --junit-xml=awg-results.xml \
+              --tb=short
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l2-awg-results
+          path: awg-results.xml
+
+      - name: Notify orchestrator
+        if: always()
+        continue-on-error: true
+        env:
+          ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
+          ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
+          curl -sf -X POST https://104-248-29-142.sslip.io/api/v1/runs \
+            -u "$ORCH_USER:$ORCH_PASS" \
+            -H 'Content-Type: application/json' \
+            -d "{\"level\":\"L2\",\"suite\":\"awg\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"${STATUS}\",\"priority\":20}" || true
