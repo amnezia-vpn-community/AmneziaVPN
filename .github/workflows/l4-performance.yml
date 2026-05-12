@@ -1,23 +1,61 @@
 name: L4 Performance Tests (Weekly)
 
+# L4 — weekly performance regression across all supported protocols.
+#
+# Single workflow, matrix over protocols:
+#   * wireguard  — throughput + latency + stability + DO Spaces baseline
+#   * openvpn    — throughput + latency through tun0 (10.10.0.0/24)
+#   * ikev2      — throughput + latency through IPsec XFRM (10.8.0.0/24)
+#
+# Each matrix leg has its own runtime requirements (strongSwan install,
+# iptables, --privileged for charon, etc.) handled by per-protocol `if`
+# gates on individual steps.
+#
+# Phase 14 (2026-05-12): consolidated previously separate
+# `l4-openvpn.yml` and `l4-ikev2.yml` into this matrix; kept WireGuard as
+# the canonical baseline-comparison leg (DO Spaces upload only on WG).
+
 on:
   schedule:
     - cron: '0 3 * * 0'  # Every Sunday at 03:00 UTC
   workflow_dispatch:
+    inputs:
+      protocols:
+        description: 'Comma-separated subset of protocols to run (default = all 3)'
+        required: false
+        default: 'wireguard,openvpn,ikev2'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   l4-performance:
+    name: L4 ${{ matrix.protocol }} performance
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        protocol: [wireguard, openvpn, ikev2]
+
     container:
       image: ghcr.io/amnezia-vpn-community/linux-runner:latest
       credentials:
         username: amneziabot
         password: ${{ secrets.GHCR_PAT }}
+      # IKEv2 (charon) needs --privileged for XFRM policy installation;
+      # other protocols only need NET_ADMIN + /dev/net/tun.
       options: >-
         --cap-add NET_ADMIN
         --device /dev/net/tun
+        ${{ matrix.protocol == 'ikev2' && '--privileged' || '' }}
 
     steps:
+      - name: Checkout AmneziaVPN
+        uses: actions/checkout@v4
+
       - name: Checkout test-suites
         uses: actions/checkout@v4
         with:
@@ -26,12 +64,17 @@ jobs:
           path: test-suites
 
       - name: Install test dependencies
-        run: pip install -q -e test-suites/
+        run: pip install -q -e ./test-suites
 
-      - name: Write WG config
+      # ── Protocol-specific install / config ───────────────────────────────
+
+      - name: (WG) Write WireGuard config
+        if: matrix.protocol == 'wireguard'
+        shell: bash
         env:
           WG_CLIENT_CONFIG_B64: ${{ secrets.WG_CLIENT_CONFIG_B64 }}
         run: |
+          set -euxo pipefail
           # Decode the WG client config and prepare it for the test container.
           #
           # Two adjustments are required for the linux-runner image:
@@ -52,29 +95,128 @@ jobs:
             | sed 's|^AllowedIPs *=.*|AllowedIPs = 10.8.0.0/24|' \
             > /tmp/wg0-client.conf
           chmod 600 /tmp/wg0-client.conf
-          echo "WG_CONFIG_PATH=/tmp/wg0-client.conf" >> $GITHUB_ENV
+          echo "WG_CONFIG_PATH=/tmp/wg0-client.conf" >> "$GITHUB_ENV"
           echo "--- WG config (sanitized, secrets redacted) ---"
-          sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/wg0-client.conf
+          sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' \
+              /tmp/wg0-client.conf
 
-      - name: Run L4 performance tests
+      - name: (OpenVPN) Install iptables (routing)
+        if: matrix.protocol == 'openvpn'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update -qq
+          apt-get install -y -qq iptables iproute2 2>&1 | tail -3
+
+      - name: (IKEv2) Install strongSwan
+        if: matrix.protocol == 'ikev2'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            strongswan strongswan-pki strongswan-starter \
+            libcharon-extra-plugins iptables iproute2 \
+            iputils-ping 2>&1 | tail -3
+          echo "strongswan: $(ipsec --version 2>&1 | head -1 || true)"
+
+      - name: (IKEv2) Configure verbose charon logging
+        if: matrix.protocol == 'ikev2'
+        shell: bash
+        run: |
+          mkdir -p /etc/strongswan.d
+          cat > /etc/strongswan.d/charon-logging.conf <<'CFG'
+          charon {
+              filelog {
+                  charon {
+                      path = /var/log/charon.log
+                      time_format = %b %e %T
+                      ike_name = yes
+                      append = no
+                      default = 2
+                      flush_line = yes
+                  }
+              }
+              cisco_unity = yes
+          }
+          CFG
+          ipsec start || true
+          sleep 3
+          ipsec status || true
+
+      # ── Run pytest (one file per protocol) ───────────────────────────────
+
+      - name: Run L4 ${{ matrix.protocol }} tests
+        shell: bash
         env:
+          # WireGuard
+          WG_CONFIG_PATH: /tmp/wg0-client.conf
           SPACES_KEY: ${{ secrets.DO_SPACES_KEY }}
           SPACES_SECRET: ${{ secrets.DO_SPACES_SECRET }}
           SPACES_ENDPOINT: https://fra1.digitaloceanspaces.com
           SPACES_REGION: fra1
           SPACES_BUCKET: amnezia-test-artifacts-fra1
+          # OpenVPN
+          OVPN_CONFIG_B64: ${{ secrets.OVPN_CONFIG_B64 }}
+          OVPN_SERVER_TUN_IP: 10.10.0.1
+          # IKEv2
+          VPN_IKEV2_PSK: ${{ secrets.VPN_IKEV2_PSK }}
+          IKEV2_SERVER_IP: 164.90.212.148
+          IKEV2_IPERF_TARGET: 10.8.0.1
         run: |
-          pytest test-suites/src/amnezia_tests/suites/l4_performance/ \
-            -v --tb=short \
-            --junitxml=/tmp/l4-results.xml \
+          set -euxo pipefail
+          case "${{ matrix.protocol }}" in
+            wireguard)
+              # Full WG L4 suite incl. DO Spaces regression compare
+              TARGETS=(
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_throughput.py
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_latency.py
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_stability.py
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_performance_regression.py
+              )
+              ;;
+            openvpn)
+              TARGETS=(
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_openvpn_performance.py
+              )
+              ;;
+            ikev2)
+              TARGETS=(
+                ./test-suites/src/amnezia_tests/suites/l4_performance/test_ikev2_performance.py
+              )
+              ;;
+          esac
+          pytest "${TARGETS[@]}" \
+            -v -s --tb=short \
+            --junitxml=/tmp/l4-${{ matrix.protocol }}-results.xml \
             -o junit_family=xunit2 \
-            -s
+            --reruns 1 --reruns-delay 5
 
-      - name: Add baseline summary
-        if: always()
+      # ── Diagnostics on failure ───────────────────────────────────────────
+
+      - name: (OpenVPN) Dump openvpn log on failure
+        if: failure() && matrix.protocol == 'openvpn'
+        continue-on-error: true
+        shell: bash
+        run: |
+          [ -f /tmp/openvpn-l4.log ] && tail -200 /tmp/openvpn-l4.log || echo '(no openvpn log)'
+
+      - name: (IKEv2) Dump charon log on failure
+        if: failure() && matrix.protocol == 'ikev2'
+        continue-on-error: true
+        shell: bash
+        run: |
+          [ -f /var/log/charon.log ] && tail -200 /var/log/charon.log || echo '(no charon.log)'
+          ipsec statusall || true
+
+      # ── Per-protocol summary into job summary ────────────────────────────
+
+      - name: Add baseline summary (WG only)
+        if: always() && matrix.protocol == 'wireguard'
+        shell: bash
         run: |
           {
-            echo "## L4 Performance Results"
+            echo "## L4 WireGuard Performance Results"
             echo ""
             if [ -f /tmp/l4_metrics.txt ]; then
               echo '```'
@@ -89,18 +231,20 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: l4-performance-results
-          path: /tmp/l4-results.xml
+          name: l4-performance-results-${{ matrix.protocol }}
+          path: /tmp/l4-${{ matrix.protocol }}-results.xml
 
       - name: Notify orchestrator
         if: always()
+        continue-on-error: true
         env:
           ORCH_URL: https://104-248-29-142.sslip.io
           ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
           ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
+        shell: bash
         run: |
           STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
           curl -sf -u "$ORCH_USER:$ORCH_PASS" \
             -X POST "$ORCH_URL/api/v1/runs" \
             -H "Content-Type: application/json" \
-            -d "{\"suite\":\"l4_performance\",\"status\":\"$STATUS\",\"commit\":\"${{ github.sha }}\"}" || true
+            -d "{\"level\":\"L4\",\"suite\":\"${{ matrix.protocol }}_performance\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"$STATUS\",\"priority\":30}" || true
