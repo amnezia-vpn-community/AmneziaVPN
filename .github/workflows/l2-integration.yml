@@ -51,7 +51,22 @@ jobs:
         run: |
           mkdir -p /workspace/vpn-config
           echo "${{ secrets.WG_CLIENT_CONFIG_B64 }}" | base64 -d > /workspace/vpn-config/wg0-client.conf
+          chmod 600 /workspace/vpn-config/wg0-client.conf
           echo "VPN config written: $(wc -l < /workspace/vpn-config/wg0-client.conf) lines"
+
+      # 5b. Prepare container environment for wg-quick
+      - name: Prepare wg-quick environment
+        run: |
+          # GitHub Actions containers run without systemd/D-Bus.
+          # wg-quick calls resolvconf when DNS= is set in config, which fails with
+          # "sd_bus_open_system: No such file or directory". Stub it out for CI.
+          if ! command -v resolvconf > /dev/null 2>&1; then
+            printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/resolvconf
+            chmod +x /usr/local/bin/resolvconf
+            echo "Installed stub resolvconf"
+          else
+            echo "resolvconf already present: $(which resolvconf)"
+          fi
 
       # 6. Install test dependencies
       - name: Install test dependencies
