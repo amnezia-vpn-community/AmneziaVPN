@@ -2,13 +2,11 @@ name: L4 Performance Tests (Weekly)
 
 # L4 — weekly performance regression across all supported protocols.
 #
-# Single workflow, matrix over protocols:
-#   * wireguard  — throughput + latency + stability + DO Spaces baseline
-#   * awg        — throughput + latency through awg0 (10.9.0.0/24)
-#   * openvpn    — throughput + latency through tun0 (10.10.0.0/24)
-#   * ikev2      — throughput + latency through IPsec XFRM (10.8.0.0/24)
+# Single workflow, two jobs:
+#   * l4-performance   — matrix over {wireguard, openvpn, ikev2} in linux-runner container
+#   * l4-awg-performance — AmneziaWG on bare ubuntu-latest (kernel module via DKMS)
 #
-# Each matrix leg has its own runtime requirements (strongSwan install,
+# Each leg has its own runtime requirements (strongSwan install,
 # iptables, --privileged for charon, etc.) handled by per-protocol `if`
 # gates on individual steps.
 #
@@ -16,13 +14,12 @@ name: L4 Performance Tests (Weekly)
 # `l4-openvpn.yml` and `l4-ikev2.yml` into this matrix; kept WireGuard as
 # the canonical baseline-comparison leg (DO Spaces upload only on WG).
 #
-# Phase 15 (2026-05-12): added AmneziaWG (`awg`) as a 4th protocol leg.
-# AWG cannot run inside the linux-runner container because it requires
-# the `amneziawg` kernel module (DKMS) loaded on the *host* kernel — same
-# constraint as the L2 AWG suite. So `awg` runs as a separate job on a
-# host `ubuntu-latest` runner (no container), gated on the matrix job
-# completing first to keep the shared iperf3 server (164.90.212.148:5201)
-# from receiving two concurrent clients.
+# Phase 15 (2026-05-12): added AmneziaWG (`awg`) as a 4th matrix leg.
+# AWG uses port 51821 and subnet 10.9.0.0/24 on the same VPN host.
+#
+# Phase 15.1 (2026-05-12): AWG split into its own job on a bare runner —
+# the `amneziawg` kernel module requires DKMS install on the host kernel,
+# which is impossible inside a container. Mirrors the l2-awg.yml pattern.
 
 on:
   schedule:
@@ -30,9 +27,9 @@ on:
   workflow_dispatch:
     inputs:
       protocols:
-        description: 'Comma-separated subset of protocols to run (matrix legs only; AWG always runs as a separate gated job)'
+        description: 'Comma-separated subset of protocols to run (default = all 4)'
         required: false
-        default: 'wireguard,openvpn,ikev2'
+        default: 'wireguard,awg,openvpn,ikev2'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -262,41 +259,44 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"level\":\"L4\",\"suite\":\"${{ matrix.protocol }}_performance\",\"target\":\"linux\",\"commit_sha\":\"${{ github.sha }}\",\"branch\":\"${{ github.ref_name }}\",\"status\":\"$STATUS\",\"priority\":30}" || true
 
-  # ── AWG leg (host runner, needs amneziawg kernel module via DKMS) ────────
+  # ──────────────────────────────────────────────────────────────────────────
+  # AmneziaWG L4 — separate job on bare ubuntu-latest runner.
+  #
+  # The `amneziawg` kernel module is built via DKMS against the host kernel
+  # at install time. That makes a containerised runner unusable here, so we
+  # mirror the L2 AWG pattern (`l2-awg.yml`): install amneziawg from the
+  # `ppa:amnezia/ppa` PPA, `sudo modprobe amneziawg`, then run pytest under
+  # `sudo -E` so the test's `awg-quick up/down` fixture can manage the
+  # tunnel as root.
+  # ──────────────────────────────────────────────────────────────────────────
   l4-awg-performance:
     name: L4 awg performance
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Wait for the matrix to finish so iperf3 server isn't double-booked.
-    # `always()` ensures we still run even if one of the matrix legs failed.
-    needs: l4-performance
-    if: always()
 
     steps:
       - name: Checkout AmneziaVPN
         uses: actions/checkout@v4
 
-      - name: Checkout test-suites
+      - name: Checkout test-suites (private)
         uses: actions/checkout@v4
         with:
           repository: amnezia-vpn-community/test-suites
           token: ${{ secrets.GHCR_PAT }}
           path: test-suites
 
-      - name: Install AmneziaWG (PPA + DKMS kernel module)
-        # Mirrors l2-awg.yml — full `amneziawg` package pulls in DKMS and
-        # builds the kernel module against the runner host kernel.
+      - name: Install AmneziaWG (PPA + DKMS)
         run: |
           set -euxo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
             software-properties-common gnupg2 python3-launchpadlib \
             "linux-headers-$(uname -r)" \
-            iproute2 iptables iputils-ping dnsutils iperf3 curl
+            iproute2 iptables iputils-ping dnsutils curl iperf3
           sudo add-apt-repository -y ppa:amnezia/ppa
           sudo apt-get install -y -qq amneziawg
           awg --version
-          awg-quick --help 2>&1 | head -1
+          awg-quick --help 2>&1 | head -1 || true
           sudo modprobe amneziawg
           lsmod | grep amneziawg
 
@@ -306,9 +306,10 @@ jobs:
           python-version: '3.12'
 
       - name: Install test dependencies
-        run: pip install -q -e ./test-suites
+        run: |
+          pip install -e ./test-suites -q
 
-      - name: (AWG) Write AmneziaWG config
+      - name: Write AWG client config from secret
         env:
           AWG_CLIENT_CONFIG_B64: ${{ secrets.AWG_CLIENT_CONFIG_B64 }}
         run: |
@@ -317,8 +318,9 @@ jobs:
             echo "::error::AWG_CLIENT_CONFIG_B64 secret is empty"
             exit 1
           fi
-          # Strip DNS (resolvconf may not be wired up) and narrow AllowedIPs
-          # to the AWG subnet — we only need to reach 10.9.0.1 for iperf3.
+          # Same sanitisation as the WG leg:
+          #   - strip DNS line (avoids resolvconf/systemd-resolved quirks)
+          #   - narrow AllowedIPs to AWG subnet (avoids default-route fwmark)
           echo "$AWG_CLIENT_CONFIG_B64" | base64 -d \
             | grep -v '^DNS' \
             | sed 's|^AllowedIPs *=.*|AllowedIPs = 10.9.0.0/24|' \
@@ -328,43 +330,50 @@ jobs:
           sudo sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' \
               /tmp/awg0-client.conf
 
-      - name: Run L4 awg tests
+      - name: Run L4 AmneziaWG tests
         env:
           AWG_CLIENT_CONFIG_B64: ${{ secrets.AWG_CLIENT_CONFIG_B64 }}
           AWG_SERVER_INTERNAL_IP: 10.9.0.1
           AWG_SUBNET: 10.9.0.0/24
         run: |
           set -euxo pipefail
-          # awg-quick needs root; preserve PATH + AWG env vars.
+          # awg-quick needs root; the pytest fixture in test_awg_performance.py
+          # invokes it directly, so run pytest under sudo -E and preserve env.
           sudo -E env "PATH=$PATH" \
             "AWG_CLIENT_CONFIG_B64=$AWG_CLIENT_CONFIG_B64" \
             "AWG_SERVER_INTERNAL_IP=$AWG_SERVER_INTERNAL_IP" \
             "AWG_SUBNET=$AWG_SUBNET" \
-            python -m pytest \
-              ./test-suites/src/amnezia_tests/suites/l4_performance/test_awg_performance.py \
+            python -m pytest ./test-suites/src/amnezia_tests/suites/l4_performance/test_awg_performance.py \
               -v -s --tb=short \
               --junitxml=/tmp/l4-awg-results.xml \
               -o junit_family=xunit2 \
               --reruns 1 --reruns-delay 5
 
-      - name: (AWG) Dump awg state on failure
+      - name: Dump awg state on failure
         if: failure()
         continue-on-error: true
+        shell: bash
         run: |
+          echo '--- lsmod | grep amnezia ---'
+          lsmod | grep amnezia || echo '(amneziawg module not loaded)'
           echo '--- ip link ---'
           ip link show || true
           echo '--- ip addr (awg0) ---'
           ip addr show awg0 || echo '(no awg0)'
           echo '--- ip route ---'
           ip route show || true
-          echo '--- awg show ---'
+          echo '--- sudo awg show ---'
           sudo awg show 2>&1 || true
-          echo '--- amneziawg lsmod ---'
-          lsmod | grep amneziawg || echo '(module not loaded)'
           echo '--- awg config (REDACTED) ---'
-          [ -f /tmp/awg0-client.conf ] && \
+          sudo test -f /tmp/awg0-client.conf && \
             sudo sed -E 's/(PrivateKey|PublicKey|PresharedKey)\s*=\s*.*/\1 = REDACTED/' /tmp/awg0-client.conf \
             || echo '(no awg config file)'
+
+      - name: Tear down AWG tunnel
+        if: always()
+        continue-on-error: true
+        run: |
+          sudo awg-quick down /tmp/awg0-client.conf 2>&1 || true
 
       - name: Upload results
         if: always()
@@ -380,6 +389,7 @@ jobs:
           ORCH_URL: https://104-248-29-142.sslip.io
           ORCH_USER: ${{ secrets.ORCH_ADMIN_USERNAME }}
           ORCH_PASS: ${{ secrets.ORCH_ADMIN_PASSWORD }}
+        shell: bash
         run: |
           STATUS=$([ "${{ job.status }}" = "success" ] && echo "passed" || echo "failed")
           curl -sf -u "$ORCH_USER:$ORCH_PASS" \
