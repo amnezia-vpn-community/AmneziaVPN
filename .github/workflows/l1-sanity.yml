@@ -79,7 +79,33 @@ jobs:
             -e AMNEZIA_BUILD_SHA256="$AMNEZIA_BUILD_SHA256" \
             -e DISPLAY=:99 \
             ghcr.io/amnezia-vpn-community/linux-runner:latest \
-            bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ -v --junitxml=/workspace/results.xml --tb=short"
+            bash -c "cd /workspace && pip install -e . -q && pytest src/amnezia_tests/suites/l1_sanity/ -v --junitxml=/workspace/results.xml --cov=amnezia_tests --cov-report=xml:/workspace/coverage.xml --tb=short"
+
+      # 4b. Upload coverage.xml to DigitalOcean Spaces (canonical matrix entry only)
+      #     The bucket key is fixed per suite, so only upload from one matrix
+      #     job to avoid races/overwrites. Best-effort: never fail the build.
+      - name: Upload coverage to DO Spaces
+        if: always() && matrix.version == '4.8.15.4'
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET }}
+          AWS_DEFAULT_REGION: fra1
+        run: |
+          set -euo pipefail
+          if [ ! -f test-suites/coverage.xml ]; then
+            echo "::warning::test-suites/coverage.xml not found — skipping upload"
+            exit 0
+          fi
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::warning::DO_SPACES_KEY/SECRET not configured — skipping upload"
+            exit 0
+          fi
+          pip install --quiet awscli
+          aws --endpoint-url https://fra1.digitaloceanspaces.com \
+            s3 cp test-suites/coverage.xml \
+            s3://amnezia-test-artifacts-fra1/coverage/l1/coverage.xml \
+            --acl private
 
       # 5. Upload results
       - name: Upload test results
