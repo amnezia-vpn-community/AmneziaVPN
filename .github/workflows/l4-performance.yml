@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: l4-performance-results-${{ matrix.protocol }}
           path: /tmp/l4-${{ matrix.protocol }}-results.xml
@@ -377,7 +377,7 @@ jobs:
 
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: l4-performance-results-awg
           path: /tmp/l4-awg-results.xml
