@@ -161,6 +161,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: textKey
+                objectName: "configKeyInput"
+
+                Component.onCompleted: textField.objectName = "configKeyInputField"
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -177,7 +180,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
-                objectName: "configSourceKeyButton"
+                objectName: "continueButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16

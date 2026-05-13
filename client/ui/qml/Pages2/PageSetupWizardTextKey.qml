@@ -57,7 +57,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: textKey
-                objectName: "textKeyInput"
+                objectName: "configKeyInput"
+
+                Component.onCompleted: textField.objectName = "configKeyInputField"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
