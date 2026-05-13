@@ -33,7 +33,7 @@ PageType {
 
         BasicButtonType {
             id: startButton
-            objectName: "wizardStartButton"
+            objectName: "startButton"
             Layout.fillWidth: true
             Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
             Layout.leftMargin: 16
