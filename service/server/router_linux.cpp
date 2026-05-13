@@ -1,5 +1,6 @@
 #include "router_linux.h"
 
+#include <QDBusInterface>
 #include <QProcess>
 #include <QThread>
 #include <core/utils/utilities.h>
@@ -183,6 +184,34 @@ bool RouterLinux::flushDns()
         qDebug().noquote() << "Flush dns completed";
     else
         qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+
+    // After restarting systemd-resolved, the service may still be initializing
+    // when systemctl returns, causing the subsequent DBus DNS configuration
+    // call on amn0 to fail silently. Poll for the DBus interface to become
+    // available before returning. Fixes #2575 (Ubuntu 24.04 DNS race).
+    if (isServiceActive("systemd-resolved.service")) {
+        constexpr int kMaxRetries = 5;
+        constexpr int kRetryIntervalMs = 500;
+        bool resolvedReady = false;
+        for (int i = 0; i < kMaxRetries; ++i) {
+            QDBusInterface resolved(
+                QStringLiteral("org.freedesktop.resolve1"),
+                QStringLiteral("/org/freedesktop/resolve1"),
+                QStringLiteral("org.freedesktop.resolve1.Manager"),
+                QDBusConnection::systemBus());
+            if (resolved.isValid()) {
+                qDebug() << "systemd-resolved DBus interface ready after" << i << "retries";
+                resolvedReady = true;
+                break;
+            }
+            qDebug() << "systemd-resolved not yet ready on DBus, retry" << (i + 1) << "/" << kMaxRetries;
+            QThread::msleep(kRetryIntervalMs);
+        }
+        if (!resolvedReady) {
+            qWarning() << "systemd-resolved DBus interface unavailable after"
+                       << kMaxRetries << "retries — DNS configuration may fail";
+        }
+    }
 
     return true;
 }
