@@ -142,10 +142,9 @@ void AmneziaApplication::init()
 
     if (m_parser.isSet(m_optImport)) {
         const QString data = m_parser.value(m_optImport);
-        if (!data.isEmpty()) {
-            if (m_coreController) {
-                m_coreController->importConfigFromData(data);
-            }
+        if (data.isEmpty() || !m_coreController || !m_coreController->importConfigFromData(data)) {
+            QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+            return;
         }
     }
 
@@ -182,13 +181,17 @@ void AmneziaApplication::init()
     if (m_parser.isSet(m_optConnect)) {
         bool ok = false;
         int idx = m_parser.value(m_optConnect).toInt(&ok);
-        if (ok) {
-            QTimer::singleShot(0, this, [this, idx]() {
-                if (m_coreController) {
-                    m_coreController->openConnectionByIndex(idx);
-                }
-            });
+        if (!ok) {
+            qWarning() << "Cannot connect: server index is not a number" << m_parser.value(m_optConnect);
+            QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+            return;
         }
+
+        QTimer::singleShot(0, this, [this, idx]() {
+            if (!m_coreController || !m_coreController->openConnectionByIndex(idx)) {
+                QCoreApplication::exit(2);
+            }
+        });
     }
 }
 

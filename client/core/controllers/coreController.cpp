@@ -320,8 +320,13 @@ PageController* CoreController::pageController() const
     return m_pageController;
 }
 
-void CoreController::openConnectionByIndex(int serverIndex)
+bool CoreController::openConnectionByIndex(int serverIndex)
 {
+    if (!m_serversModel || serverIndex < 0 || serverIndex >= m_serversModel->getServersCount()) {
+        qWarning() << "Cannot connect: server index is out of range" << serverIndex;
+        return false;
+    }
+
     if (m_serversModel) {
         m_serversModel->setProcessedServerIndex(serverIndex);
     }
@@ -329,14 +334,19 @@ void CoreController::openConnectionByIndex(int serverIndex)
         m_serversController->setDefaultServerIndex(serverIndex);
     }
     m_connectionUiController->toggleConnection();
+    return true;
 }
 
-void CoreController::importConfigFromData(const QString &data)
+bool CoreController::importConfigFromData(const QString &data)
 {
     if (!m_importController)
-        return;
+        return false;
 
     if (m_importController->extractConfigFromData(data)) {
         m_importController->importConfig();
+        return true;
     }
+
+    qWarning() << "Cannot import configuration: invalid data";
+    return false;
 }
