@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout test-suites
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           repository: amnezia-vpn-community/test-suites
           token: ${{ secrets.GHCR_PAT }}
@@ -54,7 +54,6 @@ jobs:
           echo "AMNEZIA_BIN=/tmp/AmneziaVPN.bin" >> $GITHUB_ENV
 
       - name: Run L3 GUI tests
-        env:
         run: |
           pytest test-suites/src/amnezia_tests/suites/l3_gui/ \
             -v --tb=short \
