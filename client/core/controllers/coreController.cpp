@@ -342,8 +342,9 @@ bool CoreController::importConfigFromData(const QString &data)
     if (!m_importController)
         return false;
 
-    if (m_importController->extractConfigFromData(data)) {
-        m_importController->importConfig();
+    const auto result = m_importController->extractConfigFromData(data);
+    if (result.errorCode == ErrorCode::NoError) {
+        m_importController->importConfig(result.config);
         return true;
     }
 
