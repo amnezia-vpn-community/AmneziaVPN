@@ -114,8 +114,8 @@ public:
     PageController* pageController() const;
     void setQmlRoot();
 
-    void openConnectionByIndex(int serverIndex);
-    void importConfigFromData(const QString &data);
+    bool openConnectionByIndex(int serverIndex);
+    bool importConfigFromData(const QString &data);
     void updateTranslator(const QLocale &locale);
 
 signals:
