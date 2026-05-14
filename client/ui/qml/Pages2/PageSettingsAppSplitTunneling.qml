@@ -19,6 +19,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsConnectionAppSplitTunnelingPage"
 
     property bool pageEnabled
 
@@ -68,6 +69,7 @@ PageType {
 
     ColumnLayout {
         id: header
+        objectName: "settingsConnectionAppSplitTunnelingHeaderLayout"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -77,9 +79,12 @@ PageType {
 
         BackButtonType {
             id: backButton
+            objectName: "settingsConnectionAppSplitTunnelingBackButton"
         }
 
         HeaderTypeWithSwitcher {
+            objectName: "settingsConnectionAppSplitTunnelingHeader"
+
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -100,6 +105,7 @@ PageType {
 
         DropDownType {
             id: selector
+            objectName: "settingsConnectionAppSplitTunnelingModeSelector"
 
             Layout.fillWidth: true
             Layout.topMargin: 32
@@ -146,6 +152,8 @@ PageType {
         }
 
         WarningType {
+            objectName: "settingsConnectionAppSplitTunnelingWindowsWarning"
+
             Layout.fillWidth: true
             Layout.topMargin: 8
             Layout.leftMargin: 16
@@ -160,6 +168,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsConnectionAppSplitTunnelingListView"
 
         ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
 
@@ -187,6 +196,8 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsConnectionAppSplitTunnelingAppRow"
+
                 Layout.fillWidth: true
 
                 Layout.leftMargin: 16
@@ -239,6 +250,7 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: searchField
+                objectName: "settingsConnectionAppSplitTunnelingSearchField"
 
                 Layout.fillWidth: true
 
@@ -269,6 +281,7 @@ PageType {
 
     InstalledAppsDrawer {
         id: installedAppDrawer
+        objectName: "settingsConnectionAppSplitTunnelingInstalledAppsDrawer"
 
         anchors.fill: parent
     }

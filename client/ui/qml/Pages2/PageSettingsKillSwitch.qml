@@ -11,9 +11,11 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "settingsConnectionKillSwitchPage"
 
     BackButtonType {
         id: backButton
+        objectName: "settingsConnectionKillSwitchBackButton"
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -22,6 +24,7 @@ PageType {
 
     FlickableType {
         id: fl
+        objectName: "settingsConnectionKillSwitchFlickable"
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.height
@@ -33,6 +36,8 @@ PageType {
             anchors.right: parent.right
 
             HeaderTypeWithSwitcher {
+                objectName: "settingsConnectionKillSwitchHeader"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -57,6 +62,7 @@ PageType {
 
             VerticalRadioButton {
                 id: softKillSwitch
+                objectName: "settingsConnectionKillSwitchSoftRadioButton"
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -80,6 +86,7 @@ PageType {
 
             VerticalRadioButton {
                 id: strictKillSwitch
+                objectName: "settingsConnectionKillSwitchStrictRadioButton"
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -116,6 +123,8 @@ PageType {
             }
             
             LabelWithButtonType {
+                objectName: "settingsConnectionKillSwitchDnsExceptionsButton"
+
                 Layout.topMargin: 32
                 Layout.fillWidth: true
 

@@ -19,11 +19,13 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsConnectionKillSwitchExceptionsPage"
     
     property bool pageEnabled: true
 
     ColumnLayout {
         id: header
+        objectName: "settingsConnectionKillSwitchExceptionsHeaderLayout"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -33,9 +35,12 @@ PageType {
 
         BackButtonType {
             id: backButton
+            objectName: "settingsConnectionKillSwitchExceptionsBackButton"
         }
 
         BaseHeaderType {
+            objectName: "settingsConnectionKillSwitchExceptionsHeader"
+
             enabled: root.pageEnabled
 
             Layout.fillWidth: true
@@ -48,6 +53,7 @@ PageType {
 
     ListView {
         id: listView
+        objectName: "settingsConnectionKillSwitchExceptionsListView"
 
         anchors.top: header.bottom
         anchors.topMargin: 16
@@ -95,6 +101,7 @@ PageType {
 
             LabelWithButtonType {
                 id: site
+                objectName: "settingsConnectionKillSwitchExceptionsDnsRow"
                 Layout.fillWidth: true
 
                 text: ip
@@ -128,6 +135,7 @@ PageType {
 
     AddSitePanel {
         id: addSitePanel
+        objectName: "settingsConnectionKillSwitchExceptionsAddSitePanel"
         
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -149,6 +157,7 @@ PageType {
 
     DrawerType2 {
         id: moreActionsDrawer
+        objectName: "settingsConnectionKillSwitchExceptionsMoreActionsDrawer"
 
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
@@ -169,6 +178,7 @@ PageType {
 
             LabelWithButtonType {
                 id: importSitesButton
+                objectName: "settingsConnectionKillSwitchExceptionsImportButton"
                 Layout.fillWidth: true
 
                 text: qsTr("Import")
@@ -183,6 +193,7 @@ PageType {
 
             LabelWithButtonType {
                 id: exportSitesButton
+                objectName: "settingsConnectionKillSwitchExceptionsExportButton"
                 Layout.fillWidth: true
                 text: qsTr("Save address list")
 
