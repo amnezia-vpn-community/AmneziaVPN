@@ -23,16 +23,19 @@ on:
       - "akatosh/cli-connect-status-*"   # PR #8 branches
       - "main"
       - "dev"
-  pull_request:
-    branches:
-      - "main"
-      - "dev"
   workflow_dispatch:
     inputs:
       ref:
         description: "Branch or SHA to build (default: current)"
         required: false
         type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-build-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
