@@ -16,6 +16,7 @@ import "../Controls2/TextTypes"
 
 PageType {
     id: root
+    objectName: "settingsBackupPage"
 
     Connections {
         target: SettingsController
@@ -32,6 +33,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "settingsBackupBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -47,6 +49,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsBackupListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -60,6 +63,7 @@ PageType {
             spacing: 16
 
             BaseHeaderType {
+                objectName: "settingsBackupHeader"
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -78,6 +82,7 @@ PageType {
             spacing: 16
 
             WarningType {
+                objectName: "settingsBackupWarning"
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -91,6 +96,7 @@ PageType {
 
             BasicButtonType {
                 id: makeBackupButton
+                objectName: "settingsBackupMakeBackupButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 14
@@ -121,6 +127,7 @@ PageType {
 
             BasicButtonType {
                 id: restoreBackupButton
+                objectName: "settingsBackupRestoreBackupButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: -8
