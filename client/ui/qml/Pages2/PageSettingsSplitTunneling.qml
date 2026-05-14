@@ -19,6 +19,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsConnectionSiteSplitTunnelingPage"
 
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
@@ -82,6 +83,7 @@ PageType {
 
     ColumnLayout {
         id: header
+        objectName: "settingsConnectionSiteSplitTunnelingHeaderLayout"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -91,9 +93,12 @@ PageType {
 
         BackButtonType {
             id: backButton
+            objectName: "settingsConnectionSiteSplitTunnelingBackButton"
         }
 
         HeaderTypeWithSwitcher {
+            objectName: "settingsConnectionSiteSplitTunnelingHeader"
+
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -114,6 +119,7 @@ PageType {
 
         DropDownType {
             id: selector
+            objectName: "settingsConnectionSiteSplitTunnelingModeSelector"
 
             Layout.fillWidth: true
             Layout.topMargin: 32
@@ -162,6 +168,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsConnectionSiteSplitTunnelingListView"
 
         ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
 
@@ -199,6 +206,7 @@ PageType {
 
             LabelWithButtonType {
                 id: site
+                objectName: "settingsConnectionSiteSplitTunnelingSiteRow"
                 Layout.fillWidth: true
 
                 text: url
@@ -255,6 +263,7 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: searchField
+                objectName: "settingsConnectionSiteSplitTunnelingSearchField"
 
                 Layout.fillWidth: true
                 rightButtonClickedOnEnter: true
@@ -272,6 +281,7 @@ PageType {
 
             ImageButtonType {
                 id: addSiteButtonImage
+                objectName: "settingsConnectionSiteSplitTunnelingMoreButton"
                 implicitWidth: 56
                 implicitHeight: 56
 
@@ -290,6 +300,7 @@ PageType {
 
     DrawerType2 {
         id: moreActionsDrawer
+        objectName: "settingsConnectionSiteSplitTunnelingMoreActionsDrawer"
 
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
@@ -310,6 +321,7 @@ PageType {
 
             LabelWithButtonType {
                 id: importSitesButton
+                objectName: "settingsConnectionSiteSplitTunnelingImportSitesButton"
                 Layout.fillWidth: true
 
                 text: qsTr("Import")
@@ -324,6 +336,7 @@ PageType {
 
             LabelWithButtonType {
                 id: exportSitesButton
+                objectName: "settingsConnectionSiteSplitTunnelingExportSitesButton"
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
 

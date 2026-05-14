@@ -13,9 +13,11 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsConnectionDnsServersPage"
 
     BackButtonType {
         id: backButton
+        objectName: "settingsConnectionDnsServersBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -31,6 +33,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsConnectionDnsServersListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -52,6 +55,8 @@ PageType {
             spacing: 16
 
             BaseHeaderType {
+                objectName: "settingsConnectionDnsServersHeader"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -76,6 +81,7 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: primaryDns
+                objectName: "settingsConnectionDnsServersPrimaryDnsField"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -91,6 +97,7 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: secondaryDns
+                objectName: "settingsConnectionDnsServersSecondaryDnsField"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -106,6 +113,7 @@ PageType {
 
             BasicButtonType {
                 id: restoreDefaultButton
+                objectName: "settingsConnectionDnsServersRestoreDefaultButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -142,6 +150,7 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+                objectName: "settingsConnectionDnsServersSaveButton"
 
                 Layout.fillWidth: true
                 Layout.margins: 16
