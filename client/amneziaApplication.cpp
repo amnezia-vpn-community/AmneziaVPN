@@ -14,6 +14,7 @@
 #include <QTranslator>
 #include <QEvent>
 #include <QDir>
+#include <QFile>
 #include <QSettings>
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
@@ -245,6 +246,15 @@ bool AmneziaApplication::parseCommands()
 
     if (m_parser.isSet(m_optCleanup)) {
         Logger::cleanUp();
+
+        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+        settings.clear();
+        settings.sync();
+
+        const QString configRoot = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + ORGANIZATION_NAME;
+        QFile::remove(configRoot + "/" + APPLICATION_NAME + ".conf");
+        QDir(configRoot + "/" + APPLICATION_NAME).removeRecursively();
+
         QTimer::singleShot(100, this, [this] { quit(); });
         exec();
         return false;
