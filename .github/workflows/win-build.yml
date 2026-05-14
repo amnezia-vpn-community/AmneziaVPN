@@ -50,8 +50,12 @@ jobs:
     # Only run if conan recipes or the conanfile changed.  Skip on pure
     # source-only changes; prebuilts from the Conan remote are used instead.
     if: |
-      contains(github.event.head_commit.modified, 'recipes/') ||
-      contains(github.event.head_commit.modified, 'conanfile.py')
+      contains(toJson(github.event.head_commit.added), 'recipes/') ||
+      contains(toJson(github.event.head_commit.modified), 'recipes/') ||
+      contains(toJson(github.event.head_commit.removed), 'recipes/') ||
+      contains(toJson(github.event.head_commit.added), 'conanfile.py') ||
+      contains(toJson(github.event.head_commit.modified), 'conanfile.py') ||
+      contains(toJson(github.event.head_commit.removed), 'conanfile.py')
 
     steps:
       - name: Checkout (with submodules)
