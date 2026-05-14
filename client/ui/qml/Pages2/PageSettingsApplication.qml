@@ -13,9 +13,11 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApplicationPage"
 
     BackButtonType {
         id: backButton
+        objectName: "settingsApplicationBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -31,6 +33,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsApplicationListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -41,6 +44,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "settingsApplicationHeader"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -57,6 +62,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAllowScreenshots
+                objectName: "settingsApplicationAllowScreenshotsSwitch"
 
                 visible: GC.isMobile()
 
@@ -79,6 +85,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonNotification
+                objectName: "settingsApplicationNotificationsButton"
 
                 visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
 
@@ -99,6 +106,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAutoStart
+                objectName: "settingsApplicationAutoStartSwitch"
 
                 visible: !GC.isMobile()
 
@@ -122,6 +130,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAutoConnect
+                objectName: "settingsApplicationAutoConnectSwitch"
 
                 visible: !GC.isMobile()
 
@@ -145,6 +154,7 @@ PageType {
 
             SwitcherType {
                 id: switcherStartMinimized
+                objectName: "settingsApplicationStartMinimizedSwitch"
 
                 visible: !GC.isMobile()
 
@@ -171,6 +181,7 @@ PageType {
 
             SwitcherType {
                 id: switcherNewsNotificationEnabled
+                objectName: "settingsApplicationNewsNotificationSwitch"
 
                 visible: ServersUiController.hasServersFromGatewayApi
 
@@ -199,6 +210,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonLanguage
+                objectName: "settingsApplicationLanguageButton"
 
                 Layout.fillWidth: true
 
@@ -215,6 +227,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonLogging
+                objectName: "settingsApplicationLoggingButton"
 
                 Layout.fillWidth: true
 
