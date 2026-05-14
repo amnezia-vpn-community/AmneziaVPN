@@ -1,6 +1,8 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
+#include <QTextStream>
 #include <QTranslator>
 #include <QTimer>
 
@@ -9,6 +11,7 @@
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
 #include "core/models/serverConfig.h"
+#include "core/utils/errorStrings.h"
 #include "logger.h"
 #include "secureQSettings.h"
 
@@ -333,6 +336,24 @@ bool CoreController::openConnectionByIndex(int serverIndex)
     if (m_serversController) {
         m_serversController->setDefaultServerIndex(serverIndex);
     }
+
+    connect(m_connectionController, &ConnectionController::connectionStateChanged, this,
+            [this](Vpn::ConnectionState state) {
+                switch (state) {
+                case Vpn::ConnectionState::Connected:
+                    QTextStream(stdout) << "AMNEZIAVPN_CLI_STATUS connected" << Qt::endl;
+                    break;
+                case Vpn::ConnectionState::Error: {
+                    const auto error = m_connectionController ? m_connectionController->lastConnectionError() : ErrorCode::InternalError;
+                    QTextStream(stderr) << "AMNEZIAVPN_CLI_STATUS error " << int(error) << " " << errorString(error) << Qt::endl;
+                    QCoreApplication::exit(3);
+                    break;
+                }
+                default:
+                    break;
+                }
+            });
+
     m_connectionUiController->toggleConnection();
     return true;
 }
