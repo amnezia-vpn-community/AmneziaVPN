@@ -1,6 +1,7 @@
 #include "coreController.h"
 
 #include <cstdio>
+#include <memory>
 
 #include <QCoreApplication>
 #include <QDirIterator>
@@ -339,13 +340,23 @@ bool CoreController::openConnectionByIndex(int serverIndex)
         m_serversController->setDefaultServerIndex(serverIndex);
     }
 
+    auto terminalStatusReported = std::make_shared<bool>(false);
+
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this,
-            [this](Vpn::ConnectionState state) {
+            [this, terminalStatusReported](Vpn::ConnectionState state) {
                 switch (state) {
                 case Vpn::ConnectionState::Connected:
+                    if (*terminalStatusReported) {
+                        break;
+                    }
+                    *terminalStatusReported = true;
                     QTextStream(stdout) << "AMNEZIAVPN_CLI_STATUS connected" << Qt::endl;
                     break;
                 case Vpn::ConnectionState::Error: {
+                    if (*terminalStatusReported) {
+                        break;
+                    }
+                    *terminalStatusReported = true;
                     const auto error = m_connectionController ? m_connectionController->lastConnectionError() : ErrorCode::InternalError;
                     QTextStream(stderr) << "AMNEZIAVPN_CLI_STATUS error " << int(error) << " " << errorString(error) << Qt::endl;
                     QCoreApplication::exit(3);
@@ -355,6 +366,15 @@ bool CoreController::openConnectionByIndex(int serverIndex)
                     break;
                 }
             });
+
+    QTimer::singleShot(40000, this, [terminalStatusReported]() {
+        if (*terminalStatusReported) {
+            return;
+        }
+        *terminalStatusReported = true;
+        QTextStream(stderr) << "AMNEZIAVPN_CLI_STATUS error startup-connect-timeout" << Qt::endl;
+        QCoreApplication::exit(3);
+    });
 
     m_connectionUiController->toggleConnection();
     return true;
