@@ -339,12 +339,12 @@ bool CoreController::openConnectionByIndex(int serverIndex)
 
 bool CoreController::importConfigFromData(const QString &data)
 {
-    if (!m_importController)
+    if (!m_importCoreController)
         return false;
 
-    const auto result = m_importController->extractConfigFromData(data);
+    const auto result = m_importCoreController->extractConfigFromData(data);
     if (result.errorCode == ErrorCode::NoError) {
-        m_importController->importConfig(result.config);
+        m_importCoreController->importConfig(result.config);
         return true;
     }
 
