@@ -11,11 +11,13 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "settingsConnectionPage"
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
     BackButtonType {
         id: backButton
+        objectName: "settingsConnectionBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -31,6 +33,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsConnectionListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -42,6 +45,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "settingsConnectionHeader"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -58,6 +63,7 @@ PageType {
 
             SwitcherType {
                 id: amneziaDnsSwitch
+                objectName: "settingsConnectionAmneziaDnsSwitch"
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -77,6 +83,7 @@ PageType {
 
             LabelWithButtonType {
                 id: dnsServersButton
+                objectName: "settingsConnectionDnsServersButton"
 
                 Layout.fillWidth: true
 
@@ -93,6 +100,7 @@ PageType {
 
             LabelWithButtonType {
                 id: splitTunnelingButton
+                objectName: "settingsConnectionSiteSplitTunnelingButton"
 
                 Layout.fillWidth: true
 
@@ -115,6 +123,7 @@ PageType {
 
             LabelWithButtonType {
                 id: splitTunnelingButton2
+                objectName: "settingsConnectionAppSplitTunnelingButton"
 
                 visible: root.isAppSplitTinnelingEnabled
 
@@ -135,6 +144,8 @@ PageType {
 
             LabelWithButtonType {
                 id: killSwitchButton
+                objectName: "settingsConnectionKillSwitchButton"
+
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
