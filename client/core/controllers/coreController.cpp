@@ -3,11 +3,16 @@
 #include <cstdio>
 #include <memory>
 
+#include <QByteArray>
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QTextStream>
 #include <QTranslator>
 #include <QTimer>
+
+#if defined(Q_OS_WIN)
+    #include <windows.h>
+#endif
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -17,6 +22,23 @@
 #include "core/utils/errorStrings.h"
 #include "logger.h"
 #include "secureQSettings.h"
+
+namespace {
+void writeCliStatusLine(FILE *stream, const QString &line)
+{
+#if defined(Q_OS_WIN)
+    const QByteArray bytes = (line + QLatin1Char('\n')).toUtf8();
+    const DWORD handleId = (stream == stderr) ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE;
+    const HANDLE handle = GetStdHandle(handleId);
+    if (handle != nullptr && handle != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(handle, bytes.constData(), DWORD(bytes.size()), &written, nullptr);
+        return;
+    }
+#endif
+    QTextStream(stream) << line << Qt::endl;
+}
+}
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -350,7 +372,7 @@ bool CoreController::openConnectionByIndex(int serverIndex)
                         break;
                     }
                     *terminalStatusReported = true;
-                    QTextStream(stdout) << "AMNEZIAVPN_CLI_STATUS connected" << Qt::endl;
+                    writeCliStatusLine(stdout, QStringLiteral("AMNEZIAVPN_CLI_STATUS connected"));
                     break;
                 case Vpn::ConnectionState::Error: {
                     if (*terminalStatusReported) {
@@ -358,7 +380,7 @@ bool CoreController::openConnectionByIndex(int serverIndex)
                     }
                     *terminalStatusReported = true;
                     const auto error = m_connectionController ? m_connectionController->lastConnectionError() : ErrorCode::InternalError;
-                    QTextStream(stderr) << "AMNEZIAVPN_CLI_STATUS error " << int(error) << " " << errorString(error) << Qt::endl;
+                    writeCliStatusLine(stderr, QStringLiteral("AMNEZIAVPN_CLI_STATUS error %1 %2").arg(int(error)).arg(errorString(error)));
                     QCoreApplication::exit(3);
                     break;
                 }
@@ -372,7 +394,7 @@ bool CoreController::openConnectionByIndex(int serverIndex)
             return;
         }
         *terminalStatusReported = true;
-        QTextStream(stderr) << "AMNEZIAVPN_CLI_STATUS error startup-connect-timeout" << Qt::endl;
+        writeCliStatusLine(stderr, QStringLiteral("AMNEZIAVPN_CLI_STATUS error startup-connect-timeout"));
         QCoreApplication::exit(3);
     });
 
