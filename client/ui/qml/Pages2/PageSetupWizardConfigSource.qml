@@ -171,6 +171,7 @@ PageType {
 
                 headerText: qsTr("Insert key")
                 buttonText: qsTr("Insert")
+                rightButtonObjectName: "configSourceKeyButton"
 
                 clickedFunc: function() {
                     textField.text = ""
