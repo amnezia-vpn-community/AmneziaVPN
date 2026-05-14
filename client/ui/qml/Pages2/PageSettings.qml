@@ -57,6 +57,8 @@ PageType {
             spacing: 0
 
             LabelWithButtonType {
+                objectName: automationId
+
                 Layout.fillWidth: true
 
                 visible: isVisible
@@ -78,6 +80,7 @@ PageType {
 
             LabelWithButtonType {
                 id: close
+                objectName: "settingsCloseApplicationButton"
 
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
@@ -115,6 +118,7 @@ PageType {
         id: servers
 
         property string title: qsTr("Servers")
+        readonly property string automationId: "settingsServersButton"
         readonly property string leftImagePath: "qrc:/images/controls/server.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -126,6 +130,7 @@ PageType {
         id: connection
 
         property string title: qsTr("Connection")
+        readonly property string automationId: "settingsConnectionButton"
         readonly property string leftImagePath: "qrc:/images/controls/radio.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -137,6 +142,7 @@ PageType {
         id: application
 
         property string title: qsTr("Application")
+        readonly property string automationId: "settingsApplicationButton"
         readonly property string leftImagePath: "qrc:/images/controls/app.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -148,6 +154,7 @@ PageType {
         id: news
 
         property string title: qsTr("News & Notifications")
+        readonly property string automationId: "settingsNewsButton"
         readonly property string leftImagePath: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled() ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
         property bool isVisible: ServersUiController.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
@@ -164,6 +171,7 @@ PageType {
         id: backup
 
         property string title: qsTr("Backup")
+        readonly property string automationId: "settingsBackupButton"
         readonly property string leftImagePath: "qrc:/images/controls/save.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -175,6 +183,7 @@ PageType {
         id: about
 
         property string title: qsTr("About AmneziaVPN")
+        readonly property string automationId: "settingsAboutButton"
         readonly property string leftImagePath: "qrc:/images/controls/amnezia.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -186,6 +195,7 @@ PageType {
         id: devConsole
 
         property string title: qsTr("Dev console")
+        readonly property string automationId: "settingsDevConsoleButton"
         readonly property string leftImagePath: "qrc:/images/controls/bug.svg"
         property bool isVisible: SettingsController.isDevModeEnabled
         readonly property var clickedHandler: function() {
