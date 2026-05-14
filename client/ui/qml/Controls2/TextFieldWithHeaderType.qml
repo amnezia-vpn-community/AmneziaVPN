@@ -19,6 +19,7 @@ Item {
 
     property string buttonText
     property string buttonImageSource
+    property string rightButtonObjectName
     property var clickedFunc
 
     property alias textField: textField
@@ -181,6 +182,9 @@ Item {
     }
 
     BasicButtonType {
+        id: rightButton
+        objectName: root.rightButtonObjectName
+
         visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
 
         focusPolicy: Qt.NoFocus
