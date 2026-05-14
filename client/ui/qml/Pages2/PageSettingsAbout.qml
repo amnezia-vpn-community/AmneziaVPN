@@ -111,6 +111,8 @@ PageType {
             width: listView.width
 
             CaptionTextType {
+                objectName: "aboutVersionText"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 40
 
@@ -134,6 +136,7 @@ PageType {
 
             BasicButtonType {
                 id: checkUpdatesButton
+                objectName: "aboutCheckUpdatesButton"
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 8
@@ -155,6 +158,7 @@ PageType {
 
             BasicButtonType {
                 id: privacyPolicyButton
+                objectName: "aboutPrivacyPolicyButton"
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 16
