@@ -1,0 +1,203 @@
+name: Windows Build (community installer artifact)
+
+# Produces AmneziaVPN-*-win64.exe as a downloadable Actions artifact so that
+# test-suites Windows L2 jobs can consume it via AMNEZIA_WINDOWS_ARTIFACT_RUN_ID.
+#
+# Mirrors upstream deploy.yml Build-Windows job.  See §4.1 for host-isolation.
+#
+# ── Secrets required ──────────────────────────────────────────────────────────
+# The cmake/Conan build pulls prebuilt Qt dependencies from the Amnezia Conan
+# remote.  Without these org secrets the build fails at the cmake configure step:
+#
+#   CONAN_USER     — Amnezia Conan remote username
+#   CONAN_PASSWORD — Amnezia Conan remote password
+#
+# These must be added to the amnezia-vpn-community org (or this repo) before the
+# Build job can succeed.  All other required secrets (GH_PAT, GHCR_PAT, etc.)
+# are already present as org-level secrets.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches:
+      - "akatosh/cli-connect-status-*"   # PR #8 branches
+      - "main"
+      - "dev"
+  pull_request:
+    branches:
+      - "main"
+      - "dev"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or SHA to build (default: current)"
+        required: false
+        type: string
+
+env:
+  QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
+  QT_VERSION: "6.10.1"
+  QIF_VERSION: "4.7"
+
+jobs:
+  # ── Bake Conan prebuilts (only when recipes change) ─────────────────────────
+  bake-prebuilts:
+    name: Bake Windows Prebuilts
+    runs-on: windows-latest
+    # Only run if conan recipes or the conanfile changed.  Skip on pure
+    # source-only changes; prebuilts from the Conan remote are used instead.
+    if: |
+      contains(github.event.head_commit.modified, 'recipes/') ||
+      contains(github.event.head_commit.modified, 'conanfile.py')
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          submodules: "true"
+          fetch-depth: 10
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Conan
+        run: pip install "conan==2.26.2"
+
+      - name: Authorise Conan remote
+        # CONAN_USER / CONAN_PASSWORD must be set as org secrets.
+        # If absent the step is skipped via the condition below; the Build job
+        # will fail at cmake with a clear message about missing packages.
+        env:
+          CONAN_USER: ${{ secrets.CONAN_USER }}
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        run: |
+          if (-not $env:CONAN_USER -or -not $env:CONAN_PASSWORD) {
+            Write-Warning "CONAN_USER / CONAN_PASSWORD not set — skipping prebuilt bake."
+            exit 0
+          }
+          conan remote login amnezia "$env:CONAN_USER" -p "$env:CONAN_PASSWORD"
+          cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+          conan upload -r amnezia "*" -c
+        shell: powershell
+
+  # ── Build Windows installer ──────────────────────────────────────────────────
+  build:
+    name: Build Windows Installer
+    runs-on: windows-latest
+    needs: bake-prebuilts
+    if: ${{ always() }}
+
+    env:
+      # Application-level config keys — can be empty for community/dev builds.
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY || '' }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT || '' }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT || '' }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY || '' }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT || '' }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT || '' }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT || '' }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT || '' }}
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          submodules: "true"
+          fetch-depth: 10
+
+      - name: Install Qt ${{ env.QT_VERSION }}
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2022_64"
+          modules: "qtremoteobjects qt5compat qtshadertools"
+          dir: ${{ runner.temp }}
+          setup-python: "true"
+          tools: "tools_ifw"
+          set-env: "true"
+          aqtversion: "==3.3.0"
+          py7zrversion: "==0.22.*"
+          extra: "--base ${{ env.QT_MIRROR }}"
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: "x64"
+
+      - name: Set up .NET SDK (for WiX)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install WiX Toolset
+        shell: powershell
+        run: |
+          dotnet tool install --global wix --version 4.0.6
+          wix extension add -g WixToolset.UI.wixext/4.0.6
+          wix extension add -g WixToolset.Util.wixext/4.0.6
+          wix extension list -g
+          $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
+          "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install Conan
+        run: pip install "conan==2.26.2"
+
+      - name: Authorise Conan remote (for dependency resolution)
+        # CONAN_USER / CONAN_PASSWORD must be org secrets.  Without them the
+        # cmake configure step below will fail with package-not-found errors.
+        # Add these secrets to unblock: Settings → Secrets → Actions → CONAN_USER / CONAN_PASSWORD
+        env:
+          CONAN_USER: ${{ secrets.CONAN_USER }}
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        shell: powershell
+        run: |
+          if (-not $env:CONAN_USER -or -not $env:CONAN_PASSWORD) {
+            Write-Warning "⚠️  CONAN_USER / CONAN_PASSWORD not set."
+            Write-Warning "    cmake will attempt to build dependencies from source;"
+            Write-Warning "    the build may fail if Conan remote packages are required."
+            Write-Warning "    Add these secrets to the amnezia-vpn-community org to resolve."
+          } else {
+            conan remote login amnezia "$env:CONAN_USER" -p "$env:CONAN_PASSWORD"
+            Write-Host "✅  Conan remote authenticated."
+          }
+
+      - name: Build project (deploy\build.bat --installer all)
+        shell: cmd
+        env:
+          QT_INSTALL_DIR: ${{ runner.temp }}
+        run: |
+          set WIX_ROOT_PATH="%USERPROFILE%\.dotnet\tools"
+          deploy\build.bat --installer all
+
+      - name: Upload IFW installer artifact (AmneziaVPN-*-win64.exe)
+        uses: actions/upload-artifact@v7
+        with:
+          # test-suites l2-client-windows selects this artifact by
+          # AMNEZIA_WINDOWS_ARTIFACT_RUN_ID + "AmneziaVPN-*-win64.exe" glob.
+          name: windows-installer-${{ github.run_id }}
+          path: deploy/build/AmneziaVPN-*-win64.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload WiX MSI artifact (AmneziaVPN-*-win64.msi)
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-installer-msi-${{ github.run_id }}
+          path: deploy/build/AmneziaVPN-*-win64.msi
+          if-no-files-found: warn
+          retention-days: 7
