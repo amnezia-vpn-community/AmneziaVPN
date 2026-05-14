@@ -1,5 +1,7 @@
 #include "coreController.h"
 
+#include <cstdio>
+
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QTextStream>
