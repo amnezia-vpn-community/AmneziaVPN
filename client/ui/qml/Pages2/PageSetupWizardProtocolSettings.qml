@@ -17,6 +17,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolSettingsPage"
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -61,6 +62,7 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "protocolSettingsTitle"
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
