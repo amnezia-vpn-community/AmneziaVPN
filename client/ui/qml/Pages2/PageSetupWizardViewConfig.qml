@@ -13,11 +13,14 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "importConfigReviewPage"
 
     property bool showContent: false
 
     BackButtonType {
         id: backButton
+        objectName: "importConfigReviewBackButton"
+        Accessible.name: qsTr("Back")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -59,6 +62,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "importConfigReviewListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -69,6 +73,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "importConfigReviewTitle"
+                Accessible.name: qsTr("New connection")
+
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 
@@ -197,7 +204,8 @@ PageType {
 
             BasicButtonType {
                 id: connectButton
-                objectName: "importConnectButton"
+                objectName: "connectButton"
+                Accessible.name: qsTr("Connect")
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
