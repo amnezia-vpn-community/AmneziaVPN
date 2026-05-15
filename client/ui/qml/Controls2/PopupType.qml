@@ -68,6 +68,8 @@ Popup {
             anchors.rightMargin: 16
 
             CaptionTextType {
+                objectName: "popupMessageText"
+
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
 
@@ -86,6 +88,7 @@ Popup {
 
             BasicButtonType {
                 id: closeButton
+                objectName: "popupCloseButton"
                 visible: closeButtonVisible
 
                 implicitHeight: 32

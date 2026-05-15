@@ -202,6 +202,7 @@ Window  {
 
         PopupType {
             id: popupErrorMessage
+            objectName: "popupErrorMessage"
         }
     }
 
