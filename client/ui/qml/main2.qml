@@ -177,6 +177,7 @@ Window  {
 
         PopupType {
             id: popupNotificationMessage
+            messageObjectName: "toastMessageText"
         }
 
         Timer {
@@ -203,6 +204,7 @@ Window  {
         PopupType {
             id: popupErrorMessage
             objectName: "popupErrorMessage"
+            messageObjectName: "setupWizardErrorText"
         }
     }
 
