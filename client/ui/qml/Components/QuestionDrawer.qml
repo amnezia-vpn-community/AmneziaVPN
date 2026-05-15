@@ -13,6 +13,7 @@ import "../Config"
 
 DrawerType2 {
     id: root
+    objectName: "questionDrawer"
 
     property string headerText
     property string descriptionText
@@ -24,6 +25,7 @@ DrawerType2 {
 
     expandedStateContent: ColumnLayout {
         id: content
+        objectName: "questionDrawerContent"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -36,6 +38,8 @@ DrawerType2 {
         }
 
         Header2TextType {
+            objectName: "questionDrawerHeaderText"
+
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
@@ -45,6 +49,8 @@ DrawerType2 {
         }
 
         ParagraphTextType {
+            objectName: "questionDrawerDescriptionText"
+
             Layout.fillWidth: true
             Layout.topMargin: 8
             Layout.rightMargin: 16
@@ -55,6 +61,8 @@ DrawerType2 {
 
         BasicButtonType {
             id: yesButton
+            objectName: "questionDrawerYesButton"
+
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
@@ -71,6 +79,8 @@ DrawerType2 {
 
         BasicButtonType {
             id: noButton
+            objectName: "questionDrawerNoButton"
+
             Layout.fillWidth: true
             Layout.rightMargin: 16
             Layout.leftMargin: 16
