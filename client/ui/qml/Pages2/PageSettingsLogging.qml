@@ -15,9 +15,12 @@ import "../Controls2/TextTypes"
 
 PageType {
     id: root
+    objectName: "settingsLoggingPage"
 
     BackButtonType {
         id: backButton
+        objectName: "settingsLoggingBackButton"
+        Accessible.name: qsTr("Back")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -33,6 +36,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsLoggingListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -43,6 +47,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "settingsLoggingHeader"
+                Accessible.name: qsTr("Logging")
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -54,6 +61,8 @@ PageType {
 
             SwitcherType {
                 id: switcher
+                objectName: "settingsLoggingEnableLogsSwitch"
+                Accessible.name: qsTr("Enable logs")
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -74,6 +83,9 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                objectName: "settingsLoggingClearLogsButton"
+                Accessible.name: qsTr("Clear logs")
+
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
@@ -108,12 +120,16 @@ PageType {
 
         delegate: ColumnLayout {
             id: delegateContent
+            objectName: logTypeObjectName
 
             width: listView.width
 
             enabled: isVisible
 
             ListItemTitleType {
+                objectName: logTypeTitleObjectName
+                Accessible.name: title
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -123,6 +139,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: logTypeDescriptionObjectName
+                Accessible.name: description
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -134,6 +153,9 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: openLogsObjectName
+                Accessible.name: qsTr("Open logs folder")
+
                 Layout.fillWidth: true
                 Layout.topMargin: -8
                 Layout.bottomMargin: -8
@@ -150,6 +172,9 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                objectName: exportLogsObjectName
+                Accessible.name: qsTr("Export logs")
+
                 Layout.fillWidth: true
                 Layout.topMargin: -8
                 Layout.bottomMargin: -8
@@ -180,6 +205,11 @@ PageType {
 
         readonly property string title: qsTr("Client logs")
         readonly property string description: qsTr("AmneziaVPN logs")
+        readonly property string logTypeObjectName: "settingsLoggingClientLogsSection"
+        readonly property string logTypeTitleObjectName: "settingsLoggingClientLogsTitle"
+        readonly property string logTypeDescriptionObjectName: "settingsLoggingClientLogsDescription"
+        readonly property string openLogsObjectName: "settingsLoggingClientOpenLogsButton"
+        readonly property string exportLogsObjectName: "settingsLoggingClientExportLogsButton"
         readonly property bool isVisible: true
         readonly property var openLogsHandler: function() {
             SettingsController.openLogsFolder()
@@ -209,6 +239,11 @@ PageType {
 
         readonly property string title: qsTr("Service logs")
         readonly property string description: qsTr("AmneziaVPN-service logs")
+        readonly property string logTypeObjectName: "settingsLoggingServiceLogsSection"
+        readonly property string logTypeTitleObjectName: "settingsLoggingServiceLogsTitle"
+        readonly property string logTypeDescriptionObjectName: "settingsLoggingServiceLogsDescription"
+        readonly property string openLogsObjectName: "settingsLoggingServiceOpenLogsButton"
+        readonly property string exportLogsObjectName: "settingsLoggingServiceExportLogsButton"
         readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
         readonly property var openLogsHandler: function() {
             SettingsController.openServiceLogsFolder()
