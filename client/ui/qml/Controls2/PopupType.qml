@@ -11,6 +11,7 @@ Popup {
     id: root
 
     property string text
+    property string messageObjectName: "popupMessageText"
     property bool closeButtonVisible: true
 
     leftMargin: 25
@@ -68,7 +69,7 @@ Popup {
             anchors.rightMargin: 16
 
             CaptionTextType {
-                objectName: "popupMessageText"
+                objectName: root.messageObjectName
                 Accessible.name: root.text
 
                 horizontalAlignment: Text.AlignLeft

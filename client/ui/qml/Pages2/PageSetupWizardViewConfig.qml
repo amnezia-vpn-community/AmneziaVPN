@@ -173,6 +173,8 @@ PageType {
             }
 
             Rectangle {
+                objectName: "configImportPreview"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.bottomMargin: 48
