@@ -197,6 +197,7 @@ PageType {
 
             BasicButtonType {
                 id: connectButton
+                objectName: "importConnectButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16

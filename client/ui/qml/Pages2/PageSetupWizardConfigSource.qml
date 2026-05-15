@@ -217,6 +217,8 @@ PageType {
             width: listView.width
 
             CardWithIconsType {
+                objectName: modelData.objectName
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -332,6 +334,8 @@ PageType {
     QtObject {
         id: fileOpen
 
+        objectName: "fileOpenOptionButton"
+
         property bool featuredAmneziaConnection: false
         property string title: qsTr("File with connection settings")
         property string description: qsTr("")
@@ -350,6 +354,8 @@ PageType {
 
     QtObject {
         id: qrScan
+
+        objectName: "qrScanOptionButton"
 
         property bool featuredAmneziaConnection: false
         property string title: qsTr("QR code")

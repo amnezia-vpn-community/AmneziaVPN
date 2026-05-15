@@ -14,6 +14,7 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "qrReaderPage"
 
     BackButtonType {
         id: backButton
@@ -25,6 +26,7 @@ PageType {
 
     ParagraphTextType {
         id: header
+        objectName: "qrReaderInstructionText"
 
         property string progressString
 
@@ -40,6 +42,7 @@ PageType {
 
     ProgressBarType {
         id: progressBar
+        objectName: "qrReaderProgressBar"
 
         anchors.left: parent.left
         anchors.top: header.bottom

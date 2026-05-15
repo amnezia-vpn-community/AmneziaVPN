@@ -36,6 +36,7 @@ ListViewType {
 
             VerticalRadioButton {
                 id: containerRadioButton
+                objectName: "protocolRow:" + name
 
                 Layout.fillWidth: true
 
