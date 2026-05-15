@@ -69,6 +69,7 @@ Popup {
 
             CaptionTextType {
                 objectName: "popupMessageText"
+                Accessible.name: root.text
 
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
@@ -89,6 +90,7 @@ Popup {
             BasicButtonType {
                 id: closeButton
                 objectName: "popupCloseButton"
+                Accessible.name: qsTr("Close")
                 visible: closeButtonVisible
 
                 implicitHeight: 32

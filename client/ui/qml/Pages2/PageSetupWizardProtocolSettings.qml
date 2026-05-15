@@ -18,6 +18,7 @@ import "../Components"
 PageType {
     id: root
     objectName: "protocolSettingsPage"
+    Accessible.name: qsTr("Protocol settings")
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -63,6 +64,8 @@ PageType {
             BaseHeaderType {
                 id: header
                 objectName: "protocolSettingsTitle"
+                Accessible.name: qsTr("Installing %1").arg(name)
+                Accessible.description: description
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16

@@ -218,6 +218,8 @@ PageType {
 
             CardWithIconsType {
                 objectName: modelData.objectName
+                Accessible.name: title
+                Accessible.description: description
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
