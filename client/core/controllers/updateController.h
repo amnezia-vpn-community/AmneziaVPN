@@ -4,6 +4,7 @@
 #include <functional>
 #include <QObject>
 #include <QNetworkReply>
+#include <QUrl>
 
 #include "core/repositories/secureAppSettingsRepository.h"
 
@@ -16,6 +17,9 @@ public:
     QString getRawChangelogText() const;
     QString getReleaseDate() const;
     QString getVersion() const;
+
+    static bool isValidUpdaterBaseUrl(const QString &baseUrl);
+    static bool isValidUpdaterUrl(const QUrl &url);
 
 public slots:
     void checkForUpdates();
