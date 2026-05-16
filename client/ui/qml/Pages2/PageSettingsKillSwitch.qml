@@ -47,6 +47,7 @@ PageType {
 
                 showSwitcher: true
                 switcher {
+                    objectName: "settingsConnectionKillSwitchEnableSwitch"
                     checked: SettingsController.isKillSwitchEnabled
                     enabled: !ConnectionController.isConnected
                 }
