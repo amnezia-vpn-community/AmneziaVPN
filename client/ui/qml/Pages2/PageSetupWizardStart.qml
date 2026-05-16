@@ -20,12 +20,14 @@ PageType {
 
     ColumnLayout {
         id: content
+        objectName: "setupWizardStartContent"
 
         anchors.fill: parent
         spacing: 0
 
         Image {
             id: image
+            objectName: "setupWizardStartLogoImage"
             source: "qrc:/images/amneziaBigLogo.png"
 
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
