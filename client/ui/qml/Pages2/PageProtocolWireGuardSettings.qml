@@ -16,9 +16,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolWireGuardSettingsPage"
+    Accessible.name: qsTr("WireGuard settings")
 
     BackButtonType {
         id: backButton
+        objectName: "protocolWireGuardSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -34,6 +39,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolWireGuardSettingsListView"
+        Accessible.name: qsTr("WireGuard settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -45,6 +52,8 @@ PageType {
         model: WireGuardConfigModel
 
         delegate: ColumnLayout {
+            objectName: "protocolWireGuardSettingsDelegate:" + index
+
             width: listView.width
 
             property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
@@ -52,6 +61,9 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "protocolWireGuardSettingsHeader:" + index
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -61,6 +73,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: vpnAddressSubnetTextField
+                objectName: "protocolWireGuardSettingsVpnAddressSubnetField:" + index
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 40
@@ -81,6 +95,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: portTextField
+                objectName: "protocolWireGuardSettingsPortField:" + index
+                Accessible.name: headerText
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -102,6 +118,9 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+                objectName: "protocolWireGuardSettingsSaveButton:" + index
+                Accessible.name: text
+                Accessible.role: Accessible.Button
                 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
