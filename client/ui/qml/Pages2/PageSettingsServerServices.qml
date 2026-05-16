@@ -26,6 +26,9 @@ PageType {
         id: settingsContainersListView
         objectName: "settingsServerServicesListView"
         Accessible.name: qsTr("Services")
+        delegateObjectNamePrefix: "settingsServerServicesDelegate:"
+        cardObjectNamePrefix: "settingsServerServicesServiceCard:"
+        actionButtonObjectNamePrefix: "settingsServerServicesActionButton:"
 
         anchors.fill: parent
 
