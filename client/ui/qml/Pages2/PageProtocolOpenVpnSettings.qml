@@ -16,9 +16,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolOpenVpnSettingsPage"
+    Accessible.name: qsTr("OpenVPN settings")
 
     BackButtonType {
         id: backButton
+        objectName: "protocolOpenVpnSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -34,6 +39,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolOpenVpnSettingsListView"
+        Accessible.name: qsTr("OpenVPN settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -47,6 +54,8 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "protocolOpenVpnSettingsHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -59,12 +68,17 @@ PageType {
         model: OpenVpnConfigModel             
 
         delegate: ColumnLayout {
+            id: delegateItem
+            objectName: "protocolOpenVpnSettingsDelegate:" + index
+
             width: listView.width
 
             spacing: 0
 
             TextFieldWithHeaderType {
                 id: vpnAddressSubnetTextField
+                objectName: "protocolOpenVpnSettingsVpnAddressSubnetField:" + index
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -86,6 +100,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "protocolOpenVpnSettingsNetworkProtocolLabel:" + index
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -96,6 +113,9 @@ PageType {
 
             TransportProtoSelector {
                 id: transportProtoSelector
+                objectName: "protocolOpenVpnSettingsTransportProtocolSelector:" + index
+                Accessible.name: qsTr("Network protocol")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -120,6 +140,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: portTextField
+                objectName: "protocolOpenVpnSettingsPortField:" + index
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 40
@@ -144,6 +166,8 @@ PageType {
 
             SwitcherType {
                 id: autoNegotiateEncryprionSwitcher
+                objectName: "protocolOpenVpnSettingsAutoNegotiateEncryptionSwitch:" + index
+                Accessible.name: text
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
@@ -162,6 +186,9 @@ PageType {
 
             DropDownType {
                 id: hashDropDown
+                objectName: "protocolOpenVpnSettingsHashSelector:" + index
+                Accessible.name: descriptionText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
@@ -176,6 +203,8 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: hashListView
+                    objectName: "protocolOpenVpnSettingsHashListView:" + index
+                    Accessible.name: qsTr("Hash")
 
                     rootWidth: root.width
 
@@ -223,6 +252,9 @@ PageType {
 
             DropDownType {
                 id: cipherDropDown
+                objectName: "protocolOpenVpnSettingsCipherSelector:" + index
+                Accessible.name: descriptionText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -237,6 +269,8 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: cipherListView
+                    objectName: "protocolOpenVpnSettingsCipherListView:" + index
+                    Accessible.name: qsTr("Cipher")
 
                     rootWidth: root.width
 
@@ -284,6 +318,8 @@ PageType {
 
             Rectangle {
                 id: contentRect
+                objectName: "protocolOpenVpnSettingsOptionsPanel:" + index
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -300,6 +336,9 @@ PageType {
 
                     CheckBoxType {
                         id: tlsAuthCheckBox
+                        objectName: "protocolOpenVpnSettingsTlsAuthCheckBox:" + index
+                        Accessible.name: text
+
                         Layout.fillWidth: true
 
                         text: qsTr("TLS auth")
@@ -317,6 +356,9 @@ PageType {
 
                     CheckBoxType {
                         id: blockDnsCheckBox
+                        objectName: "protocolOpenVpnSettingsBlockDnsCheckBox:" + index
+                        Accessible.name: text
+
                         Layout.fillWidth: true
 
                         text: qsTr("Block DNS requests outside of VPN")
@@ -333,6 +375,9 @@ PageType {
 
             SwitcherType {
                 id: additionalClientCommandsSwitcher
+                objectName: "protocolOpenVpnSettingsAdditionalClientCommandsSwitch:" + index
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -351,6 +396,9 @@ PageType {
 
             TextAreaType {
                 id: additionalClientCommandsTextArea
+                objectName: "protocolOpenVpnSettingsAdditionalClientCommandsField:" + index
+                Accessible.name: qsTr("Additional client configuration commands")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -370,6 +418,9 @@ PageType {
 
             SwitcherType {
                 id: additionalServerCommandsSwitcher
+                objectName: "protocolOpenVpnSettingsAdditionalServerCommandsSwitch:" + index
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -388,6 +439,9 @@ PageType {
 
             TextAreaType {
                 id: additionalServerCommandsTextArea
+                objectName: "protocolOpenVpnSettingsAdditionalServerCommandsField:" + index
+                Accessible.name: qsTr("Additional server configuration commands")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -407,6 +461,9 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+                objectName: "protocolOpenVpnSettingsSaveButton:" + index
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
