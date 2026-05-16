@@ -16,6 +16,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "serviceTorWebsiteSettingsPage"
+    Accessible.name: qsTr("Tor website settings")
 
     Connections {
         target: InstallController
@@ -27,6 +29,9 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "serviceTorWebsiteSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -42,6 +47,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "serviceTorWebsiteSettingsListView"
+        Accessible.name: qsTr("Tor website settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -52,6 +59,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "serviceTorWebsiteSettingsHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -67,6 +77,10 @@ PageType {
 
             LabelWithButtonType {
                 id: websiteName
+                objectName: "serviceTorWebsiteSettingsWebsiteButton:" + index
+                Accessible.name: text
+                Accessible.description: descriptionText
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -92,6 +106,9 @@ PageType {
             width: listView.width
 
             ParagraphTextType {
+                objectName: "serviceTorWebsiteSettingsTorBrowserHint"
+                Accessible.name: qsTr("Use Tor Browser to open this URL.")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -103,6 +120,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "serviceTorWebsiteSettingsAvailabilityHint"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -112,6 +132,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "serviceTorWebsiteSettingsWordPressHint"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
