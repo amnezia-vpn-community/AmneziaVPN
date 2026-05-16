@@ -13,6 +13,9 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "setupWizardProtocolsPage"
+    Accessible.name: qsTr("VPN protocol")
+
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -39,6 +42,10 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "setupWizardProtocolsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
+
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -55,6 +62,9 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "setupWizardProtocolsListView"
+        Accessible.name: qsTr("VPN protocol")
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -65,6 +75,9 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "setupWizardProtocolsHeader"
+                Accessible.name: headerText
+
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -82,9 +95,16 @@ PageType {
         snapMode: ListView.SnapToItem
 
         delegate: ColumnLayout {
+            objectName: "setupWizardProtocolsDelegate:" + proxyContainersModel.mapToSource(index)
+
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "setupWizardProtocolButton:" + proxyContainersModel.mapToSource(index)
+                Accessible.name: text
+                Accessible.description: descriptionText
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 text: name
