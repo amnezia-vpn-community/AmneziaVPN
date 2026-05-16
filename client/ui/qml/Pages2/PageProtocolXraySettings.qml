@@ -17,8 +17,14 @@ import "../Components"
 PageType {
     id: root
 
+    objectName: "protocolXraySettingsPage"
+    Accessible.name: qsTr("XRay settings")
+
     BackButtonType {
         id: backButton
+
+        objectName: "protocolXraySettingsBackButton"
+        Accessible.name: qsTr("Back")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -35,6 +41,9 @@ PageType {
     ListViewType {
         id: listView
 
+        objectName: "protocolXraySettingsListView"
+        Accessible.name: qsTr("XRay settings")
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -46,11 +55,16 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
+            objectName: "protocolXraySettingsDelegate:" + index
+
             property alias focusItemId: textFieldWithHeaderType.textField
 
             spacing: 0
 
             BaseHeaderType {
+                objectName: "protocolXraySettingsHeader:" + index
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -59,6 +73,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: textFieldWithHeaderType
+
+                objectName: "protocolXraySettingsSiteField:" + index
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -90,6 +107,9 @@ PageType {
             TextFieldWithHeaderType {
                 id: portTextField
 
+                objectName: "protocolXraySettingsPortField:" + index
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -113,6 +133,9 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+
+                objectName: "protocolXraySettingsSaveButton:" + index
+                Accessible.name: text
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
