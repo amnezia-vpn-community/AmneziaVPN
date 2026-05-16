@@ -16,11 +16,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolSettingsPage"
+    Accessible.name: qsTr("Protocol settings")
 
     property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
 
     BackButtonType {
         id: backButton
+        objectName: "protocolSettingsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -36,6 +39,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolSettingsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -46,6 +50,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "protocolSettingsTitle"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -67,6 +73,8 @@ PageType {
 
             LabelWithButtonType {
                 id: clientSettings
+                objectName: "protocolClientSettingsRow:" + protocolName
+                Accessible.name: text
 
                 Layout.fillWidth: true
 
@@ -96,6 +104,8 @@ PageType {
 
             LabelWithButtonType {
                 id: serverSettings
+                objectName: "protocolServerSettingsRow:" + protocolName
+                Accessible.name: text
 
                 Layout.fillWidth: true
 
