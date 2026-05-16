@@ -14,6 +14,7 @@ Item {
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
     property alias errorText: errorField.text
+    property string errorObjectName
     property bool checkEmptyText: false
     property bool rightButtonClickedOnEnter: false
 
@@ -149,6 +150,8 @@ Item {
 
         SmallTextType {
             id: errorField
+            objectName: root.errorObjectName
+            Accessible.name: root.errorText
 
             text: root.errorText
             visible: root.errorText !== ""
