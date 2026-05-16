@@ -10,9 +10,13 @@ import "../Config"
 
 DrawerType2 {
     id: root
+    objectName: "selectLanguageDrawer"
+    Accessible.name: qsTr("Choose language")
 
     expandedStateContent: Item {
         id: container
+        objectName: "selectLanguageDrawerContent"
+        Accessible.name: qsTr("Choose language")
 
         implicitHeight: root.height * 0.9
 
@@ -30,6 +34,8 @@ DrawerType2 {
 
             BackButtonType {
                 id: backButton
+                objectName: "selectLanguageDrawerBackButton"
+                Accessible.name: qsTr("Back")
 
                 Layout.fillWidth: true
 
@@ -39,6 +45,8 @@ DrawerType2 {
 
             Header2Type {
                 id: header
+                objectName: "selectLanguageDrawerHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -51,6 +59,7 @@ DrawerType2 {
 
         ListViewType {
             id: listView
+            objectName: "selectLanguageDrawerListView"
 
             anchors.top: backButtonLayout.bottom
             anchors.left: parent.left
@@ -66,6 +75,9 @@ DrawerType2 {
             }
 
             delegate: Item {
+                objectName: "selectLanguageDrawerDelegate:" + index
+                Accessible.name: languageName
+
                 implicitWidth: root.width
                 implicitHeight: delegateContent.implicitHeight
 
@@ -76,6 +88,8 @@ DrawerType2 {
 
                     RadioButton {
                         id: radioButton
+                        objectName: "selectLanguageDrawerRadioButton:" + index
+                        Accessible.name: languageName
 
                         implicitWidth: parent.width
                         implicitHeight: radioButtonContent.implicitHeight
@@ -135,6 +149,9 @@ DrawerType2 {
                             z: 1
 
                             ParagraphTextType {
+                                objectName: "selectLanguageDrawerLanguageText:" + index
+                                Accessible.name: text
+
                                 Layout.fillWidth: true
                                 Layout.topMargin: 20
                                 Layout.bottomMargin: 20
@@ -143,6 +160,9 @@ DrawerType2 {
                             }
 
                             Image {
+                                objectName: "selectLanguageDrawerCheckIcon:" + index
+                                Accessible.name: languageName + qsTr(" selected")
+
                                 source: "qrc:/images/controls/check.svg"
                                 visible: radioButton.checked
 
