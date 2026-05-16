@@ -96,7 +96,8 @@ PageType {
 
             BasicButtonType {
                 id: makeBackupButton
-                objectName: "settingsBackupMakeBackupButton"
+                objectName: "settingsBackupCreateButton"
+                Accessible.name: qsTr("Make a backup")
 
                 Layout.fillWidth: true
                 Layout.topMargin: 14
@@ -127,7 +128,8 @@ PageType {
 
             BasicButtonType {
                 id: restoreBackupButton
-                objectName: "settingsBackupRestoreBackupButton"
+                objectName: "settingsBackupRestoreButton"
+                Accessible.name: qsTr("Restore from backup")
 
                 Layout.fillWidth: true
                 Layout.topMargin: -8
