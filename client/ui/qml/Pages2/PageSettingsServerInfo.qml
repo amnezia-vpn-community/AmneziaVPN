@@ -16,6 +16,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsServerInfoPage"
 
     readonly property int pageSettingsServerProtocols: 0
     readonly property int pageSettingsServerServices: 1
@@ -41,7 +42,7 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
+        objectName: "settingsServerInfoProxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -57,7 +58,7 @@ PageType {
     }
 
     ColumnLayout {
-        objectName: "mainLayout"
+        objectName: "settingsServerInfoMainLayout"
 
         anchors.fill: parent
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
@@ -66,12 +67,12 @@ PageType {
 
         BackButtonType {
             id: backButton
-            objectName: "backButton"
+            objectName: "settingsServerInfoBackButton"
         }
 
         HeaderTypeWithButton {
             id: headerContent
-            objectName: "headerContent"
+            objectName: "settingsServerInfoHeader"
 
             Layout.fillWidth: true
             Layout.leftMargin: 16
@@ -79,6 +80,7 @@ PageType {
             Layout.bottomMargin: 10
 
             actionButtonImage: "qrc:/images/controls/edit-3.svg"
+            actionButton.objectName: "settingsServerInfoEditButton"
 
             headerText: root.processedServer.name
             descriptionText: {
@@ -98,6 +100,7 @@ PageType {
 
         RenameServerDrawer {
             id: serverNameEditDrawer
+            objectName: "settingsServerInfoRenameServerDrawer"
 
             parent: root
 
@@ -109,6 +112,7 @@ PageType {
 
         TabBar {
             id: tabBar
+            objectName: "settingsServerInfoTabBar"
 
             Layout.fillWidth: true
 
@@ -123,6 +127,7 @@ PageType {
 
             TabButtonType {
                 id: protocolsTab
+                objectName: "settingsServerInfoProtocolsTabButton"
                 visible: protocolsPage.installedProtocolsCount
                 width: protocolsPage.installedProtocolsCount ? undefined : 0
                 isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerProtocols
@@ -134,6 +139,7 @@ PageType {
 
             TabButtonType {
                 id: servicesTab
+                objectName: "settingsServerInfoServicesTabButton"
                 visible: servicesPage.installedServicesCount
                 width: servicesPage.installedServicesCount ? undefined : 0
                 isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerServices
@@ -145,6 +151,7 @@ PageType {
 
             TabButtonType {
                 id: dataTab
+                objectName: "settingsServerInfoManagementTabButton"
                 isSelected: tabBar.currentIndex === root.pageSettingsServerData
                 text: qsTr("Management")
 
@@ -155,6 +162,7 @@ PageType {
 
         StackLayout {
             id: nestedStackView
+            objectName: "settingsServerInfoStackLayout"
 
             Layout.fillWidth: true
 
@@ -162,16 +170,19 @@ PageType {
 
             PageSettingsServerProtocols {
                 id: protocolsPage
+                objectName: "settingsServerInfoProtocolsPage"
                 stackView: root.stackView
             }
 
             PageSettingsServerServices {
                 id: servicesPage
+                objectName: "settingsServerInfoServicesPage"
                 stackView: root.stackView
             }
 
             PageSettingsServerData {
                 id: dataPage
+                objectName: "settingsServerInfoManagementPage"
                 stackView: root.stackView
             }
         }
