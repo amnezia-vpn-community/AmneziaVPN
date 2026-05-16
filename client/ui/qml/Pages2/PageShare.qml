@@ -18,6 +18,8 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "sharePage"
+    Accessible.name: qsTr("Share VPN Access")
 
     enum ConfigType {
         AmneziaConnection,
@@ -130,6 +132,7 @@ PageType {
 
     FlickableType {
         id: a
+        objectName: "shareFlickable"
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -149,6 +152,8 @@ PageType {
 
             HeaderTypeWithButton {
                 id: header
+                objectName: "shareHeader"
+                Accessible.name: headerText
                 Layout.fillWidth: true
                 Layout.topMargin: 24 + PageController.safeAreaTopMargin
 
@@ -161,6 +166,7 @@ PageType {
 
                 DrawerType2 {
                     id: shareFullAccessDrawer
+                    objectName: "shareFullAccessDrawer"
 
                     parent: root
 
@@ -181,6 +187,9 @@ PageType {
                         }
 
                         Header2Type {
+                            objectName: "shareFullAccessDrawerHeader"
+                            Accessible.name: headerText
+
                             Layout.fillWidth: true
                             Layout.bottomMargin: 16
                             Layout.leftMargin: 16
@@ -192,6 +201,10 @@ PageType {
 
                         LabelWithButtonType {
                             id: shareFullAccessButton
+                            objectName: "shareFullAccessButton"
+                            Accessible.name: text
+                            Accessible.role: Accessible.Button
+
                             Layout.fillWidth: true
 
                             text: qsTr("Share")
@@ -208,6 +221,8 @@ PageType {
 
             Rectangle {
                 id: accessTypeSelector
+                objectName: "shareAccessTypeSelector"
+                Accessible.name: qsTr("Access type")
 
                 property int currentIndex
 
@@ -226,6 +241,10 @@ PageType {
 
                     HorizontalRadioButton {
                         id: connectionRadioButton
+                        objectName: "shareConnectionAccessTypeButton"
+                        Accessible.name: text
+                        Accessible.role: Accessible.RadioButton
+
                         checked: accessTypeSelector.currentIndex === 0
 
                         implicitWidth: (root.width - 32) / 2
@@ -241,6 +260,10 @@ PageType {
 
                     HorizontalRadioButton {
                         id: usersRadioButton
+                        objectName: "shareUsersAccessTypeButton"
+                        Accessible.name: text
+                        Accessible.role: Accessible.RadioButton
+
                         checked: accessTypeSelector.currentIndex === 1
 
                         implicitWidth: (root.width - 32) / 2
@@ -261,6 +284,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "shareConnectionDescription"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
@@ -273,6 +299,10 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: clientNameTextField
+                objectName: "shareClientNameField"
+
+                Component.onCompleted: textField.objectName = "shareClientNameInput"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -287,6 +317,8 @@ PageType {
 
             DropDownType {
                 id: serverSelector
+                objectName: "shareServerSelector"
+                Accessible.name: descriptionText
 
                 signal serverSelectorIndexChanged
                 property int currentIndex: -1
@@ -302,6 +334,9 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
+                    objectName: "shareServerSelectorListView"
+                    Accessible.name: qsTr("Server")
+
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
 
@@ -351,6 +386,8 @@ PageType {
 
             DropDownType {
                 id: containerSelector
+                objectName: "shareProtocolSelector"
+                Accessible.name: descriptionText
 
                 signal containerSelectorTextChanged
 
@@ -365,6 +402,8 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: containerSelectorListView
+                    objectName: "shareProtocolSelectorListView"
+                    Accessible.name: qsTr("Protocol")
 
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
@@ -447,6 +486,8 @@ PageType {
 
             DropDownType {
                 id: exportTypeSelector
+                objectName: "shareConnectionFormatSelector"
+                Accessible.name: descriptionText
 
                 property int currentIndex: 0
 
@@ -464,6 +505,8 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: exportTypeSelectorListView
+                    objectName: "shareConnectionFormatSelectorListView"
+                    Accessible.name: qsTr("Connection format")
 
                     onCurrentIndexChanged: {
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
@@ -513,6 +556,9 @@ PageType {
 
             BasicButtonType {
                 id: shareButton
+                objectName: "shareConnectionButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 40
@@ -533,6 +579,9 @@ PageType {
 
             Header2Type {
                 id: usersHeader
+                objectName: "shareUsersHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
@@ -553,6 +602,10 @@ PageType {
 
                 TextFieldWithHeaderType {
                     id: searchTextField
+                    objectName: "shareUsersSearchField"
+
+                    Component.onCompleted: textField.objectName = "shareUsersSearchInput"
+
                     Layout.fillWidth: true
 
                     textField.placeholderText: qsTr("Search")
@@ -575,6 +628,10 @@ PageType {
 
                 ImageButtonType {
                     id: closeSearchButton
+                    objectName: "shareUsersCloseSearchButton"
+                    Accessible.name: qsTr("Close search")
+                    Accessible.role: Accessible.Button
+
                     image: "qrc:/images/controls/close.svg"
                     imageColor: AmneziaStyle.color.paleGray
 
@@ -591,6 +648,9 @@ PageType {
 
             ListView {
                 id: clientsListView
+                objectName: "shareUsersListView"
+                Accessible.name: qsTr("Users")
+
                 Layout.fillWidth: true
                 Layout.preferredHeight: childrenRect.height
 
@@ -617,11 +677,14 @@ PageType {
                 reuseItems: true
 
                 delegate: Item {
+                    objectName: "shareUserDelegate:" + index
+
                     implicitWidth: clientsListView.width
                     implicitHeight: delegateContent.implicitHeight
 
                     ColumnLayout {
                         id: delegateContent
+                        objectName: "shareUserDelegateContent:" + index
 
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -632,6 +695,10 @@ PageType {
 
                         LabelWithButtonType {
                             id: clientFocusItem
+                            objectName: "shareUserButton:" + index
+                            Accessible.name: text
+                            Accessible.role: Accessible.Button
+
                             Layout.fillWidth: true
 
                             text: clientName
@@ -646,6 +713,7 @@ PageType {
 
                         DrawerType2 {
                             id: clientInfoDrawer
+                            objectName: "shareUserInfoDrawer:" + index
 
                             parent: root
 
@@ -666,6 +734,9 @@ PageType {
                                 }
 
                                 Header2TextType {
+                                    objectName: "shareUserInfoHeader:" + index
+                                    Accessible.name: text
+
                                     Layout.maximumWidth: parent.width
                                     Layout.bottomMargin: 24
 
@@ -676,6 +747,9 @@ PageType {
                                 }
 
                                 ParagraphTextType {
+                                    objectName: "shareUserCreationDateText:" + index
+                                    Accessible.name: text
+
                                     color: AmneziaStyle.color.mutedGray
                                     visible: creationDate
                                     Layout.maximumWidth: parent.width
@@ -688,6 +762,9 @@ PageType {
                                 }
 
                                 ParagraphTextType {
+                                    objectName: "shareUserLatestHandshakeText:" + index
+                                    Accessible.name: text
+
                                     color: AmneziaStyle.color.mutedGray
                                     visible: latestHandshake
                                     Layout.maximumWidth: parent.width
@@ -700,6 +777,9 @@ PageType {
                                 }
 
                                 ParagraphTextType {
+                                    objectName: "shareUserDataReceivedText:" + index
+                                    Accessible.name: text
+
                                     color: AmneziaStyle.color.mutedGray
                                     visible: dataReceived
                                     Layout.maximumWidth: parent.width
@@ -712,6 +792,9 @@ PageType {
                                 }
 
                                 ParagraphTextType {
+                                    objectName: "shareUserDataSentText:" + index
+                                    Accessible.name: text
+
                                     color: AmneziaStyle.color.mutedGray
                                     visible: dataSent
                                     Layout.maximumWidth: parent.width
@@ -724,6 +807,9 @@ PageType {
                                 }
 
                                 ParagraphTextType {
+                                    objectName: "shareUserAllowedIpsText:" + index
+                                    Accessible.name: text
+
                                     color: AmneziaStyle.color.mutedGray
                                     visible: allowedIps
                                     Layout.maximumWidth: parent.width
@@ -735,6 +821,10 @@ PageType {
 
                                 BasicButtonType {
                                     id: renameButton
+                                    objectName: "shareUserRenameButton:" + index
+                                    Accessible.name: text
+                                    Accessible.role: Accessible.Button
+
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
 
@@ -753,6 +843,7 @@ PageType {
 
                                     DrawerType2 {
                                         id: clientNameEditDrawer
+                                        objectName: "shareUserRenameDrawer:" + index
 
                                         parent: root
 
@@ -769,6 +860,10 @@ PageType {
 
                                             TextFieldWithHeaderType {
                                                 id: clientNameEditor
+                                                objectName: "shareUserRenameField:" + index
+
+                                                Component.onCompleted: textField.objectName = "shareUserRenameInput:" + index
+
                                                 Layout.fillWidth: true
                                                 headerText: qsTr("Client name")
                                                 textField.text: clientName
@@ -778,6 +873,9 @@ PageType {
 
                                             BasicButtonType {
                                                 id: saveButton
+                                                objectName: "shareUserRenameSaveButton:" + index
+                                                Accessible.name: text
+                                                Accessible.role: Accessible.Button
 
                                                 Layout.fillWidth: true
 
@@ -807,6 +905,10 @@ PageType {
 
                                 BasicButtonType {
                                     id: revokeButton
+                                    objectName: "shareUserRevokeButton:" + index
+                                    Accessible.name: text
+                                    Accessible.role: Accessible.Button
+
                                     Layout.fillWidth: true
                                     Layout.topMargin: 8
 
