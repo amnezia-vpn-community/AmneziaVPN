@@ -48,9 +48,15 @@ PageType {
 
         model: SortFilterProxyModel {
             id: proxyContainersModel
+            objectName: "settingsServerServicesProxyContainersModel"
+
             sourceModel: ContainersModel
             sorters: [
-                RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                RoleSorter {
+                    objectName: "settingsServerServicesInstalledSorter"
+                    roleName: "isInstalled"
+                    sortOrder: Qt.DescendingOrder
+                }
             ]
         }
 
