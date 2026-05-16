@@ -30,6 +30,9 @@ PageType {
         id: settingsContainersListView
         objectName: "settingsServerProtocolsListView"
         Accessible.name: qsTr("Protocols")
+        delegateObjectNamePrefix: "settingsServerProtocolsDelegate:"
+        cardObjectNamePrefix: "settingsServerProtocolsProtocolCard:"
+        actionButtonObjectNamePrefix: "settingsServerProtocolsActionButton:"
 
         anchors.fill: parent
 
