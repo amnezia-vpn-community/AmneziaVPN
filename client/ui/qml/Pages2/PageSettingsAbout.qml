@@ -103,6 +103,11 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsAbout" + automationId + "Button"
+                Accessible.name: text
+                Accessible.description: descriptionText
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
@@ -204,6 +209,7 @@ PageType {
     QtObject {
         id: telegramGroup
 
+        readonly property string automationId: "TelegramGroup"
         readonly property string title: qsTr("Telegram group")
         readonly property string description: qsTr("To discuss features")
         readonly property string imageSource: "qrc:/images/controls/telegram.svg"
@@ -215,6 +221,7 @@ PageType {
     QtObject {
         id: mail
 
+        readonly property string automationId: "Email"
         readonly property string title: qsTr("support@amnezia.org")
         readonly property string description: qsTr("For reviews and bug reports")
         readonly property string imageSource: "qrc:/images/controls/mail.svg"
@@ -226,6 +233,7 @@ PageType {
     QtObject {
         id: github
 
+        readonly property string automationId: "GitHub"
         readonly property string title: qsTr("GitHub")
         readonly property string description: qsTr("Discover the source code")
         readonly property string imageSource: "qrc:/images/controls/github.svg"
@@ -237,6 +245,7 @@ PageType {
     QtObject {
         id: website
 
+        readonly property string automationId: "Website"
         readonly property string title: qsTr("Website")
         readonly property string description: qsTr("Visit official website")
         readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
