@@ -14,12 +14,23 @@ import "../Controls2/TextTypes"
 ListViewType {
     id: root
 
+    property string delegateObjectNamePrefix: ""
+    property string cardObjectNamePrefix: ""
+    property string actionButtonObjectNamePrefix: ""
+
     anchors.fill: parent
 
     delegate: ColumnLayout {
+        readonly property int sourceIndex: root.model.mapToSource(index)
+
+        objectName: root.delegateObjectNamePrefix === "" ? "" : root.delegateObjectNamePrefix + sourceIndex
+
         width: root.width
 
         LabelWithButtonType {
+            objectName: root.cardObjectNamePrefix === "" ? "" : root.cardObjectNamePrefix + parent.sourceIndex
+            rightButton.objectName: root.actionButtonObjectNamePrefix === "" ? "" : root.actionButtonObjectNamePrefix + parent.sourceIndex
+
             Layout.fillWidth: true
 
             text: name
