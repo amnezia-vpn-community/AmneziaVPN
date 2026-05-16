@@ -14,6 +14,8 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "setupWizardInstallingPage"
+    Accessible.name: qsTr("Installing")
 
     Component.onCompleted: PageController.disableTabBar(true)
     Component.onDestruction: PageController.disableTabBar(false)
@@ -91,6 +93,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "setupWizardInstallingListView"
+        Accessible.name: qsTr("Installing")
 
         anchors.fill: parent
 
@@ -99,9 +103,14 @@ PageType {
         model: proxyContainersModel
 
         delegate: ColumnLayout {
+            objectName: "setupWizardInstallingDelegate:" + proxyContainersModel.mapToSource(index)
+
             width: listView.width
 
             BaseHeaderType {
+                objectName: "setupWizardInstallingHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 16
@@ -113,6 +122,8 @@ PageType {
 
             ProgressBarType {
                 id: progressBar
+                objectName: "setupWizardInstallingProgressBar"
+                Accessible.name: progressText.text
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -133,6 +144,8 @@ PageType {
 
             ParagraphTextType {
                 id: progressText
+                objectName: "setupWizardInstallingProgressText"
+                Accessible.name: text
 
                 Layout.fillWidth: true
                 Layout.topMargin: 8
@@ -144,6 +157,9 @@ PageType {
 
             BasicButtonType {
                 id: cancelIntallationButton
+                objectName: "setupWizardInstallingCancelButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
