@@ -64,6 +64,8 @@ PageType {
 
             BackButtonType {
                 objectName: "settingsApiSubscriptionKeyBackButton"
+                Accessible.name: qsTr("Back")
+                Accessible.role: Accessible.Button
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
@@ -176,6 +178,8 @@ PageType {
 
                 Image {
                     objectName: "settingsApiSubscriptionKeyQrImage"
+                    Accessible.name: qsTr("QR code")
+                    Accessible.role: Accessible.Graphic
                     anchors.fill: parent
                     smooth: false
                     fillMode: Image.PreserveAspectFit
@@ -209,6 +213,9 @@ PageType {
 
         expandedStateContent: Item {
             BackButtonType {
+                objectName: "settingsApiSubscriptionKeyDrawerBackButton"
+                Accessible.name: qsTr("Back")
+                Accessible.role: Accessible.Button
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.topMargin: 16
