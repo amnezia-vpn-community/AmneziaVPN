@@ -244,6 +244,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonReset
+                objectName: "settingsApplicationResetButton"
                 
                 Layout.fillWidth: true
 
