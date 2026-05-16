@@ -14,6 +14,8 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "settingsServerDataPage"
+    Accessible.name: qsTr("Server data")
 
     signal lastItemTabClickedSignal()
 
@@ -66,6 +68,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsServerDataListView"
 
         anchors.fill: parent
 
@@ -75,6 +78,10 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsServerData" + automationId + "Button"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 visible: isVisible
@@ -106,6 +113,7 @@ PageType {
         id: check
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property string automationId: "Check"
         readonly property string title: qsTr("Check the server for previously installed Amnezia services")
         readonly property string description: qsTr("Add them to the application if they were not displayed")
         readonly property var tColor: AmneziaStyle.color.paleGray
@@ -120,6 +128,7 @@ PageType {
         id: reboot
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property string automationId: "Reboot"
         readonly property string title: qsTr("Reboot server")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -150,6 +159,7 @@ PageType {
         id: remove
 
         property bool isVisible: true
+        readonly property string automationId: "Remove"
         readonly property string title: qsTr("Remove server from application")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -180,6 +190,7 @@ PageType {
         id: clear
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property string automationId: "Clear"
         readonly property string title: qsTr("Clear server from Amnezia software")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -209,6 +220,7 @@ PageType {
         id: reset
 
         property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        readonly property string automationId: "Reset"
         readonly property string title: qsTr("Reset API config")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
