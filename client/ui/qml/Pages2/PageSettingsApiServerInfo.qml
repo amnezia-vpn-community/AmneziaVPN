@@ -16,6 +16,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiServerInfoPage"
+    Accessible.name: qsTr("Subscription settings")
 
     property list<QtObject> labelsModel: [
         statusObject,
@@ -103,6 +105,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsApiServerInfoListView"
+        Accessible.name: qsTr("Subscription settings")
 
         anchors.fill: parent
 
@@ -115,14 +119,15 @@ PageType {
 
             BackButtonType {
                 id: backButton
-                objectName: "backButton"
+                objectName: "settingsApiServerInfoBackButton"
 
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
                 id: headerContent
-                objectName: "headerContent"
+                objectName: "settingsApiServerInfoHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -139,6 +144,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsApiServerInfoSubscriptionStatusText"
+                Accessible.name: text
+
                 visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
 
                 Layout.fillWidth: true
@@ -156,6 +164,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsApiServerInfoServiceDescription"
+                Accessible.name: text
+
                 visible: ApiAccountInfoModel.data("serviceDescription") !== ""
 
                 Layout.fillWidth: true
@@ -169,6 +180,10 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsApiServerInfoRenewSubscriptionBannerButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
                     && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
@@ -205,6 +220,8 @@ PageType {
 
             LabelWithImageType {
                 id: delegateItem
+                objectName: "settingsApiServerInfo" + contentKey + "Label"
+                Accessible.name: leftText
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -227,6 +244,10 @@ PageType {
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
             BasicButtonType {
+                objectName: "settingsApiServerInfoRenewSubscriptionFooterButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
                     && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
@@ -257,6 +278,8 @@ PageType {
 
             SwitcherType {
                 id: switcher
+                objectName: "settingsApiServerInfoProtocolSwitcher"
+                Accessible.name: text
 
                 readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getProcessedServerIndex())
                 readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
@@ -289,6 +312,8 @@ PageType {
 
             WarningType {
                 id: warning
+                objectName: "settingsApiServerInfoConfigUpdateWarning"
+                Accessible.name: textString
 
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
@@ -312,6 +337,9 @@ PageType {
 
             LabelWithButtonType {
                 id: vpnKey
+                objectName: "settingsApiServerInfoSubscriptionKeyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 0
@@ -336,6 +364,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "settingsApiServerInfoConfigurationFilesButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 visible: footer.isVisibleForAmneziaFree
@@ -356,6 +388,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "settingsApiServerInfoActiveDevicesButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 visible: footer.isVisibleForAmneziaFree
@@ -376,6 +412,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "settingsApiServerInfoSupportButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
 
@@ -390,6 +430,10 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                objectName: "settingsApiServerInfoInstructionsButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 visible: footer.isVisibleForAmneziaFree
@@ -408,6 +452,10 @@ PageType {
 
             BasicButtonType {
                 id: resetButton
+                objectName: "settingsApiServerInfoReloadApiConfigButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
@@ -444,6 +492,10 @@ PageType {
 
             BasicButtonType {
                 id: revokeButton
+                objectName: "settingsApiServerInfoUnlinkDeviceButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 8
@@ -484,6 +536,10 @@ PageType {
 
             BasicButtonType {
                 id: removeButton
+                objectName: "settingsApiServerInfoRemoveFromApplicationButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 8
