@@ -19,6 +19,7 @@ import "../Components"
 
 PageType {
     id: pageShareConnection
+    objectName: "shareConnectionPage"
 
     property string headerText
     property string configContentHeaderText
@@ -44,6 +45,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "shareConnectionBackButton"
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -52,6 +54,8 @@ PageType {
 
     Text {
         id: shareHeader
+        objectName: "shareConnectionHeader"
+        Accessible.name: text
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -88,6 +92,8 @@ PageType {
 
             BasicButtonType {
                 id: shareButton
+                objectName: "shareButton"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -115,6 +121,8 @@ PageType {
 
             BasicButtonType {
                 id: copyConfigTextButton
+                objectName: "copyConfigTextButton"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -136,6 +144,8 @@ PageType {
 
             BasicButtonType {
                 id: copyNativeConfigStringButton
+                objectName: "copyNativeConfigStringButton"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -154,6 +164,8 @@ PageType {
 
             BasicButtonType {
                 id: showSettingsButton
+                objectName: "showSettingsButton"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
@@ -173,6 +185,7 @@ PageType {
 
             DrawerType2 {
                 id: configContentDrawer
+                objectName: "configContentDrawer"
                 parent: pageShareConnection.parent
                 anchors.fill: parent
                 expandedHeight: (parent ? parent.height : pageShareConnection.height) * 0.9
@@ -232,6 +245,8 @@ PageType {
 
                             TextField {
                                 id: nativeConfigString
+                                objectName: "nativeConfigString"
+                                Accessible.name: qsTr("Native config string")
                                 visible: false
                                 text: ExportController.nativeConfigString
                                 onTextChanged: copyNativeConfigStringButton.visible = nativeConfigString.text !== ""
@@ -239,6 +254,8 @@ PageType {
 
                             TextArea {
                                 id: configText
+                                objectName: "configText"
+                                Accessible.name: pageShareConnection.configContentHeaderText
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 Layout.bottomMargin: 16
