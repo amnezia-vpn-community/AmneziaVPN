@@ -14,10 +14,12 @@ import "../Components"
 PageType {
     id: root
     objectName: "settingsConnectionDnsServersPage"
+    Accessible.name: qsTr("DNS servers")
 
     BackButtonType {
         id: backButton
         objectName: "settingsConnectionDnsServersBackButton"
+        Accessible.name: qsTr("Back")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -56,6 +58,7 @@ PageType {
 
             BaseHeaderType {
                 objectName: "settingsConnectionDnsServersHeader"
+                Accessible.name: qsTr("DNS servers")
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -65,10 +68,13 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsConnectionDnsServersDescription"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                
+
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
         }
@@ -82,6 +88,7 @@ PageType {
             TextFieldWithHeaderType {
                 id: primaryDns
                 objectName: "settingsConnectionDnsServersPrimaryDnsField"
+                Accessible.name: qsTr("Primary DNS")
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -98,6 +105,7 @@ PageType {
             TextFieldWithHeaderType {
                 id: secondaryDns
                 objectName: "settingsConnectionDnsServersSecondaryDnsField"
+                Accessible.name: qsTr("Secondary DNS")
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -114,6 +122,7 @@ PageType {
             BasicButtonType {
                 id: restoreDefaultButton
                 objectName: "settingsConnectionDnsServersRestoreDefaultButton"
+                Accessible.name: qsTr("Restore default")
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -151,6 +160,7 @@ PageType {
             BasicButtonType {
                 id: saveButton
                 objectName: "settingsConnectionDnsServersSaveButton"
+                Accessible.name: qsTr("Save")
 
                 Layout.fillWidth: true
                 Layout.margins: 16
