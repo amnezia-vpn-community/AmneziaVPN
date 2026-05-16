@@ -134,6 +134,8 @@ PageType {
             headerText: qsTr("Mode")
 
             listView: ListViewWithRadioButtonType {
+                objectName: "settingsConnectionSiteSplitTunnelingModeSelectorListView"
+
                 rootWidth: root.width
 
                 model: root.routeModesModel
@@ -202,6 +204,8 @@ PageType {
         }
 
         delegate: ColumnLayout {
+            objectName: "settingsConnectionSiteSplitTunnelingSiteDelegate:" + proxyIpSplitTunnelingModel.mapToSource(index)
+
             width: listView.width
 
             LabelWithButtonType {
@@ -240,6 +244,8 @@ PageType {
     }
 
     Rectangle {
+        objectName: "settingsConnectionSiteSplitTunnelingAddSitePanel"
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -250,6 +256,7 @@ PageType {
         
         RowLayout {
             id: addSiteButton
+            objectName: "settingsConnectionSiteSplitTunnelingAddSiteLayout"
 
             enabled: root.pageEnabled
 
@@ -267,6 +274,8 @@ PageType {
 
                 Layout.fillWidth: true
                 rightButtonClickedOnEnter: true
+                textField.objectName: "settingsConnectionSiteSplitTunnelingSearchInput"
+                rightButtonObjectName: "settingsConnectionSiteSplitTunnelingAddSiteButton"
 
                 textField.placeholderText: qsTr("website or IP")
                 buttonImageSource: "qrc:/images/controls/plus.svg"
@@ -307,12 +316,15 @@ PageType {
 
         expandedStateContent: ColumnLayout {
             id: moreActionsDrawerContent
+            objectName: "settingsConnectionSiteSplitTunnelingMoreActionsContent"
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
 
             Header2Type {
+                objectName: "settingsConnectionSiteSplitTunnelingMoreActionsHeader"
+
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -364,6 +376,7 @@ PageType {
             
             LabelWithButtonType {
                 id: clearSitesButton
+                objectName: "settingsConnectionSiteSplitTunnelingClearSitesButton"
                 Layout.fillWidth: true
 
                 text: qsTr("Clear site list")
@@ -393,6 +406,7 @@ PageType {
 
     DrawerType2 {
         id: importSitesDrawer
+        objectName: "settingsConnectionSiteSplitTunnelingImportSitesDrawer"
 
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
@@ -402,6 +416,7 @@ PageType {
 
             BackButtonType {
                 id: importSitesDrawerBackButton
+                objectName: "settingsConnectionSiteSplitTunnelingImportSitesBackButton"
 
                 anchors.top: parent.top
                 anchors.left: parent.left
@@ -421,6 +436,7 @@ PageType {
 
             ListViewType {
                 id: importSitesDrawerListView
+                objectName: "settingsConnectionSiteSplitTunnelingImportSitesListView"
 
                 anchors.top: importSitesDrawerBackButton.bottom
                 anchors.left: parent.left
@@ -431,6 +447,8 @@ PageType {
                     width: importSitesDrawerListView.width
 
                     Header2Type {
+                        objectName: "settingsConnectionSiteSplitTunnelingImportSitesHeader"
+
                         Layout.fillWidth: true
                         Layout.margins: 16
 
@@ -441,9 +459,13 @@ PageType {
                 model: importOptions
 
                 delegate: ColumnLayout {
+                    objectName: "settingsConnectionSiteSplitTunnelingImportSitesDelegate:" + index
+
                     width: importSitesDrawerListView.width
 
                     LabelWithButtonType {
+                        objectName: "settingsConnectionSiteSplitTunnelingImportSitesOption:" + index
+
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
