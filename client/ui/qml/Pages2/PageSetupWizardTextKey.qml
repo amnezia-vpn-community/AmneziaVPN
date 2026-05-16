@@ -12,9 +12,11 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "setupWizardTextKeyPage"
 
     BackButtonType {
         id: backButton
+        objectName: "setupWizardTextKeyBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -30,6 +32,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "setupWizardTextKeyListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -40,6 +43,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "setupWizardTextKeyHeader"
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -57,9 +62,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: textKey
-                objectName: "configKeyInput"
-
-                Component.onCompleted: textField.objectName = "configKeyInputField"
+                objectName: "setupWizardTextKeyField"
+                textField.objectName: "setupWizardTextKeyInput"
+                rightButtonObjectName: "setupWizardTextKeyInsertButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -67,7 +72,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Key")
-                errorObjectName: "configKeyErrorText"
+                errorObjectName: "setupWizardTextKeyError"
                 textField.placeholderText: "vpn://"
                 buttonText: qsTr("Insert")
 
@@ -83,7 +88,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
-                objectName: "continueButton"
+                objectName: "setupWizardTextKeyContinueButton"
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
