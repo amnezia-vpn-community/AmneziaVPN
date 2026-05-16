@@ -116,6 +116,9 @@ PageType {
         expandedHeight: parent.height * 0.4375
 
         expandedStateContent: Item {
+            objectName: "settingsApiNativeConfigsMoreOptionsContent"
+            Accessible.name: moreOptionsDrawer.countryName + qsTr(" configuration file")
+
             implicitHeight: moreOptionsDrawer.expandedHeight
 
             BackButtonType {
