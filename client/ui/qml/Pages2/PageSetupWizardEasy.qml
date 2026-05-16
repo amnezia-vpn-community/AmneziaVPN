@@ -37,6 +37,9 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "easySetupBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -57,6 +60,7 @@ PageType {
     ListViewType {
         id: listView
         objectName: "easySetupListView"
+        Accessible.name: qsTr("Installation type")
 
         property int dockerContainer
         property int containerDefaultPort
@@ -76,6 +80,8 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "easySetupHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -92,10 +98,16 @@ PageType {
         currentIndex: 0
 
         delegate: ColumnLayout {
+            objectName: "easySetupDelegate:" + proxyContainersModel.mapToSource(index)
+
             width: listView.width
 
             CardType {
                 id: card
+                objectName: "easySetupOptionButton:" + proxyContainersModel.mapToSource(index)
+                Accessible.name: headerText
+                Accessible.description: bodyText
+                Accessible.role: Accessible.RadioButton
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -134,6 +146,9 @@ PageType {
 
             CardType {
                 objectName: "manualSetupOptionButton"
+                Accessible.name: headerText
+                Accessible.description: bodyText
+                Accessible.role: Accessible.RadioButton
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -156,6 +171,8 @@ PageType {
             BasicButtonType {
                 id: continueButton
                 objectName: "easySetupContinueButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -180,6 +197,8 @@ PageType {
             BasicButtonType {
                 id: setupLaterButton
                 objectName: "easySetupSkipButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 8
