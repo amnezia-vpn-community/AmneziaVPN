@@ -16,9 +16,13 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolRawPage"
+    Accessible.name: qsTr("Protocol settings")
 
     BackButtonType {
         id: backButton
+        objectName: "protocolRawBackButton"
+        Accessible.name: qsTr("Back")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -34,6 +38,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolRawListView"
+        Accessible.name: qsTr("Protocol raw settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -44,6 +50,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "protocolRawHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -60,6 +69,8 @@ PageType {
 
             LabelWithButtonType {
                 id: button
+                objectName: "protocolRawShowConnectionOptionsButton"
+                Accessible.name: text
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -82,6 +93,7 @@ PageType {
 
             DrawerType2 {
                 id: configContentDrawer
+                objectName: "protocolRawConfigContentDrawer"
 
                 expandedHeight: root.height * 0.9
 
@@ -93,6 +105,8 @@ PageType {
 
                     BackButtonType {
                         id: drawerBackButton
+                        objectName: "protocolRawDrawerBackButton"
+                        Accessible.name: qsTr("Back")
 
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -106,6 +120,8 @@ PageType {
 
                     ListViewType {
                         id: drawerListView
+                        objectName: "protocolRawDrawerListView"
+                        Accessible.name: qsTr("Connection options")
 
                         anchors.top: drawerBackButton.bottom
                         anchors.bottom: parent.bottom
@@ -116,6 +132,9 @@ PageType {
                             width: drawerListView.width
 
                             Header2Type {
+                                objectName: "protocolRawDrawerHeader"
+                                Accessible.name: headerText
+
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 Layout.leftMargin: 16
@@ -132,6 +151,8 @@ PageType {
 
                             TextArea {
                                 id: configText
+                                objectName: "protocolRawConfigText"
+                                Accessible.name: qsTr("Raw protocol config")
 
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
@@ -168,6 +189,8 @@ PageType {
 
             LabelWithButtonType {
                 id: removeButton
+                objectName: "protocolRawRemoveButton"
+                Accessible.name: text
 
                 width: parent.width
 
