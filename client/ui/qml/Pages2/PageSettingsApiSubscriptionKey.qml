@@ -18,6 +18,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiSubscriptionKeyPage"
+    Accessible.name: qsTr("Subscription Key")
 
     property var processedServer
 
@@ -61,10 +63,13 @@ PageType {
             width: root.width
 
             BackButtonType {
+                objectName: "settingsApiSubscriptionKeyBackButton"
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             Label {
+                objectName: "settingsApiSubscriptionKeyHeader"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -77,6 +82,9 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsApiSubscriptionKeyCopyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -92,6 +100,9 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsApiSubscriptionKeySaveFileButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
                 Layout.fillWidth: true
                 Layout.topMargin: 4
                 Layout.leftMargin: 16
@@ -126,6 +137,9 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsApiSubscriptionKeyShowTextButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
@@ -148,6 +162,7 @@ PageType {
             }
 
             Rectangle {
+                objectName: "settingsApiSubscriptionKeyQrContainer"
                 Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
                 Layout.preferredHeight: Layout.preferredWidth
                 Layout.alignment: Qt.AlignHCenter
@@ -160,6 +175,7 @@ PageType {
                 radius: 12
 
                 Image {
+                    objectName: "settingsApiSubscriptionKeyQrImage"
                     anchors.fill: parent
                     smooth: false
                     fillMode: Image.PreserveAspectFit
@@ -170,6 +186,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsApiSubscriptionKeyQrHint"
+                Accessible.name: text
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
@@ -184,6 +202,7 @@ PageType {
 
     DrawerType2 {
         id: vpnKeyDrawer
+        objectName: "settingsApiSubscriptionKeyKeyDrawer"
 
         anchors.fill: root
         expandedHeight: root.height * 0.9
@@ -205,11 +224,15 @@ PageType {
                 anchors.rightMargin: 16
 
                 Header2Type {
+                    objectName: "settingsApiSubscriptionKeyDrawerHeader"
+                    Accessible.name: headerText
                     Layout.fillWidth: true
                     headerText: qsTr(root.processedServer.name + " Subscription key")
                 }
 
                 TextArea {
+                    objectName: "settingsApiSubscriptionKeyText"
+                    Accessible.name: text
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     readOnly: true
