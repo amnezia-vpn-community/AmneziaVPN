@@ -15,9 +15,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "serviceDnsSettingsPage"
+    Accessible.name: qsTr("AmneziaDNS")
 
     BackButtonType {
         id: backButton
+        objectName: "serviceDnsSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -33,6 +38,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "serviceDnsSettingsListView"
+        Accessible.name: qsTr("AmneziaDNS")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -43,6 +50,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "serviceDnsSettingsHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -61,6 +71,10 @@ PageType {
 
             LabelWithButtonType {
                 id: removeButton
+                objectName: "serviceDnsSettingsRemoveButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
