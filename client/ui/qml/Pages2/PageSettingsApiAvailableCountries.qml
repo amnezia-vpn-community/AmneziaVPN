@@ -16,6 +16,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiAvailableCountriesPage"
+    Accessible.name: qsTr("Location for connection")
 
     property var processedServer
     property bool subscriptionExpired: false
@@ -70,6 +72,8 @@ PageType {
 
     ListViewType {
         id: menuContent
+        objectName: "settingsApiAvailableCountriesListView"
+        Accessible.name: qsTr("Available countries")
 
         anchors.fill: parent
 
@@ -88,14 +92,17 @@ PageType {
 
             BackButtonType {
                 id: backButton
-                objectName: "backButton"
+                objectName: "settingsApiAvailableCountriesBackButton"
+                Accessible.name: qsTr("Back")
+                Accessible.role: Accessible.Button
 
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
                 id: headerContent
-                objectName: "headerContent"
+                objectName: "settingsApiAvailableCountriesHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -119,6 +126,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsApiAvailableCountriesSubscriptionStatus"
+                Accessible.name: text
+
                 visible: root.subscriptionExpired || root.subscriptionExpiringSoon
 
                 Layout.fillWidth: true
@@ -131,6 +141,10 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsApiAvailableCountriesRenewSubscriptionButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
                     && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
@@ -153,6 +167,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsApiAvailableCountriesLocationHint"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -173,6 +190,8 @@ PageType {
             RowLayout {
                 VerticalRadioButton {
                     id: containerRadioButton
+                    objectName: "settingsApiAvailableCountriesCountryButton:" + countryCode
+                    Accessible.name: text
 
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
