@@ -16,9 +16,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolWireGuardClientSettingsPage"
+    Accessible.name: qsTr("WireGuard settings")
 
     BackButtonType {
         id: backButton
+        objectName: "protocolWireGuardClientSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -34,6 +39,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolWireGuardClientSettingsListView"
+        Accessible.name: qsTr("WireGuard settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -43,6 +50,8 @@ PageType {
         model: WireGuardConfigModel
 
         delegate: ColumnLayout {
+            objectName: "protocolWireGuardClientSettingsDelegate:" + index
+
             width: listView.width
 
             property alias mtuTextField: mtuTextField
@@ -51,6 +60,9 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "protocolWireGuardClientSettingsHeader:" + index
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -60,6 +72,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: mtuTextField
+                objectName: "protocolWireGuardClientSettingsMtuField:" + index
+                Accessible.name: qsTr("MTU")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 40
                 Layout.leftMargin: 16
@@ -78,6 +93,9 @@ PageType {
             }
 
             Header2TextType {
+                objectName: "protocolWireGuardClientSettingsServerSettingsHeader:" + index
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -88,6 +106,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: portTextField
+                objectName: "protocolWireGuardClientSettingsPortField:" + index
+                Accessible.name: qsTr("Port")
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -105,6 +126,9 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+                objectName: "protocolWireGuardClientSettingsSaveButton"
+                Accessible.name: qsTr("Save")
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
