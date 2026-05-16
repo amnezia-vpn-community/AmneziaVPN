@@ -77,8 +77,10 @@ PageType {
             readonly property bool isAmneziaFree: sourceIndex === ApiServicesModel.serviceIndexForType("amnezia-free")
             readonly property bool isAmneziaPremium: sourceIndex === ApiServicesModel.serviceIndexForType("amnezia-premium")
             readonly property string serviceObjectName: isAmneziaFree
-                ? "apiServiceRow:amnezia-free"
-                : isAmneziaPremium ? "apiServiceRow:amnezia-premium" : "apiServiceRow:" + sourceIndex
+                ? "apiServicesListServiceCard:amnezia-free"
+                : isAmneziaPremium ? "apiServicesListServiceCard:amnezia-premium" : "apiServicesListServiceCard:" + sourceIndex
+
+            objectName: "apiServicesListDelegate:" + sourceIndex
 
             width: listView.width
             visible: !hideCard
