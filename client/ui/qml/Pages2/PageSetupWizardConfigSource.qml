@@ -220,6 +220,13 @@ PageType {
                 objectName: modelData.objectName
                 Accessible.name: title
                 Accessible.description: description
+                Component.onCompleted: {
+                    if (modelData.objectName === "fileOpenOptionButton") {
+                        focusItem.objectName = "fileOpenOptionCardButton"
+                    } else if (modelData.objectName === "qrScanOptionButton") {
+                        focusItem.objectName = "qrScanOptionCardButton"
+                    }
+                }
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
