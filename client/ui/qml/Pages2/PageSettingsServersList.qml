@@ -16,9 +16,13 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsServersListPage"
+    Accessible.name: qsTr("Servers")
 
     ColumnLayout {
         id: header
+        objectName: "settingsServersListHeaderContainer"
+        Accessible.name: qsTr("Servers")
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,9 +32,15 @@ PageType {
 
         BackButtonType {
             id: backButton
+            objectName: "settingsServersListBackButton"
+            Accessible.name: qsTr("Back")
+            Accessible.role: Accessible.Button
         }
 
         BaseHeaderType {
+            objectName: "settingsServersListHeader"
+            Accessible.name: headerText
+
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -41,7 +51,8 @@ PageType {
 
     ListViewType {
         id: servers
-        objectName: "servers"
+        objectName: "settingsServersListView"
+        Accessible.name: qsTr("Servers")
 
         width: parent.width
         anchors.top: header.bottom
@@ -54,11 +65,14 @@ PageType {
         model: ServersModel
 
         delegate: Item {
+            objectName: "settingsServersListDelegate:" + index
+
             implicitWidth: servers.width
             implicitHeight: delegateContent.implicitHeight
 
             ColumnLayout {
                 id: delegateContent
+                objectName: "settingsServersListDelegateContent:" + index
 
                 anchors.top: parent.top
                 anchors.left: parent.left
@@ -66,6 +80,11 @@ PageType {
 
                 LabelWithButtonType {
                     id: server
+                    objectName: "settingsServersListServerButton:" + index
+                    Accessible.name: text
+                    Accessible.description: descriptionText
+                    Accessible.role: Accessible.Button
+
                     Layout.fillWidth: true
 
                     text: name
