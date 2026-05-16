@@ -11,6 +11,7 @@ import Style 1.0
 Button {
     id: root
     objectName: "connectButton"
+    Accessible.name: text
 
     property string defaultButtonColor: AmneziaStyle.color.paleGray
     property string progressButtonColor: AmneziaStyle.color.paleGray
@@ -169,6 +170,9 @@ Button {
     }
 
     contentItem: Text {
+        objectName: "connectButtonStatusText"
+        Accessible.name: text
+
         height: 24
 
         font.family: "PT Root UI VF"

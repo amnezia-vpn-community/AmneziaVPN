@@ -18,6 +18,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "homePage"
+    Accessible.name: qsTr("Home")
 
     property var containersDropDownRef: null
 
@@ -66,6 +68,7 @@ PageType {
             BasicButtonType {
                 id: loggingButton
                 objectName: "loggingButton"
+                Accessible.name: qsTr("Logging enabled")
 
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
@@ -94,6 +97,7 @@ PageType {
             BasicButtonType {
                 id: devGatewayButton
                 objectName: "devGatewayButton"
+                Accessible.name: qsTr("Dev gateway enabled")
 
                 property bool isDevGatewayEnabled: SettingsController.isDevGatewayEnv
 
@@ -122,6 +126,7 @@ PageType {
             ConnectButton {
                 id: connectButton
                 objectName: "connectButton"
+                Accessible.name: ConnectionController.connectionStateText
 
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
@@ -130,6 +135,7 @@ PageType {
             BasicButtonType {
                 id: splitTunnelingButton
                 objectName: "splitTunnelingButton"
+                Accessible.name: text
 
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 leftPadding: 16
@@ -263,6 +269,7 @@ PageType {
                     Header1TextType {
                         id: collapsedButtonHeader
                         objectName: "collapsedButtonHeader"
+                        Accessible.name: text
 
                         Layout.maximumWidth: drawer.width - 48 - 18 - 12
 
@@ -280,6 +287,7 @@ PageType {
                     ImageButtonType {
                         id: collapsedButtonChevron
                         objectName: "collapsedButtonChevron"
+                        Accessible.name: qsTr("Open server selector")
 
                         Layout.leftMargin: 8
 
@@ -315,6 +323,9 @@ PageType {
                     spacing: 0
 
                     BasicButtonType {
+                        objectName: "defaultServerDetailsButton"
+                        Accessible.name: text
+
                         enabled: (ServersUiController.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
                         hoverEnabled: enabled
 
@@ -384,6 +395,7 @@ PageType {
                     DropDownType {
                         id: containersDropDown
                         objectName: "containersDropDown"
+                        Accessible.name: qsTr("VPN protocol")
 
                         Component.onCompleted: root.containersDropDownRef = containersDropDown
 
@@ -448,6 +460,9 @@ PageType {
                 }
 
                 Header2Type {
+                    objectName: "serversHeader"
+                    Accessible.name: qsTr("Servers")
+
                     Layout.fillWidth: true
                     Layout.topMargin: 48
                     Layout.leftMargin: 16

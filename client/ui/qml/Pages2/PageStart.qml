@@ -14,6 +14,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "startPage"
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
@@ -343,6 +344,7 @@ PageType {
         TabImageButtonType {
             id: homeTabButton
             objectName: "homeTabButton"
+            Accessible.name: qsTr("Home")
 
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
@@ -356,6 +358,7 @@ PageType {
         TabImageButtonType {
             id: shareTabButton
             objectName: "shareTabButton"
+            Accessible.name: qsTr("Share")
 
             Connections {
                 target: ServersModel
@@ -383,6 +386,7 @@ PageType {
         TabImageButtonType {
             id: settingsTabButton
             objectName: "settingsTabButton"
+            Accessible.name: qsTr("Settings")
 
             isSelected: tabBar.currentIndex === 2
             image: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
@@ -401,6 +405,7 @@ PageType {
         TabImageButtonType {
             id: plusTabButton
             objectName: "plusTabButton"
+            Accessible.name: qsTr("Add connection")
 
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
