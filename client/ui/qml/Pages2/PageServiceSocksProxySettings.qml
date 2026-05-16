@@ -17,6 +17,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "serviceSocksProxySettingsPage"
+    Accessible.name: qsTr("SOCKS5 settings")
 
     Connections {
         target: InstallController
@@ -28,6 +30,9 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "serviceSocksProxySettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -43,6 +48,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "serviceSocksProxySettingsListView"
+        Accessible.name: qsTr("SOCKS5 settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -57,6 +64,9 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "serviceSocksProxySettingsHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -65,6 +75,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "serviceSocksProxySettingsHostCopyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.rightMargin: 16
@@ -85,6 +99,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "serviceSocksProxySettingsPortCopyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
@@ -104,6 +122,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "serviceSocksProxySettingsUsernameCopyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
@@ -123,6 +145,10 @@ PageType {
             }
 
             LabelWithButtonType {
+                objectName: "serviceSocksProxySettingsPasswordCopyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
@@ -145,6 +171,7 @@ PageType {
 
             DrawerType2 {
                 id: changeSettingsDrawer
+                objectName: "serviceSocksProxySettingsChangeDrawer"
                 parent: root
 
                 anchors.fill: parent
@@ -181,6 +208,9 @@ PageType {
                     }
 
                     BaseHeaderType {
+                        objectName: "serviceSocksProxySettingsChangeDrawerHeader"
+                        Accessible.name: headerText
+
                         Layout.fillWidth: true
                         Layout.rightMargin: 16
                         Layout.bottomMargin: 16
@@ -190,6 +220,9 @@ PageType {
 
                     TextFieldWithHeaderType {
                         id: portTextField
+                        objectName: "serviceSocksProxySettingsPortField"
+
+                        Component.onCompleted: textField.objectName = "serviceSocksProxySettingsPortInput"
 
                         Layout.fillWidth: true
                         Layout.topMargin: 40
@@ -211,6 +244,9 @@ PageType {
 
                     TextFieldWithHeaderType {
                         id: usernameTextField
+                        objectName: "serviceSocksProxySettingsUsernameField"
+
+                        Component.onCompleted: textField.objectName = "serviceSocksProxySettingsUsernameInput"
 
                         Layout.fillWidth: true
                         Layout.topMargin: 16
@@ -232,8 +268,11 @@ PageType {
 
                     TextFieldWithHeaderType {
                         id: passwordTextField
+                        objectName: "serviceSocksProxySettingsPasswordField"
 
                         property bool hidePassword: true
+
+                        Component.onCompleted: textField.objectName = "serviceSocksProxySettingsPasswordInput"
 
                         Layout.fillWidth: true
                         Layout.topMargin: 16
@@ -263,6 +302,9 @@ PageType {
 
                     BasicButtonType {
                         id: saveButton
+                        objectName: "serviceSocksProxySettingsSaveButton"
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
 
                         Layout.fillWidth: true
                         Layout.topMargin: 24
@@ -297,6 +339,9 @@ PageType {
 
             BasicButtonType {
                 id: changeSettingsButton
+                objectName: "serviceSocksProxySettingsChangeButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
