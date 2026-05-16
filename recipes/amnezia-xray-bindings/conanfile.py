@@ -90,7 +90,6 @@ class AmneziaXrayBindings(ConanFile):
 
     def _rename_libs(self):
         # workaround of bad naming strategy in amnezia-xray-bindings
-        # TODO: change it and kick out the code below
         lib_dir = os.path.join(self.package_folder, "lib")
         for fname in os.listdir(lib_dir):
             if not fname.startswith("lib"):
