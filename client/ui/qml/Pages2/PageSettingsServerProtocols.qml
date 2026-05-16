@@ -52,10 +52,20 @@ PageType {
 
         model: SortFilterProxyModel {
             id: proxyContainersModel
+            objectName: "settingsServerProtocolsProxyContainersModel"
+
             sourceModel: ContainersModel
             sorters: [
-                RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder },
-                RoleSorter { roleName: "installPageOrder"; sortOrder: Qt.AscendingOrder }
+                RoleSorter {
+                    objectName: "settingsServerProtocolsInstalledSorter"
+                    roleName: "isInstalled"
+                    sortOrder: Qt.DescendingOrder
+                },
+                RoleSorter {
+                    objectName: "settingsServerProtocolsInstallPageOrderSorter"
+                    roleName: "installPageOrder"
+                    sortOrder: Qt.AscendingOrder
+                }
             ]
         }
 
