@@ -75,6 +75,7 @@ PageType {
         model: serverActions
 
         delegate: ColumnLayout {
+            objectName: "settingsServerData" + automationId + "ActionItem"
             width: listView.width
 
             LabelWithButtonType {
@@ -96,6 +97,7 @@ PageType {
             }
 
             DividerType {
+                objectName: "settingsServerData" + automationId + "ActionDivider"
                 visible: isVisible
             }
         }
@@ -111,6 +113,7 @@ PageType {
 
     QtObject {
         id: check
+        objectName: "settingsServerDataCheckActionData"
 
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string automationId: "Check"
@@ -126,6 +129,7 @@ PageType {
 
     QtObject {
         id: reboot
+        objectName: "settingsServerDataRebootActionData"
 
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string automationId: "Reboot"
@@ -157,6 +161,7 @@ PageType {
 
     QtObject {
         id: remove
+        objectName: "settingsServerDataRemoveActionData"
 
         property bool isVisible: true
         readonly property string automationId: "Remove"
@@ -188,6 +193,7 @@ PageType {
 
     QtObject {
         id: clear
+        objectName: "settingsServerDataClearActionData"
 
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string automationId: "Clear"
@@ -218,6 +224,7 @@ PageType {
 
     QtObject {
         id: reset
+        objectName: "settingsServerDataResetActionData"
 
         property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
         readonly property string automationId: "Reset"
