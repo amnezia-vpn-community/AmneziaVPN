@@ -13,6 +13,9 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "setupWizardStartPage"
+    Accessible.name: qsTr("Setup wizard")
+
     enableTimer: (SettingsController.isOnTv()) ? false : true
 
     ColumnLayout {
@@ -33,7 +36,9 @@ PageType {
 
         BasicButtonType {
             id: startButton
-            objectName: "startButton"
+            objectName: "setupWizardStartButton"
+            Accessible.name: text
+            Accessible.role: Accessible.Button
 
             Layout.fillWidth: true
             Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
