@@ -13,6 +13,7 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "settingsPage"
 
     Connections {
         target: ApiNewsController
@@ -31,6 +32,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsListView"
 
         anchors.fill: parent
 
@@ -39,6 +41,7 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "settingsHeader"
                 Layout.fillWidth: true
                 Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.bottomMargin: 16
