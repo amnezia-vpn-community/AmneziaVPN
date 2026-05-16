@@ -73,6 +73,7 @@ PageType {
 
     ListView {
         id: listView
+        objectName: "shareConnectionListView"
 
         anchors.top: shareHeader.bottom
         anchors.topMargin: 16
@@ -191,6 +192,7 @@ PageType {
                 expandedHeight: (parent ? parent.height : pageShareConnection.height) * 0.9
                 expandedStateContent: Item {
                     id: configContentContainer
+                    objectName: "shareConnectionConfigContentContainer"
                     implicitHeight: configContentDrawer.expandedHeight
 
                     Connections {
@@ -216,6 +218,7 @@ PageType {
 
                     BackButtonType {
                         id: configBackButton
+                        objectName: "shareConnectionConfigBackButton"
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -224,6 +227,7 @@ PageType {
                     }
 
                     FlickableType {
+                        objectName: "shareConnectionConfigFlickable"
                         anchors.top: configBackButton.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -232,12 +236,14 @@ PageType {
 
                         ColumnLayout {
                             id: configContent
+                            objectName: "shareConnectionConfigContent"
                             anchors.fill: parent
                             anchors.rightMargin: 16
                             anchors.leftMargin: 16
 
                             Header2Type {
                                 id: configContentHeader
+                                objectName: "shareConnectionConfigHeader"
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 headerText: pageShareConnection.configContentHeaderText
@@ -281,11 +287,13 @@ PageType {
         }
 
         delegate: ColumnLayout {
+            objectName: "shareConnectionDelegate"
             width: listView.width
             property bool isQrCodeVisible: pageShareConnection.isSelfHostedConfig ? ExportController.qrCodesCount > 0 : SubscriptionUiController.qrCodesCount > 0
 
             Rectangle {
                 id: qrCodeContainer
+                objectName: "shareConnectionQrCodeContainer"
                 Layout.preferredWidth: Math.min(Math.min(listView.width - (Layout.leftMargin + Layout.rightMargin), pageShareConnection.height * 0.5), 360)
                 Layout.preferredHeight: Layout.preferredWidth
                 Layout.alignment: Qt.AlignHCenter
@@ -296,6 +304,7 @@ PageType {
                 color: "white"
 
                 Image {
+                    objectName: "shareConnectionQrCodeImage"
                     anchors.fill: parent
                     smooth: false
                     fillMode: Image.PreserveAspectFit
@@ -330,6 +339,7 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "shareConnectionQrCodeHint"
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.bottomMargin: 32
