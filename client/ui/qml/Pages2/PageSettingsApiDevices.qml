@@ -18,9 +18,12 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiDevicesPage"
+    Accessible.name: qsTr("Active Devices")
 
     ListViewType {
         id: listView
+        objectName: "settingsApiDevicesListView"
 
         anchors.fill: parent
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
@@ -33,10 +36,13 @@ PageType {
 
             BackButtonType {
                 id: backButton
+                objectName: "settingsApiDevicesBackButton"
             }
 
             BaseHeaderType {
                 id: header
+                objectName: "settingsApiDevicesHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -47,6 +53,9 @@ PageType {
             }
 
             WarningType {
+                objectName: "settingsApiDevicesIdentifierHint"
+                Accessible.name: textString
+
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -63,6 +72,10 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsApiDevicesDeviceButton:" + index
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
