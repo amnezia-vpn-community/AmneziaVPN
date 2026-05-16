@@ -21,6 +21,9 @@ constexpr const char* DBUS_PROPERTY_INTERFACE =
 
 namespace {
 Logger logger("DnsUtilsLinux");
+constexpr int kResolvedMaxRetries = 5;
+constexpr int kResolvedRetryIntervalMs = 200;
+constexpr int kResolvedCallTimeoutMs = 1000;
 }
 
 DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
@@ -65,7 +68,9 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
   if (!setLinkDefaultRoute(m_ifindex, true)) {
     return false;
   }
-  updateLinkDomains();
+  if (!updateLinkDomains()) {
+    return false;
+  }
   return true;
 }
 
@@ -119,7 +124,7 @@ bool DnsUtilsLinux::setLinkDNS(int ifindex,
   return resolverCallWithRetry(QStringLiteral("SetLinkDNS"), argumentList);
 }
 
-void DnsUtilsLinux::setLinkDomains(int ifindex,
+bool DnsUtilsLinux::setLinkDomains(int ifindex,
                                    const QList<DnsLinkDomain>& domains) {
   char ifnamebuf[IF_NAMESIZE];
   const char* ifname = if_indextoname(ifindex, ifnamebuf);
@@ -135,12 +140,7 @@ void DnsUtilsLinux::setLinkDomains(int ifindex,
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(domains);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDomains"), argumentList);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
+  return resolverCallWithRetry(QStringLiteral("SetLinkDomains"), argumentList);
 }
 
 bool DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
@@ -153,10 +153,7 @@ bool DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
 
 bool DnsUtilsLinux::resolverCallWithRetry(const QString& method,
                                           const QList<QVariant>& argumentList) {
-  constexpr int kMaxRetries = 5;
-  constexpr int kRetryIntervalMs = 200;
-
-  for (int attempt = 1; attempt <= kMaxRetries; ++attempt) {
+  for (int attempt = 1; attempt <= kResolvedMaxRetries; ++attempt) {
     if (!m_resolver || !m_resolver->isValid()) {
       delete m_resolver;
       m_resolver = new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
@@ -164,54 +161,68 @@ bool DnsUtilsLinux::resolverCallWithRetry(const QString& method,
                                       QDBusConnection::systemBus(), this);
     }
 
-    QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-        method, argumentList);
+    QDBusMessage message = QDBusMessage::createMethodCall(
+        DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER,
+        method);
+    message.setArguments(argumentList);
+    QDBusPendingReply<> reply =
+        m_resolver->connection().asyncCall(message, kResolvedCallTimeoutMs);
     reply.waitForFinished();
     if (!reply.isError()) {
       return true;
     }
 
     logger.warning() << method << "failed via systemd-resolved DBus on attempt"
-                     << attempt << "/" << kMaxRetries << ":"
+                     << attempt << "/" << kResolvedMaxRetries << ":"
                      << reply.error().message();
-    if (attempt < kMaxRetries) {
-      QThread::msleep(kRetryIntervalMs);
+    if (attempt < kResolvedMaxRetries) {
+      QThread::msleep(kResolvedRetryIntervalMs);
     }
   }
 
   logger.error() << method << "failed via systemd-resolved DBus after"
-                 << kMaxRetries << "attempts";
+                 << kResolvedMaxRetries << "attempts";
   return false;
 }
 
-void DnsUtilsLinux::updateLinkDomains() {
+bool DnsUtilsLinux::updateLinkDomains() {
   /* Get the list of search domains, and remove any others that might conspire
    * to satisfy DNS resolution. Unfortunately, this is a pain because Qt doesn't
    * seem to be able to demarshall complex property types.
    */
-  QDBusMessage message = QDBusMessage::createMethodCall(
-      DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_PROPERTY_INTERFACE, "Get");
-  message << QString(DBUS_RESOLVE_MANAGER);
-  message << QString("Domains");
-  QDBusPendingReply<QVariant> reply =
-      m_resolver->connection().asyncCall(message);
+  QVariant domainsValue;
+  bool domainsReceived = false;
+  for (int attempt = 1; attempt <= kResolvedMaxRetries; ++attempt) {
+    QDBusMessage message = QDBusMessage::createMethodCall(
+        DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_PROPERTY_INTERFACE, "Get");
+    message << QString(DBUS_RESOLVE_MANAGER);
+    message << QString("Domains");
+    QDBusPendingReply<QVariant> reply =
+        m_resolver->connection().asyncCall(message, kResolvedCallTimeoutMs);
+    reply.waitForFinished();
+    if (!reply.isError()) {
+      domainsValue = reply.value();
+      domainsReceived = true;
+      break;
+    }
 
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsDomainsReceived(QDBusPendingCallWatcher*)));
-}
+    logger.warning()
+        << "Get Domains failed via systemd-resolved DBus on attempt" << attempt
+        << "/" << kResolvedMaxRetries << ":" << reply.error().message();
+    if (attempt < kResolvedMaxRetries) {
+      QThread::msleep(kResolvedRetryIntervalMs);
+    }
+  }
 
-void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
-  QDBusPendingReply<QVariant> reply = *call;
-  if (reply.isError()) {
-    logger.error() << "Error retrieving the DNS  domains from the DBus service";
-    delete call;
-    return;
+  if (!domainsReceived) {
+    logger.error() << "Get Domains failed via systemd-resolved DBus after"
+                   << kResolvedMaxRetries << "attempts";
+    return false;
   }
 
   /* Update the state of the DNS domains */
   m_linkDomains.clear();
-  QDBusArgument args = qvariant_cast<QDBusArgument>(reply.value());
+  QDBusArgument args = qvariant_cast<QDBusArgument>(domainsValue);
   QList<DnsDomain> list = qdbus_cast<QList<DnsDomain>>(args);
   for (const auto& d : list) {
     if (d.ifindex == 0) {
@@ -229,13 +240,14 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
     }
     QList<DnsLinkDomain> newlist = iterator.value();
     newlist.removeAll(root);
-    setLinkDomains(iterator.key(), newlist);
+    if (!setLinkDomains(iterator.key(), newlist)) {
+      return false;
+    }
   }
 
   /* Add a root search domain for the new interface. */
   QList<DnsLinkDomain> newlist = {root};
-  setLinkDomains(m_ifindex, newlist);
-  delete call;
+  return setLinkDomains(m_ifindex, newlist);
 }
 
 static DnsMetatypeRegistrationProxy s_dnsMetatypeProxy;

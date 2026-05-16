@@ -24,15 +24,14 @@ class DnsUtilsLinux final : public DnsUtils {
 
  private:
   bool setLinkDNS(int ifindex, const QList<QHostAddress>& resolvers);
-  void setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
+  bool setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
   bool setLinkDefaultRoute(int ifindex, bool enable);
-  void updateLinkDomains();
+  bool updateLinkDomains();
   bool resolverCallWithRetry(const QString& method,
                              const QList<QVariant>& argumentList);
 
  private slots:
   void dnsCallCompleted(QDBusPendingCallWatcher*);
-  void dnsDomainsReceived(QDBusPendingCallWatcher*);
 
  private:
   int m_ifindex = 0;
