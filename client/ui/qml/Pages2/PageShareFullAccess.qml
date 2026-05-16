@@ -18,9 +18,11 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "shareFullAccessPage"
 
     BackButtonType {
         id: backButton
+        objectName: "shareFullAccessBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -36,6 +38,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "shareFullAccessListView"
 
         property string headerText: ""
         property string configContentHeaderText: ""
@@ -49,6 +52,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "shareFullAccessHeader"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -58,6 +63,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "shareFullAccessDescription"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -71,7 +78,7 @@ PageType {
 
             DropDownType {
                 id: serverSelector
-                objectName: "serverSelector"
+                objectName: "shareFullAccessServerSelector"
 
                 signal severSelectorIndexChanged
                 property int currentIndex: 0
@@ -89,6 +96,7 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
+                    objectName: "shareFullAccessServerSelectorListView"
 
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
@@ -139,6 +147,8 @@ PageType {
 
             BasicButtonType {
                 id: shareButton
+                objectName: "shareFullAccessShareButton"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
