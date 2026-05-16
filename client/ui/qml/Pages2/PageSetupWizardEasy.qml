@@ -15,6 +15,7 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "easySetupPage"
 
     property bool isEasySetup: true
 
@@ -55,6 +56,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "easySetupListView"
 
         property int dockerContainer
         property int containerDefaultPort
@@ -131,6 +133,8 @@ PageType {
             }
 
             CardType {
+                objectName: "manualSetupOptionButton"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -151,6 +155,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
+                objectName: "easySetupContinueButton"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -174,6 +179,7 @@ PageType {
 
             BasicButtonType {
                 id: setupLaterButton
+                objectName: "easySetupSkipButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 8

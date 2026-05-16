@@ -12,9 +12,11 @@ import "../Controls2/TextTypes"
 
 PageType {
     id: root
+    objectName: "credentialsPage"
 
     BackButtonType {
         id: backButton
+        objectName: "credentialsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -30,6 +32,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "credentialsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -57,6 +60,9 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: delegate
+                objectName: modelData.objectName
+
+                Component.onCompleted: textField.objectName = modelData.objectName + "Field"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -103,6 +109,7 @@ PageType {
 
             BasicButtonType {
                 id: continueButton
+                objectName: "credentialsContinueButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -202,6 +209,7 @@ PageType {
 
     QtObject {
         id: hostnameObject
+        objectName: "credentialsHostInput"
 
         property string title: qsTr("Server IP address [:port]")
         readonly property string placeholderContent: qsTr("255.255.255.255:22")
@@ -211,6 +219,7 @@ PageType {
 
     QtObject {
         id: usernameObject
+        objectName: "credentialsUsernameInput"
 
         property string title: qsTr("SSH Username")
         readonly property string placeholderContent: "root"
@@ -220,6 +229,7 @@ PageType {
 
     QtObject {
         id: secretDataObject
+        objectName: "credentialsSecretInput"
 
         property string title: qsTr("Password or SSH private key")
         readonly property string placeholderContent: ""
