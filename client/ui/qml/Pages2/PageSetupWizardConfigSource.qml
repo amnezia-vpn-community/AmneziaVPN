@@ -222,7 +222,7 @@ PageType {
                 Accessible.description: description
                 Component.onCompleted: {
                     if (modelData.objectName === "fileOpenOptionButton") {
-                        focusItem.objectName = "fileOpenOptionCardButton"
+                        focusItem.objectName = "configSourceFileButton"
                     } else if (modelData.objectName === "qrScanOptionButton") {
                         focusItem.objectName = "qrScanOptionCardButton"
                     }
