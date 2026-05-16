@@ -45,10 +45,13 @@ PageType {
         anchors.left: parent.left
 
         header: ColumnLayout {
+            objectName: "settingsAboutHeaderSection"
+
             width: listView.width
 
             Image {
                 id: image
+                objectName: "settingsAboutLogoImage"
                 source: "qrc:/images/amneziaBigLogo.png"
 
                 Layout.alignment: Qt.AlignCenter
@@ -73,6 +76,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsAboutSupportDescription"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -88,6 +94,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsAboutContactsLabel"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -118,11 +127,15 @@ PageType {
                 clickedFunction: handler
             }
 
-            DividerType {}
+            DividerType {
+                objectName: "settingsAbout" + automationId + "Divider"
+            }
 
         }
 
         footer: ColumnLayout {
+            objectName: "settingsAboutFooterSection"
+
             width: listView.width
 
             CaptionTextType {
@@ -137,6 +150,8 @@ PageType {
                 color: AmneziaStyle.color.mutedGray
 
                 MouseArea {
+                    objectName: "aboutVersionDevModeClickArea"
+
                     property int clickCount: 0
                     anchors.fill: parent
                     onClicked: {
