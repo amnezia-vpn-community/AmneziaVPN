@@ -18,12 +18,17 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiNativeConfigsPage"
+    Accessible.name: qsTr("Configuration Files")
 
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save AmneziaVPN config")
+    property string configSavedNotificationText: qsTr("Config file saved")
+    property string configRevokedNotificationText: qsTr("The config has been revoked")
 
     BackButtonType {
         id: backButton
+        objectName: "settingsApiNativeConfigsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -39,6 +44,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsApiNativeConfigsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -52,6 +58,8 @@ PageType {
 
             BaseHeaderType {
                 id: header
+                objectName: "settingsApiNativeConfigsHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -66,6 +74,10 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsApiNativeConfigsCountryRow:" + countryCode
+                Accessible.name: countryName
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
@@ -94,6 +106,8 @@ PageType {
 
     DrawerType2 {
         id: moreOptionsDrawer
+        objectName: "settingsApiNativeConfigsMoreOptionsDrawer"
+        Accessible.name: countryName + qsTr(" configuration file")
 
         property string countryName
         property string countryCode
@@ -106,6 +120,7 @@ PageType {
 
             BackButtonType {
                 id: moreOptionsDrawerBackButton
+                objectName: "settingsApiNativeConfigsMoreOptionsBackButton"
 
                 anchors.top: parent.top
                 anchors.left: parent.left
@@ -119,6 +134,7 @@ PageType {
 
             ListViewType {
                 id: drawerListView
+                objectName: "settingsApiNativeConfigsMoreOptionsListView"
 
                 anchors.top: moreOptionsDrawerBackButton.bottom
                 anchors.bottom: parent.bottom
@@ -129,6 +145,9 @@ PageType {
                     width: drawerListView.width
 
                     Header2Type {
+                        objectName: "settingsApiNativeConfigsMoreOptionsHeader"
+                        Accessible.name: headerText
+
                         Layout.fillWidth: true
                         Layout.margins: 16
 
@@ -142,6 +161,10 @@ PageType {
                     width: drawerListView.width
 
                     LabelWithButtonType {
+                        objectName: "settingsApiNativeConfigsGenerateNewConfigButton"
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
@@ -161,6 +184,10 @@ PageType {
                     width: drawerListView.width
 
                     LabelWithButtonType {
+                        objectName: "settingsApiNativeConfigsRevokeConfigButton"
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
@@ -198,7 +225,7 @@ PageType {
 
             PageController.showBusyIndicator(false)
             if (result) {
-                PageController.showNotificationMessage(qsTr("Config file saved"))
+                PageController.showNotificationMessage(root.configSavedNotificationText)
             }
         }
     }
@@ -212,7 +239,7 @@ PageType {
         PageController.showBusyIndicator(false)
 
         if (result) {
-            PageController.showNotificationMessage(qsTr("The config has been revoked"))
+            PageController.showNotificationMessage(root.configRevokedNotificationText)
         }
     }
 
