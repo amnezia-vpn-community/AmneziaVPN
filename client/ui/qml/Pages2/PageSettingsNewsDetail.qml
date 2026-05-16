@@ -13,6 +13,9 @@ import SortFilterProxyModel 0.2
 
 PageType {
     id: root
+    objectName: "settingsNewsDetailPage"
+    Accessible.name: newsItem ? newsItem.title : qsTr("News")
+
     property var newsItem
     property bool isUpdateItem: newsItem && (newsItem.isUpdate !== undefined ? newsItem.isUpdate : false)
 
@@ -32,6 +35,10 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "settingsNewsDetailBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -40,18 +47,26 @@ PageType {
 
     FlickableType {
         id: fl
+        objectName: "settingsNewsDetailFlickable"
+        Accessible.name: root.Accessible.name
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.height
 
         ColumnLayout {
             id: content
+            objectName: "settingsNewsDetailContent"
+
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             spacing: 0
 
             BaseHeaderType {
+                objectName: "settingsNewsDetailHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -59,6 +74,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "settingsNewsDetailBody"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -72,6 +90,8 @@ PageType {
                 }
 
                 MouseArea {
+                    objectName: "settingsNewsDetailBodyLinkArea"
+
                     anchors.fill: parent
                     acceptedButtons: Qt.NoButton
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
@@ -79,6 +99,10 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsNewsDetailUpdateButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -97,6 +121,10 @@ PageType {
             }
 
             BasicButtonType {
+                objectName: "settingsNewsDetailSkipButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
