@@ -13,9 +13,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsAboutPage"
+    Accessible.name: qsTr("About")
 
     BackButtonType {
         id: backButton
+        objectName: "settingsAboutBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -31,6 +36,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsAboutListView"
+        Accessible.name: qsTr("About")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -53,6 +60,9 @@ PageType {
             }
 
             Header2TextType {
+                objectName: "settingsAboutHeader"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -137,6 +147,8 @@ PageType {
             BasicButtonType {
                 id: checkUpdatesButton
                 objectName: "aboutCheckUpdatesButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 8
@@ -159,6 +171,8 @@ PageType {
             BasicButtonType {
                 id: privacyPolicyButton
                 objectName: "aboutPrivacyPolicyButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 16
