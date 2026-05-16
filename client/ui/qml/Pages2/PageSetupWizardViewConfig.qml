@@ -13,7 +13,7 @@ import "../Config"
 
 PageType {
     id: root
-    objectName: "importConfigReviewPage"
+    objectName: "setupWizardViewConfigPage"
 
     property bool showContent: false
 
@@ -73,7 +73,7 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
-                objectName: "importConfigReviewTitle"
+                objectName: "setupWizardViewConfigHeader"
                 Accessible.name: qsTr("New connection")
 
                 Layout.leftMargin: 16
