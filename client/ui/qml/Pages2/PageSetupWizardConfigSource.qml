@@ -293,6 +293,8 @@ PageType {
     QtObject {
         id: amneziaVpn
 
+        objectName: "configSourceAmneziaVpnButton"
+
         property string title: qsTr("VPN by Amnezia")
         property string description: qsTr("The easiest way to connect to the VPN")
         property string imageSource: "qrc:/images/controls/amnezia.svg"

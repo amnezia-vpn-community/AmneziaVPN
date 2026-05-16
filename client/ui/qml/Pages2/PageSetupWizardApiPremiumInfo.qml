@@ -13,6 +13,7 @@ import PageEnum 1.0
 
 PageType {
     id: root
+    objectName: "apiPremiumInfoPage"
 
     property int selectedPlanIndex: 0
     property string premiumHeaderName: ""
@@ -31,6 +32,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "apiPremiumInfoBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -46,6 +48,7 @@ PageType {
 
     FlickableType {
         id: flick
+        objectName: "apiPremiumInfoFlickable"
 
         anchors.top: backButton.bottom
         anchors.bottom: continueButton.top
@@ -61,6 +64,8 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "apiPremiumInfoHeader"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -77,6 +82,10 @@ PageType {
                 delegate: SubscriptionPlanCard {
                     required property int index
                     required property var model
+                    objectName: "apiPremiumPlanCard:" + index
+                    Accessible.name: String(model.billingPeriod)
+                    Accessible.description: String(model.priceLabel)
+                        + (String(model.subtitle) !== "" ? " " + String(model.subtitle) : "")
 
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -95,6 +104,8 @@ PageType {
             }
 
             LabelTextType {
+                objectName: "apiPremiumInfoFeaturesLabel"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -154,6 +165,8 @@ PageType {
 
     BasicButtonType {
         id: continueButton
+        objectName: "apiPremiumContinueButton"
+        Accessible.name: text
 
         z: 2
         anchors.left: parent.left
