@@ -15,11 +15,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiInstructionsPage"
+    Accessible.name: qsTr("How to connect on another device")
 
     QtObject {
         id: windows
 
         readonly property string title: qsTr("Windows")
+        readonly property string automationId: "Windows"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#windows")
     }
 
@@ -27,6 +30,7 @@ PageType {
         id: macos
 
         readonly property string title: qsTr("macOS")
+        readonly property string automationId: "Macos"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#macos")
     }
 
@@ -34,6 +38,7 @@ PageType {
         id: android
 
         readonly property string title: qsTr("Android")
+        readonly property string automationId: "Android"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#android")
     }
 
@@ -41,6 +46,7 @@ PageType {
         id: androidTv
 
         readonly property string title: qsTr("AndroidTV")
+        readonly property string automationId: "AndroidTv"
         readonly property string link: qsTr("documentation/instructions/android_tv_connect/")
     }
 
@@ -48,6 +54,7 @@ PageType {
         id: ios
 
         readonly property string title: qsTr("iOS")
+        readonly property string automationId: "Ios"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#ios")
     }
 
@@ -55,6 +62,7 @@ PageType {
         id: linux
 
         readonly property string title: qsTr("Linux")
+        readonly property string automationId: "Linux"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#linux")
     }
 
@@ -62,6 +70,7 @@ PageType {
         id: routers
 
         readonly property string title: qsTr("Routers")
+        readonly property string automationId: "Routers"
         readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#routers")
     }
 
@@ -77,6 +86,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsApiInstructionsListView"
 
         anchors.fill: parent
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
@@ -89,10 +99,13 @@ PageType {
 
             BackButtonType {
                 id: backButton
+                objectName: "settingsApiInstructionsBackButton"
             }
 
             BaseHeaderType {
                 id: header
+                objectName: "settingsApiInstructionsHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -107,6 +120,10 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsApiInstructions" + automationId + "Button"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
