@@ -15,6 +15,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "serviceSftpSettingsPage"
 
     Connections {
         target: InstallController
@@ -26,6 +27,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "serviceSftpSettingsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -41,6 +43,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "serviceSftpSettingsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -52,11 +55,15 @@ PageType {
         model: SftpConfigModel
 
         delegate: ColumnLayout {
+            objectName: "serviceSftpSettingsDelegate:" + index
+
             width: listView.width
 
             spacing: 0
 
             BaseHeaderType {
+                objectName: "serviceSftpSettingsHeader:" + index
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -66,6 +73,7 @@ PageType {
 
             LabelWithButtonType {
                 id: hostLabel
+                objectName: "serviceSftpSettingsHostCopyButton:" + index
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -88,6 +96,7 @@ PageType {
 
             LabelWithButtonType {
                 id: portLabel
+                objectName: "serviceSftpSettingsPortCopyButton:" + index
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -109,6 +118,7 @@ PageType {
 
             LabelWithButtonType {
                 id: usernameLabel
+                objectName: "serviceSftpSettingsUsernameCopyButton:" + index
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -130,6 +140,7 @@ PageType {
 
             LabelWithButtonType {
                 id: passwordLabel
+                objectName: "serviceSftpSettingsPasswordCopyButton:" + index
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -153,6 +164,7 @@ PageType {
 
             BasicButtonType {
                 id: mountButton
+                objectName: "serviceSftpSettingsMountButton:" + index
 
                 visible: !GC.isMobile()
 
@@ -179,6 +191,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "serviceSftpSettingsMountInstructionsText:" + index
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -217,6 +231,7 @@ PageType {
 
             BasicButtonType {
                 id: detailedInstructionsButton
+                objectName: "serviceSftpSettingsDetailedInstructionsButton:" + index
 
                 Layout.topMargin: 16
                 Layout.bottomMargin: 16
