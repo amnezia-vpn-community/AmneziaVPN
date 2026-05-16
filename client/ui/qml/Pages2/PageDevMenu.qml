@@ -13,9 +13,11 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "devMenuPage"
 
     BackButtonType {
         id: backButton
+        objectName: "devMenuBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -25,6 +27,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "devMenuListView"
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -34,6 +37,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "devMenuHeader"
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -51,6 +56,10 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: gatewayEndpointField
+                objectName: "devMenuGatewayEndpointField"
+
+                textField.objectName: "devMenuGatewayEndpointInput"
+                rightButtonObjectName: "devMenuGatewayEndpointResetButton"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -70,6 +79,7 @@ PageType {
 
             BasicButtonType {
                 id: saveButton
+                objectName: "devMenuSaveButton"
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -91,6 +101,8 @@ PageType {
             width: listView.width
 
             SwitcherType {
+                objectName: "devMenuGatewayEnvironmentSwitch"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
