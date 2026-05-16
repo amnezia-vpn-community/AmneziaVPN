@@ -19,9 +19,14 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "protocolAwgSettingsPage"
+    Accessible.name: qsTr("AmneziaWG settings")
 
     BackButtonType {
         id: backButton
+        objectName: "protocolAwgSettingsBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -42,6 +47,8 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolAwgSettingsListView"
+        Accessible.name: qsTr("AmneziaWG settings")
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -52,6 +59,7 @@ PageType {
 
         delegate: ColumnLayout {
             id: delegateItem
+            objectName: "protocolAwgSettingsDelegate:" + index
 
             width: listView.width
 
@@ -61,6 +69,9 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "protocolAwgSettingsHeader:" + index
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -70,6 +81,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: vpnAddressSubnetTextField
+                objectName: "protocolAwgSettingsVpnAddressSubnetField:" + index
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.topMargin: 40
@@ -98,6 +111,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: portTextField
+                objectName: "protocolAwgSettingsPortField:" + index
+                Accessible.name: headerText
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -127,6 +142,8 @@ PageType {
 
             AwgTextField {
                 id: junkPacketCountTextField
+                objectName: "protocolAwgSettingsJunkPacketCountField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -149,6 +166,8 @@ PageType {
 
             AwgTextField {
                 id: junkPacketMinSizeTextField
+                objectName: "protocolAwgSettingsJunkPacketMinSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -171,6 +190,8 @@ PageType {
 
             AwgTextField {
                 id: junkPacketMaxSizeTextField
+                objectName: "protocolAwgSettingsJunkPacketMaxSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -193,6 +214,8 @@ PageType {
 
             AwgTextField {
                 id: initPacketJunkSizeTextField
+                objectName: "protocolAwgSettingsInitPacketJunkSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -215,6 +238,8 @@ PageType {
 
             AwgTextField {
                 id: responsePacketJunkSizeTextField
+                objectName: "protocolAwgSettingsResponsePacketJunkSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -237,6 +262,8 @@ PageType {
 
             AwgTextField {
                 id: cookieReplyPacketJunkSizeTextField
+                objectName: "protocolAwgSettingsCookieReplyPacketJunkSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -261,6 +288,8 @@ PageType {
 
             AwgTextField {
                 id: transportPacketJunkSizeTextField
+                objectName: "protocolAwgSettingsTransportPacketJunkSizeField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -285,6 +314,8 @@ PageType {
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField
+                objectName: "protocolAwgSettingsInitPacketMagicHeaderField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -310,6 +341,8 @@ PageType {
 
             AwgTextField {
                 id: responsePacketMagicHeaderTextField
+                objectName: "protocolAwgSettingsResponsePacketMagicHeaderField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -335,6 +368,8 @@ PageType {
 
             AwgTextField {
                 id: underloadPacketMagicHeaderTextField
+                objectName: "protocolAwgSettingsUnderloadPacketMagicHeaderField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -360,6 +395,8 @@ PageType {
 
             AwgTextField {
                 id: transportPacketMagicHeaderTextField
+                objectName: "protocolAwgSettingsTransportPacketMagicHeaderField:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -385,6 +422,8 @@ PageType {
 
             AwgTextField {
                 id: specialJunk1TextField
+                objectName: "protocolAwgSettingsSpecialJunk1Field:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -408,6 +447,8 @@ PageType {
 
             AwgTextField {
                 id: specialJunk2TextField
+                objectName: "protocolAwgSettingsSpecialJunk2Field:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -431,6 +472,8 @@ PageType {
 
             AwgTextField {
                 id: specialJunk3TextField
+                objectName: "protocolAwgSettingsSpecialJunk3Field:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -454,6 +497,8 @@ PageType {
 
             AwgTextField {
                 id: specialJunk4TextField
+                objectName: "protocolAwgSettingsSpecialJunk4Field:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -477,6 +522,8 @@ PageType {
 
             AwgTextField {
                 id: specialJunk5TextField
+                objectName: "protocolAwgSettingsSpecialJunk5Field:" + index
+                Accessible.name: headerText
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -500,6 +547,9 @@ PageType {
 
             BasicButtonType {
                 id: saveRestartButton
+                objectName: "protocolAwgSettingsSaveButton:" + index
+                Accessible.name: text
+                Accessible.role: Accessible.Button
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
