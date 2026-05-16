@@ -14,6 +14,7 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "deinstallingPage"
 
     Component.onCompleted: PageController.disableTabBar(true)
     Component.onDestruction: PageController.disableTabBar(false)
@@ -33,6 +34,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "deinstallingListView"
 
         anchors.fill: parent
 
@@ -41,9 +43,13 @@ PageType {
         model: proxyServersModel
 
         delegate: ColumnLayout {
+            objectName: "deinstallingDelegate:" + proxyServersModel.mapToSource(index)
+
             width: listView.width
 
             BaseHeaderType {
+                objectName: "deinstallingHeader"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 16
@@ -54,6 +60,7 @@ PageType {
 
             ProgressBarType {
                 id: progressBar
+                objectName: "deinstallingProgressBar"
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
@@ -73,6 +80,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "deinstallingProgressText"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
