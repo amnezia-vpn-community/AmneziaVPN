@@ -15,10 +15,13 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsApiSupportPage"
+    Accessible.name: qsTr("Support")
 
     QtObject {
         id: telegram
 
+        readonly property string automationId: "Telegram"
         readonly property string title: qsTr("Telegram")
         readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
         readonly property string link: "https://t.me/" + ApiAccountInfoModel.getTelegramBotLink()
@@ -27,6 +30,7 @@ PageType {
     QtObject {
         id: techSupport
 
+        readonly property string automationId: "TechSupport"
         readonly property string title: qsTr("Email")
         readonly property string description: ApiAccountInfoModel.getEmailLink()
         readonly property string link: "mailto:" + ApiAccountInfoModel.getEmailLink()
@@ -35,6 +39,7 @@ PageType {
     QtObject {
         id: paymentSupport
 
+        readonly property string automationId: "PaymentSupport"
         readonly property string title: qsTr("Email Billing & Orders")
         readonly property string description: ApiAccountInfoModel.getBillingEmailLink()
         readonly property string link: "mailto:" + ApiAccountInfoModel.getBillingEmailLink()
@@ -43,6 +48,7 @@ PageType {
     QtObject {
         id: site
 
+        readonly property string automationId: "Site"
         readonly property string title: qsTr("Website")
         readonly property string description: ApiAccountInfoModel.getSiteLink()
         readonly property string link: ApiAccountInfoModel.getFullSiteLink()
@@ -57,6 +63,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "settingsApiSupportListView"
 
         anchors.fill: parent
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
@@ -69,10 +76,13 @@ PageType {
 
             BackButtonType {
                 id: backButton
+                objectName: "settingsApiSupportBackButton"
             }
 
             BaseHeaderType {
                 id: header
+                objectName: "settingsApiSupportHeader"
+                Accessible.name: headerText
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -87,6 +97,10 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                objectName: "settingsApiSupport" + automationId + "Button"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
                 visible: link !== ""
                 text: title
@@ -105,6 +119,10 @@ PageType {
 
             LabelWithButtonType {
                 id: supportUuid
+                objectName: "settingsApiSupportTagButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+
                 Layout.fillWidth: true
 
                 text: qsTr("Support tag")
