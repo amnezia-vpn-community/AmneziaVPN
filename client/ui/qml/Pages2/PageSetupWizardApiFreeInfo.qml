@@ -12,6 +12,7 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "apiFreeInfoPage"
 
     property string freeHeaderName: ""
     property string freeHeaderDescription: ""
@@ -25,6 +26,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "apiFreeInfoBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -40,6 +42,7 @@ PageType {
 
     FlickableType {
         id: flick
+        objectName: "apiFreeInfoFlickable"
 
         anchors.top: backButton.bottom
         anchors.bottom: continueButton.top
@@ -55,6 +58,8 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "apiFreeInfoHeader"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -66,6 +71,8 @@ PageType {
             }
 
             LabelTextType {
+                objectName: "apiFreeInfoFeaturesLabel"
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -113,6 +120,8 @@ PageType {
 
     BasicButtonType {
         id: continueButton
+        objectName: "apiFreeContinueButton"
+        Accessible.name: text
 
         z: 2
         anchors.left: parent.left

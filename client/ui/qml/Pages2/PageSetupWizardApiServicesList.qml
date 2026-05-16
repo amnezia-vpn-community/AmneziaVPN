@@ -15,9 +15,11 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "apiServicesListPage"
 
     BackButtonType {
         id: backButton
+        objectName: "apiServicesListBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -33,6 +35,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "apiServicesListView"
 
         anchors.top: backButton.bottom
         anchors.right: parent.right
@@ -44,6 +47,8 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
+                objectName: "apiServicesListHeader"
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -68,6 +73,12 @@ PageType {
 
         delegate: ColumnLayout {
             property bool hideCard: isPremium && !hasSubscriptionPlans
+            readonly property int sourceIndex: proxyApiServicesModel.mapToSource(index)
+            readonly property bool isAmneziaFree: sourceIndex === ApiServicesModel.serviceIndexForType("amnezia-free")
+            readonly property bool isAmneziaPremium: sourceIndex === ApiServicesModel.serviceIndexForType("amnezia-premium")
+            readonly property string serviceObjectName: isAmneziaFree
+                ? "apiServiceRow:amnezia-free"
+                : isAmneziaPremium ? "apiServiceRow:amnezia-premium" : "apiServiceRow:" + sourceIndex
 
             width: listView.width
             visible: !hideCard
@@ -77,6 +88,9 @@ PageType {
 
             CardWithIconsType {
                 id: card
+                objectName: serviceObjectName
+                Accessible.name: name
+                Accessible.description: cardDescription
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
