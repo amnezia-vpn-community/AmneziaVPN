@@ -12,6 +12,8 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "settingsNewsNotificationsPage"
+    Accessible.name: qsTr("News & Notifications")
 
     ColumnLayout {
         id: header
@@ -23,19 +25,25 @@ PageType {
 
         BackButtonType {
             id: backButton
+            objectName: "settingsNewsNotificationsBackButton"
+            Accessible.name: qsTr("Back")
         }
 
         BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            
+            objectName: "settingsNewsNotificationsHeader"
+            Accessible.name: headerText
+
             headerText: qsTr("News & Notifications")
         }
     }
 
     ListView {
         id: newsList
+        objectName: "settingsNewsNotificationsListView"
+        Accessible.name: qsTr("News & Notifications")
         width: parent.width
         anchors.top: header.bottom
         anchors.topMargin: 16
@@ -51,16 +59,22 @@ PageType {
         reuseItems: true
 
         delegate: Item {
+            objectName: "settingsNewsNotificationsDelegate:" + index
+            Accessible.name: title
             implicitWidth: newsList.width
             implicitHeight: content.implicitHeight
 
             ColumnLayout {
                 id: content
+                objectName: "settingsNewsNotificationsDelegateContent:" + index
+                Accessible.name: title
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
 
                 LabelWithButtonType {
+                    objectName: "settingsNewsNotificationsItemButton:" + index
+                    Accessible.name: title
                     Layout.fillWidth: true
                     leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
                     isSmallLeftImage: !read
