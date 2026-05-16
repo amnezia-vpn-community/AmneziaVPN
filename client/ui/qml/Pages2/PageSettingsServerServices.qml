@@ -17,11 +17,15 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsServerServicesPage"
+    Accessible.name: qsTr("Services")
 
     property var installedServicesCount
 
     SettingsContainersListView {
         id: settingsContainersListView
+        objectName: "settingsServerServicesListView"
+        Accessible.name: qsTr("Services")
 
         anchors.fill: parent
 
