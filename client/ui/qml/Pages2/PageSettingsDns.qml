@@ -13,11 +13,11 @@ import "../Components"
 
 PageType {
     id: root
-    objectName: "settingsConnectionDnsServersPage"
+    objectName: "settingsDnsPage"
 
     BackButtonType {
         id: backButton
-        objectName: "settingsConnectionDnsServersBackButton"
+        objectName: "settingsDnsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -33,7 +33,7 @@ PageType {
 
     ListViewType {
         id: listView
-        objectName: "settingsConnectionDnsServersListView"
+        objectName: "settingsDnsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -55,7 +55,7 @@ PageType {
             spacing: 16
 
             BaseHeaderType {
-                objectName: "settingsConnectionDnsServersHeader"
+                objectName: "settingsDnsHeader"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
