@@ -65,7 +65,7 @@ PageType {
                 id: header
                 objectName: "protocolSettingsTitle"
                 Accessible.name: qsTr("Installing %1").arg(name)
-                Accessible.description: description
+                Accessible.description: "protocolSettingsTitle"
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -190,6 +190,9 @@ PageType {
 
             ParagraphTextType {
                 id: transportProtoHeader
+                objectName: "protocolSettingsNetworkProtocolLabel"
+                Accessible.name: text
+                Accessible.description: "protocolSettingsNetworkProtocolLabel"
 
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
