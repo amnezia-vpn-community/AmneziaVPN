@@ -36,9 +36,12 @@ ListViewType {
 
             VerticalRadioButton {
                 id: containerRadioButton
-                objectName: "protocolRow:" + name
+
+                readonly property string protocolRowSelector: "protocolRow:" + name
+
+                objectName: protocolRowSelector
                 Accessible.name: name
-                Accessible.description: description
+                Accessible.description: protocolRowSelector
 
                 Layout.fillWidth: true
 

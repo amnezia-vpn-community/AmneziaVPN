@@ -51,6 +51,8 @@ PageType {
 
             BaseHeaderType {
                 objectName: "protocolSettingsTitle"
+                Accessible.name: headerText
+                Accessible.description: "protocolSettingsTitle"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -73,8 +75,12 @@ PageType {
 
             LabelWithButtonType {
                 id: clientSettings
-                objectName: "protocolClientSettingsRow:" + protocolName
+
+                readonly property string protocolClientSettingsSelector: "protocolClientSettingsRow:" + protocolName
+
+                objectName: protocolClientSettingsSelector
                 Accessible.name: text
+                Accessible.description: protocolClientSettingsSelector
 
                 Layout.fillWidth: true
 
@@ -104,8 +110,12 @@ PageType {
 
             LabelWithButtonType {
                 id: serverSettings
-                objectName: "protocolServerSettingsRow:" + protocolName
+
+                readonly property string protocolServerSettingsSelector: "protocolServerSettingsRow:" + protocolName
+
+                objectName: protocolServerSettingsSelector
                 Accessible.name: text
+                Accessible.description: protocolServerSettingsSelector
 
                 Layout.fillWidth: true
 
