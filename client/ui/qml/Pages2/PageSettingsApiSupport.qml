@@ -64,6 +64,7 @@ PageType {
     ListViewType {
         id: listView
         objectName: "settingsApiSupportListView"
+        Accessible.name: qsTr("Support")
 
         anchors.fill: parent
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
@@ -77,6 +78,8 @@ PageType {
             BackButtonType {
                 id: backButton
                 objectName: "settingsApiSupportBackButton"
+                Accessible.name: qsTr("Back")
+                Accessible.role: Accessible.Button
             }
 
             BaseHeaderType {
