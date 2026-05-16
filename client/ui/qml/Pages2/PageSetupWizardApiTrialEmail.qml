@@ -13,6 +13,10 @@ import "../Components"
 
 PageType {
     id: root
+
+    objectName: "setupWizardApiTrialEmailPage"
+    Accessible.name: qsTr("Create an account")
+
     property string trialEmailErrorMessage: ""
 
     Connections {
@@ -26,6 +30,10 @@ PageType {
 
     BackButtonType {
         id: backButton
+
+        objectName: "setupWizardApiTrialEmailBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -42,6 +50,9 @@ PageType {
     FlickableType {
         id: flick
 
+        objectName: "setupWizardApiTrialEmailFlickable"
+        Accessible.name: root.Accessible.name
+
         anchors.top: backButton.bottom
         anchors.bottom: continueButton.top
         anchors.left: parent.left
@@ -56,6 +67,9 @@ PageType {
             spacing: 0
 
             BaseHeaderType {
+                objectName: "setupWizardApiTrialEmailHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -68,6 +82,12 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: emailField
+
+                objectName: "setupWizardApiTrialEmailField"
+                Accessible.name: headerText
+                textField.objectName: "setupWizardApiTrialEmailInput"
+                textField.Accessible.name: headerText
+                errorObjectName: "setupWizardApiTrialEmailError"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -91,6 +111,9 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "setupWizardApiTrialEmailDescription"
+                Accessible.name: text
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -106,6 +129,10 @@ PageType {
 
     BasicButtonType {
         id: continueButton
+
+        objectName: "setupWizardApiTrialEmailContinueButton"
+        Accessible.name: text
+        Accessible.role: Accessible.Button
 
         z: 2
         anchors.left: parent.left
