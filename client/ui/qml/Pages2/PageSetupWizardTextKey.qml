@@ -67,6 +67,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Key")
+                errorObjectName: "configKeyErrorText"
                 textField.placeholderText: "vpn://"
                 buttonText: qsTr("Insert")
 
@@ -95,6 +96,8 @@ PageType {
                 clickedFunc: function() {
                     if (ImportController.extractConfigFromData(textKey.textField.text)) {
                         PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    } else {
+                        textKey.errorText = qsTr("Invalid connection key")
                     }
                 }
             }
