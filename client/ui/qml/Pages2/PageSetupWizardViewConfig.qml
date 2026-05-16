@@ -142,7 +142,7 @@ PageType {
 
         model: 1 // fake model to force the ListView to be created without a model
 
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after have migrated to 6.9
+        delegate: ColumnLayout {
             width: listView.width
 
             WarningType {

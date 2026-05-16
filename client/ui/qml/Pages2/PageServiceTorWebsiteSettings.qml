@@ -62,7 +62,7 @@ PageType {
 
         model: TorConfigModel
 
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after migrate to 6.9
+        delegate: ColumnLayout {
             width: listView.width
 
             LabelWithButtonType {

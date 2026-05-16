@@ -43,7 +43,7 @@ Item {
     property bool descriptionOnTop: false
     property bool hideDescription: true
 
-    property bool isFocusable: !(eyeImage.visible || rightImage.visible) // TODO: this component already has focusable items
+    property bool isFocusable: !(eyeImage.visible || rightImage.visible)
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
