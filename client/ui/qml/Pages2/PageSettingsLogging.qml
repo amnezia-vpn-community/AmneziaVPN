@@ -44,6 +44,8 @@ PageType {
         anchors.left: parent.left
 
         header: ColumnLayout {
+            objectName: "settingsLoggingHeaderSection"
+
             width: listView.width
 
             BaseHeaderType {
@@ -80,7 +82,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                objectName: "settingsLoggingClearLogsDivider"
+            }
 
             LabelWithButtonType {
                 objectName: "settingsLoggingClearLogsButton"
@@ -169,7 +173,9 @@ PageType {
                 clickedFunction: openLogsHandler
             }
 
-            DividerType {}
+            DividerType {
+                objectName: openLogsDividerObjectName
+            }
 
             LabelWithButtonType {
                 objectName: exportLogsObjectName
@@ -186,7 +192,9 @@ PageType {
                 clickedFunction: exportLogsHandler
             }
 
-            DividerType {}
+            DividerType {
+                objectName: exportLogsDividerObjectName
+            }
         }
     }
 
@@ -209,7 +217,9 @@ PageType {
         readonly property string logTypeTitleObjectName: "settingsLoggingClientLogsTitle"
         readonly property string logTypeDescriptionObjectName: "settingsLoggingClientLogsDescription"
         readonly property string openLogsObjectName: "settingsLoggingClientOpenLogsButton"
+        readonly property string openLogsDividerObjectName: "settingsLoggingClientOpenLogsDivider"
         readonly property string exportLogsObjectName: "settingsLoggingClientExportLogsButton"
+        readonly property string exportLogsDividerObjectName: "settingsLoggingClientExportLogsDivider"
         readonly property bool isVisible: true
         readonly property var openLogsHandler: function() {
             SettingsController.openLogsFolder()
@@ -243,7 +253,9 @@ PageType {
         readonly property string logTypeTitleObjectName: "settingsLoggingServiceLogsTitle"
         readonly property string logTypeDescriptionObjectName: "settingsLoggingServiceLogsDescription"
         readonly property string openLogsObjectName: "settingsLoggingServiceOpenLogsButton"
+        readonly property string openLogsDividerObjectName: "settingsLoggingServiceOpenLogsDivider"
         readonly property string exportLogsObjectName: "settingsLoggingServiceExportLogsButton"
+        readonly property string exportLogsDividerObjectName: "settingsLoggingServiceExportLogsDivider"
         readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
         readonly property var openLogsHandler: function() {
             SettingsController.openServiceLogsFolder()
