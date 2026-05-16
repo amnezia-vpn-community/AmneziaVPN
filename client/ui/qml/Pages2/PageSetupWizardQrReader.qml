@@ -15,9 +15,14 @@ import "../Config"
 PageType {
     id: root
     objectName: "qrReaderPage"
+    Accessible.name: qsTr("Scan QR code")
 
     BackButtonType {
         id: backButton
+        objectName: "qrReaderBackButton"
+        Accessible.name: qsTr("Back")
+        Accessible.role: Accessible.Button
+
         anchors.left: parent.left
         anchors.top: parent.top
 
@@ -54,6 +59,9 @@ PageType {
 
     Rectangle {
         id: qrCodeRectange
+        objectName: "qrReaderCameraView"
+        Accessible.name: qsTr("QR code camera view")
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
