@@ -17,6 +17,8 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "settingsServerProtocolsPage"
+    Accessible.name: qsTr("Protocols")
 
     property var installedProtocolsCount
 
@@ -26,6 +28,8 @@ PageType {
 
     SettingsContainersListView {
         id: settingsContainersListView
+        objectName: "settingsServerProtocolsListView"
+        Accessible.name: qsTr("Protocols")
 
         anchors.fill: parent
 
