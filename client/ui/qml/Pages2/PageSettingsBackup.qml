@@ -57,6 +57,7 @@ PageType {
         anchors.right: parent.right
 
         header: ColumnLayout {
+            objectName: "settingsBackupHeaderContent"
 
             width: listView.width
 
@@ -76,6 +77,7 @@ PageType {
         model: 1 // fake model to force the ListView to be created without a model
 
         delegate: ColumnLayout {
+            objectName: "settingsBackupContent"
 
             width: listView.width
 
