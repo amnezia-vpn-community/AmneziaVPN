@@ -7,6 +7,7 @@
 #include <net/if.h>
 
 #include <QDBusVariant>
+#include <QThread>
 #include <QtDBus/QtDBus>
 
 #include "leakdetector.h"
@@ -58,8 +59,12 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     return false;
   }
 
-  setLinkDNS(m_ifindex, resolvers);
-  setLinkDefaultRoute(m_ifindex, true);
+  if (!setLinkDNS(m_ifindex, resolvers)) {
+    return false;
+  }
+  if (!setLinkDefaultRoute(m_ifindex, true)) {
+    return false;
+  }
   updateLinkDomains();
   return true;
 }
@@ -95,7 +100,7 @@ void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   delete call;
 }
 
-void DnsUtilsLinux::setLinkDNS(int ifindex,
+bool DnsUtilsLinux::setLinkDNS(int ifindex,
                                const QList<QHostAddress>& resolvers) {
   QList<DnsResolver> resolverList;
   char ifnamebuf[IF_NAMESIZE];
@@ -111,12 +116,7 @@ void DnsUtilsLinux::setLinkDNS(int ifindex,
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(resolverList);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDNS"), argumentList);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
+  return resolverCallWithRetry(QStringLiteral("SetLinkDNS"), argumentList);
 }
 
 void DnsUtilsLinux::setLinkDomains(int ifindex,
@@ -143,16 +143,45 @@ void DnsUtilsLinux::setLinkDomains(int ifindex,
                    SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
 }
 
-void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
+bool DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(enable);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDefaultRoute"), argumentList);
+  return resolverCallWithRetry(QStringLiteral("SetLinkDefaultRoute"),
+                               argumentList);
+}
 
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
+bool DnsUtilsLinux::resolverCallWithRetry(const QString& method,
+                                          const QList<QVariant>& argumentList) {
+  constexpr int kMaxRetries = 5;
+  constexpr int kRetryIntervalMs = 200;
+
+  for (int attempt = 1; attempt <= kMaxRetries; ++attempt) {
+    if (!m_resolver || !m_resolver->isValid()) {
+      delete m_resolver;
+      m_resolver = new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
+                                      DBUS_RESOLVE_MANAGER,
+                                      QDBusConnection::systemBus(), this);
+    }
+
+    QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
+        method, argumentList);
+    reply.waitForFinished();
+    if (!reply.isError()) {
+      return true;
+    }
+
+    logger.warning() << method << "failed via systemd-resolved DBus on attempt"
+                     << attempt << "/" << kMaxRetries << ":"
+                     << reply.error().message();
+    if (attempt < kMaxRetries) {
+      QThread::msleep(kRetryIntervalMs);
+    }
+  }
+
+  logger.error() << method << "failed via systemd-resolved DBus after"
+                 << kMaxRetries << "attempts";
+  return false;
 }
 
 void DnsUtilsLinux::updateLinkDomains() {

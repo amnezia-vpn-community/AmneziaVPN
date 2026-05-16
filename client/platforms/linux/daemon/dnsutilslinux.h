@@ -23,10 +23,12 @@ class DnsUtilsLinux final : public DnsUtils {
   bool restoreResolvers() override;
 
  private:
-  void setLinkDNS(int ifindex, const QList<QHostAddress>& resolvers);
+  bool setLinkDNS(int ifindex, const QList<QHostAddress>& resolvers);
   void setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
-  void setLinkDefaultRoute(int ifindex, bool enable);
+  bool setLinkDefaultRoute(int ifindex, bool enable);
   void updateLinkDomains();
+  bool resolverCallWithRetry(const QString& method,
+                             const QList<QVariant>& argumentList);
 
  private slots:
   void dnsCallCompleted(QDBusPendingCallWatcher*);
