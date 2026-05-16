@@ -16,14 +16,14 @@ import "../Components"
 
 PageType {
     id: root
-    objectName: "protocolSettingsPage"
+    objectName: "settingsServerProtocolPage"
     Accessible.name: qsTr("Protocol settings")
 
     property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
 
     BackButtonType {
         id: backButton
-        objectName: "protocolSettingsBackButton"
+        objectName: "settingsServerProtocolBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -39,7 +39,7 @@ PageType {
 
     ListViewType {
         id: listView
-        objectName: "protocolSettingsListView"
+        objectName: "settingsServerProtocolListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -50,9 +50,9 @@ PageType {
             width: listView.width
 
             BaseHeaderType {
-                objectName: "protocolSettingsTitle"
+                objectName: "settingsServerProtocolHeader"
                 Accessible.name: headerText
-                Accessible.description: "protocolSettingsTitle"
+                Accessible.description: "settingsServerProtocolHeader"
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -76,7 +76,7 @@ PageType {
             LabelWithButtonType {
                 id: clientSettings
 
-                readonly property string protocolClientSettingsSelector: "protocolClientSettingsRow:" + protocolName
+                readonly property string protocolClientSettingsSelector: "settingsServerProtocolClientSettingsRow:" + protocolName
 
                 objectName: protocolClientSettingsSelector
                 Accessible.name: text
@@ -111,7 +111,7 @@ PageType {
             LabelWithButtonType {
                 id: serverSettings
 
-                readonly property string protocolServerSettingsSelector: "protocolServerSettingsRow:" + protocolName
+                readonly property string protocolServerSettingsSelector: "settingsServerProtocolServerSettingsRow:" + protocolName
 
                 objectName: protocolServerSettingsSelector
                 Accessible.name: text
@@ -146,6 +146,8 @@ PageType {
 
             LabelWithButtonType {
                 id: clearCacheButton
+                objectName: "settingsServerProtocolClearProfileButton"
+                Accessible.description: "settingsServerProtocolClearProfileButton"
 
                 Layout.fillWidth: true
 
@@ -190,6 +192,8 @@ PageType {
 
             LabelWithButtonType {
                 id: removeButton
+                objectName: "settingsServerProtocolRemoveButton"
+                Accessible.description: "settingsServerProtocolRemoveButton"
 
                 Layout.fillWidth: true
 
