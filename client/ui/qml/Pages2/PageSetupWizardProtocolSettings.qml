@@ -33,6 +33,7 @@ PageType {
 
     BackButtonType {
         id: backButton
+        objectName: "protocolSettingsBackButton"
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -48,6 +49,7 @@ PageType {
 
     ListViewType {
         id: listView
+        objectName: "protocolSettingsListView"
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
@@ -59,6 +61,8 @@ PageType {
         model: proxyContainersModel
 
         delegate: ColumnLayout {
+            objectName: "protocolSettingsDelegate:" + index
+
             width: listView.width
 
             BaseHeaderType {
@@ -77,6 +81,7 @@ PageType {
 
             BasicButtonType {
                 id: showDetailsButton
+                objectName: "protocolSettingsShowDetailsButton:" + index
 
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
@@ -99,6 +104,7 @@ PageType {
 
             DrawerType2 {
                 id: showDetailsDrawer
+                objectName: "protocolSettingsShowDetailsDrawer:" + index
                 parent: root
 
                 anchors.fill: parent
@@ -108,6 +114,7 @@ PageType {
 
                     BackButtonType {
                         id: showDetailsBackButton
+                        objectName: "protocolSettingsShowDetailsBackButton:" + index
 
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -121,6 +128,7 @@ PageType {
 
                     ListViewType {
                         id: showDetailsListView
+                        objectName: "protocolSettingsShowDetailsListView:" + index
 
                         anchors.top: showDetailsBackButton.bottom
                         anchors.left: parent.left
@@ -132,6 +140,7 @@ PageType {
 
                             Header2Type {
                                 id: showDetailsDrawerHeader
+                                objectName: "protocolSettingsShowDetailsHeader:" + index
 
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
@@ -148,6 +157,8 @@ PageType {
                             width: showDetailsListView.width
 
                             ParagraphTextType {
+                                objectName: "protocolSettingsShowDetailsDescription:" + index
+
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16
                                 Layout.bottomMargin: 16
@@ -172,6 +183,7 @@ PageType {
 
                             BasicButtonType {
                                 id: showDetailsCloseButton
+                                objectName: "protocolSettingsShowDetailsCloseButton:" + index
                                 Layout.fillWidth: true
                                 Layout.bottomMargin: 32
                                 Layout.leftMargin: 16
@@ -203,6 +215,7 @@ PageType {
 
             TransportProtoSelector {
                 id: transportProtoSelector
+                objectName: "protocolSettingsTransportProtocolSelector:" + index
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
@@ -213,6 +226,8 @@ PageType {
 
             TextFieldWithHeaderType {
                 id: port
+                objectName: "protocolSettingsPortField:" + index
+                textField.objectName: "protocolSettingsPortInput:" + index
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -234,6 +249,7 @@ PageType {
 
             BasicButtonType {
                 id: installButton
+                objectName: "protocolSettingsInstallButton:" + index
 
                 Layout.fillWidth: true
                 Layout.bottomMargin: 32
