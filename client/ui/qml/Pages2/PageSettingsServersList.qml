@@ -51,7 +51,7 @@ PageType {
 
     ListViewType {
         id: servers
-        objectName: "settingsServersListView"
+        objectName: "servers"
         Accessible.name: qsTr("Servers")
 
         width: parent.width
