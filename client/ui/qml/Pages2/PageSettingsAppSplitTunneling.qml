@@ -120,6 +120,8 @@ PageType {
             enabled: (Qt.platform.os === "android") && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
+                objectName: "settingsConnectionAppSplitTunnelingModeSelectorListView"
+
                 rootWidth: root.width
 
                 model: root.routeModesModel
@@ -193,6 +195,8 @@ PageType {
         }
 
         delegate: ColumnLayout {
+            objectName: "settingsConnectionAppSplitTunnelingAppDelegate:" + proxyAppSplitTunnelingModel.mapToSource(index)
+
             width: listView.width
 
             LabelWithButtonType {
@@ -227,6 +231,8 @@ PageType {
     }
 
     Rectangle {
+        objectName: "settingsConnectionAppSplitTunnelingAddAppPanel"
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -237,6 +243,7 @@ PageType {
         
         RowLayout {
             id: addAppButton
+            objectName: "settingsConnectionAppSplitTunnelingAddAppLayout"
 
             enabled: root.pageEnabled
 
@@ -255,7 +262,9 @@ PageType {
                 Layout.fillWidth: true
 
                 textField.placeholderText: qsTr("application name")
+                textField.objectName: "settingsConnectionAppSplitTunnelingSearchInput"
                 buttonImageSource: "qrc:/images/controls/plus.svg"
+                rightButtonObjectName: "settingsConnectionAppSplitTunnelingAddAppButton"
 
                 rightButtonClickedOnEnter: true
 

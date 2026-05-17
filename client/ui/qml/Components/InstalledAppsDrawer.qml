@@ -13,6 +13,8 @@ import Style 1.0
 DrawerType2 {
     id: root
 
+    Accessible.name: qsTr("Choose application")
+
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
 
@@ -33,6 +35,7 @@ DrawerType2 {
 
         ColumnLayout {
             id: backButton
+            objectName: "installedAppsDrawerContent"
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -41,6 +44,9 @@ DrawerType2 {
             anchors.topMargin: 16
 
             BackButtonType {
+                objectName: "installedAppsDrawerBackButton"
+                Accessible.name: qsTr("Back")
+
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
                 backButtonFunction: function() {
                     root.closeTriggered()
@@ -49,6 +55,9 @@ DrawerType2 {
 
             Header2Type {
                 id: header
+                objectName: "installedAppsDrawerHeader"
+                Accessible.name: headerText
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
@@ -59,6 +68,7 @@ DrawerType2 {
 
             ListViewType {
                 id: listView
+                objectName: "installedAppsDrawerListView"
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -81,10 +91,15 @@ DrawerType2 {
                 }
 
                 delegate: ColumnLayout {
+                    objectName: "installedAppsDrawerDelegate:" + proxyInstalledAppsModel.mapToSource(index)
+
                     width: listView.width
 
                     RowLayout {
                         CheckBoxType {
+                            objectName: "installedAppsDrawerAppCheckBox:" + proxyInstalledAppsModel.mapToSource(index)
+                            Accessible.name: appName
+
                             Layout.fillWidth: true
 
                             text: appName
@@ -111,6 +126,7 @@ DrawerType2 {
 
         TextFieldWithHeaderType {
             id: searchField
+            objectName: "installedAppsDrawerSearchField"
 
             anchors.left: parent.left
             anchors.right: parent.right
@@ -122,10 +138,13 @@ DrawerType2 {
             backgroundColor: AmneziaStyle.color.slateGray
 
             textField.placeholderText: qsTr("application name")
+            textField.objectName: "installedAppsDrawerSearchInput"
         }
 
         BasicButtonType {
             id: addButton
+            objectName: "installedAppsDrawerAddSelectedButton"
+            Accessible.name: text
 
             anchors.left: parent.left
             anchors.right: parent.right
