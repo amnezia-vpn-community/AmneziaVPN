@@ -396,8 +396,7 @@ void ImportController::importConfig(const QJsonObject &config)
             emit importFinished();
         }
     } else {
-        qDebug() << "Failed to import profile";
-        qDebug().noquote() << QJsonDocument(config).toJson();
+        qWarning() << "Failed to import profile: unsupported config schema";
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
     }
 }
