@@ -5,6 +5,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QNetworkInterface>
+#include <QRegularExpression>
 
 #include "core/utils/networkUtilities.h"
 #include "ipc.h"
@@ -12,6 +13,27 @@
 #include "core/utils/utilities.h"
 #include "core/protocols/protocolUtils.h"
 #include "version.h"
+
+namespace {
+
+QString redactOpenVpnManagementLogLine(QString line)
+{
+    // Management log output may include credential-bearing options pushed or
+    // echoed by OpenVPN (for example auth-token). Keep diagnostics while never
+    // writing the token/password value to the application log.
+    static const QRegularExpression urlUserInfoPattern(
+            QStringLiteral(R"((\b(?:https?|socks5?)://)[^\s/@:]+:[^\s/@]+@)"),
+            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression optionPattern(
+            QStringLiteral(R"((^|[,\s'])(auth-token|auth-user-pass|password|pkcs11-pin-cache)(?:[ =][^,\s']*)?)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    line.replace(urlUserInfoPattern, QStringLiteral("\\1[redacted]@"));
+    line.replace(optionPattern, QStringLiteral("\\1\\2 [redacted]"));
+    return line;
+}
+
+}
 
 OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -276,7 +298,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
         }
 
         if (!line.contains(">BYTECOUNT")) {
-            qDebug().noquote() << line;
+            qDebug().noquote() << redactOpenVpnManagementLogLine(line);
         }
 
         if (line.contains(">INFO:OpenVPN Management Interface")) {
