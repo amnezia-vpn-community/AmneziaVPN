@@ -35,7 +35,8 @@ void IpcServerProcess::start()
 
     Utils::killProcessByName(m_process->program());
     m_process->start();
-    qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
+    qDebug() << "IpcServerProcess started," << m_process->program()
+             << "argumentCount=" << m_process->arguments().size();
 
     m_process->waitForStarted();
 }

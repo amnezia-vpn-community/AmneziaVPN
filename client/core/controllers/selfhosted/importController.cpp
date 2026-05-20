@@ -758,4 +758,3 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
         }
     }
 }
-

@@ -15,6 +15,7 @@
 #include <QEvent>
 #include <QDir>
 #include <QFile>
+#include <QIODevice>
 #include <QSettings>
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
@@ -34,7 +35,8 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string (visible in process list; prefer --import-file)"), QStringLiteral("data")),
+      m_optImportFile({QStringLiteral("import-file")}, QStringLiteral("Import configuration from a local file"), QStringLiteral("path"))
 {
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
@@ -141,8 +143,19 @@ void AmneziaApplication::init()
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
 
-    if (m_parser.isSet(m_optImport)) {
-        const QString data = m_parser.value(m_optImport);
+    if (m_parser.isSet(m_optImport) || m_parser.isSet(m_optImportFile)) {
+        QString data = m_parser.value(m_optImport);
+
+        if (m_parser.isSet(m_optImportFile)) {
+            QFile importFile(m_parser.value(m_optImportFile));
+            if (!importFile.open(QIODevice::ReadOnly)) {
+                qWarning() << "Cannot import profile: failed to open import file";
+                QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+                return;
+            }
+            data = QString::fromUtf8(importFile.readAll());
+        }
+
         if (data.isEmpty() || !m_coreController || !m_coreController->importConfigFromData(data)) {
             QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
             return;
@@ -241,6 +254,7 @@ bool AmneziaApplication::parseCommands()
     m_parser.addOption(m_optCleanup);
     m_parser.addOption(m_optConnect);
     m_parser.addOption(m_optImport);
+    m_parser.addOption(m_optImportFile);
     
     m_parser.process(*this);
 
