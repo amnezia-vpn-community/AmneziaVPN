@@ -159,7 +159,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         return amnezia::ErrorCode::ApiUpdateRequestError;
     }
 
-    qDebug() << QString::fromUtf8(responseBody);
+    qDebug() << apiUtils::responseBodyForLog(responseBody);
     qDebug() << replyError;
     qDebug() << httpStatusCode;
 
@@ -193,6 +193,11 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 
     qDebug() << "something went wrong";
     return amnezia::ErrorCode::ApiConfigDownloadError;
+}
+
+QString apiUtils::responseBodyForLog(const QByteArray &responseBody)
+{
+    return QStringLiteral("Response body omitted from logs; size: %1 bytes").arg(responseBody.size());
 }
 
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
