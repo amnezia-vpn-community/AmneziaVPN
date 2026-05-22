@@ -28,6 +28,7 @@ PageType {
         target: ServersModel
 
         function onProcessedServerChanged() {
+            root.showQrCode = false
             root.processedServer = proxyServersModel.get(0)
         }
     }
