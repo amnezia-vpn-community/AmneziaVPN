@@ -3,8 +3,11 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
-#include <QMutex>
+#include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QMutex>
 
 #include "systemController.h"
 
@@ -16,6 +19,58 @@
 ImportUiController* ImportUiController::mInstance = nullptr;
 static QMutex qrDecodeMutex;
 #endif
+
+namespace
+{
+bool isSensitiveConfigKey(const QString &key)
+{
+    const QString lowerKey = key.toLower();
+    return lowerKey == "password"
+        || lowerKey == "api_key"
+        || lowerKey == "vpn_key"
+        || lowerKey == "client_priv_key"
+        || lowerKey == "server_priv_key"
+        || lowerKey == "psk_key"
+        || lowerKey == "presharedkey"
+        || lowerKey == "pre_shared_key"
+        || lowerKey == "auth-token"
+        || lowerKey == "auth_token"
+        || (lowerKey.contains("private") && lowerKey.contains("key"))
+        || lowerKey.contains("secret")
+        || lowerKey.contains("token");
+}
+
+QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key = {})
+{
+    if (isSensitiveConfigKey(key)) {
+        return QStringLiteral("[hidden]");
+    }
+
+    if (value.isString() && value.toString().startsWith("vpn://", Qt::CaseInsensitive)) {
+        return QStringLiteral("[hidden]");
+    }
+
+    if (value.isObject()) {
+        QJsonObject redactedObject;
+        const QJsonObject object = value.toObject();
+        for (auto it = object.constBegin(); it != object.constEnd(); ++it) {
+            redactedObject.insert(it.key(), redactConfigForDisplay(it.value(), it.key()));
+        }
+        return redactedObject;
+    }
+
+    if (value.isArray()) {
+        QJsonArray redactedArray;
+        const QJsonArray array = value.toArray();
+        for (const auto &item : array) {
+            redactedArray.append(redactConfigForDisplay(item));
+        }
+        return redactedArray;
+    }
+
+    return value;
+}
+}
 
 ImportUiController::ImportUiController(ImportController* importController, QObject *parent)
     : QObject(parent),
@@ -100,7 +155,7 @@ bool ImportUiController::extractConfigFromQr(const QByteArray &data)
 
 QString ImportUiController::getConfig()
 {
-    return QJsonDocument(m_config).toJson(QJsonDocument::Indented);
+    return QJsonDocument(redactConfigForDisplay(m_config).toObject()).toJson(QJsonDocument::Indented);
 }
 
 QString ImportUiController::getConfigFileName()

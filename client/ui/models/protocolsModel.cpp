@@ -11,7 +11,22 @@
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
 
+#include <QRegularExpression>
+
 using namespace ProtocolUtils;
+
+namespace
+{
+QString redactNativeConfigLineForDisplay(QString line)
+{
+    static const QRegularExpression sensitiveOptionPattern(
+            QStringLiteral(R"(^(\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*=\s*).*)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    line.replace(sensitiveOptionPattern, QStringLiteral("\\1[hidden]"));
+    return line;
+}
+}
 
 ProtocolsModel::ProtocolsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -99,7 +114,7 @@ QString ProtocolsModel::getRawConfig() const
     QStringList lines = configString.replace("\r", "").split("\n");
     QString rawConfig;
     for (const QString &l : lines) {
-        rawConfig.append(l + "\n");
+        rawConfig.append(redactNativeConfigLineForDisplay(l) + "\n");
     }
     return rawConfig;
 }
