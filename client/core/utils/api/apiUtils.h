@@ -27,6 +27,7 @@ namespace apiUtils
     amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                const QByteArray &responseBody);
+    QString responseBodyForLog(const QByteArray &responseBody);
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
