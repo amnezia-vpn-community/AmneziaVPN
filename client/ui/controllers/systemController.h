@@ -10,8 +10,8 @@ public:
     explicit SystemController(QObject *parent = nullptr);
 
     static void saveFile(const QString &fileName, const QString &data);
-    static bool readFile(const QString &fileName, QByteArray &data);
-    static bool readFile(const QString &fileName, QString &data);
+    static bool readFile(const QString &fileName, QByteArray &data, qint64 maxSize = -1);
+    static bool readFile(const QString &fileName, QString &data, qint64 maxSize = -1);
 
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",

@@ -34,6 +34,40 @@ using namespace ProtocolUtils;
 
 namespace
 {
+    constexpr qsizetype kMaxImportPayloadBytes = 4 * 1024 * 1024;
+    constexpr qsizetype kMaxImportDecompressedBytes = 16 * 1024 * 1024;
+
+    bool exceedsImportPayloadLimit(qsizetype size)
+    {
+        return size > kMaxImportPayloadBytes;
+    }
+
+    bool exceedsImportDecompressedLimit(qsizetype size)
+    {
+        return size > kMaxImportDecompressedBytes;
+    }
+
+    QByteArray boundedUncompress(const QByteArray &data)
+    {
+        if (data.size() < 4) {
+            return QByteArray();
+        }
+
+        const auto *bytes = reinterpret_cast<const uchar *>(data.constData());
+        quint32 expectedSize = (quint32(bytes[0]) << 24) | (quint32(bytes[1]) << 16)
+                | (quint32(bytes[2]) << 8) | quint32(bytes[3]);
+        if (exceedsImportDecompressedLimit(expectedSize)) {
+            return QByteArray();
+        }
+
+        QByteArray result = qUncompress(data);
+        if (exceedsImportDecompressedLimit(result.size())) {
+            return QByteArray();
+        }
+
+        return result;
+    }
+
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
@@ -87,6 +121,12 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     ImportResult result;
     result.configFileName = configFileName;
     result.maliciousWarningText.clear();
+
+    if (exceedsImportPayloadLimit(data.toUtf8().size())) {
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        result.configFileName.clear();
+        return result;
+    }
 
     QString config = data;
     QString prefix;
@@ -166,7 +206,13 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     if (configType == ConfigTypes::Invalid) {
         config.replace("vpn://", "");
         QByteArray ba = QByteArray::fromBase64(config.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-        QByteArray baUncompressed = qUncompress(ba);
+        if (exceedsImportPayloadLimit(ba.size())) {
+            result.errorCode = ErrorCode::ImportInvalidConfigError;
+            result.configFileName.clear();
+            return result;
+        }
+
+        QByteArray baUncompressed = boundedUncompress(ba);
         if (!baUncompressed.isEmpty()) {
             ba = baUncompressed;
         }
@@ -241,6 +287,11 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
 {
     ImportResult result;
 
+    if (exceedsImportPayloadLimit(data.size())) {
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
     QString dataStr = QString::fromUtf8(data);
     ConfigTypes configType = checkConfigFormat(dataStr);
     if (configType != ConfigTypes::Invalid) {
@@ -254,7 +305,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
         return result;
     }
 
-    QByteArray ba_uncompressed = qUncompress(data);
+    QByteArray ba_uncompressed = boundedUncompress(data);
     if (!ba_uncompressed.isEmpty()) {
         result.config = QJsonDocument::fromJson(ba_uncompressed).object();
         if (result.config.isEmpty()) {
@@ -266,7 +317,12 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
     }
 
     QByteArray ba = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray baUncompressed = qUncompress(ba);
+    if (exceedsImportPayloadLimit(ba.size())) {
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QByteArray baUncompressed = boundedUncompress(ba);
 
     if (!baUncompressed.isEmpty()) {
         ba = baUncompressed;
@@ -304,7 +360,16 @@ ImportController::QrParseResult ImportController::parseQrCodeChunk(const QString
         return parseResult;
     }
 
-    QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray encodedChunk = code.toUtf8();
+    if (exceedsImportPayloadLimit(encodedChunk.size())) {
+        return parseResult;
+    }
+
+    QByteArray ba = QByteArray::fromBase64(encodedChunk, QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    if (exceedsImportPayloadLimit(ba.size())) {
+        return parseResult;
+    }
+
     QDataStream s(&ba, QIODevice::ReadOnly);
     qint16 magic;
     s >> magic;
@@ -321,6 +386,12 @@ ImportController::QrParseResult ImportController::parseQrCodeChunk(const QString
         quint8 chunkId;
         s >> chunkId;
         s >> m_qrCodeChunks[chunkId];
+        if (exceedsImportPayloadLimit(m_qrCodeChunks[chunkId].size())) {
+            m_qrCodeChunks.clear();
+            m_totalQrCodeChunksCount = 0;
+            m_receivedQrCodeChunksCount = 0;
+            return parseResult;
+        }
         m_receivedQrCodeChunksCount = m_qrCodeChunks.size();
         parseResult.chunksReceived = m_receivedQrCodeChunksCount;
         parseResult.chunksTotal = m_totalQrCodeChunksCount;
@@ -329,6 +400,12 @@ ImportController::QrParseResult ImportController::parseQrCodeChunk(const QString
             QByteArray data;
             for (int i = 0; i < m_totalQrCodeChunksCount; ++i) {
                 data.append(m_qrCodeChunks.value(i));
+                if (exceedsImportPayloadLimit(data.size())) {
+                    m_qrCodeChunks.clear();
+                    m_totalQrCodeChunksCount = 0;
+                    m_receivedQrCodeChunksCount = 0;
+                    return parseResult;
+                }
             }
 
             ImportResult result = extractConfigFromQr(data);
