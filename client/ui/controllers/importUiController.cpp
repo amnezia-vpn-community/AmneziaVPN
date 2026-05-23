@@ -25,6 +25,11 @@ namespace
 bool isSensitiveConfigKey(const QString &key)
 {
     const QString lowerKey = key.toLower();
+    QString compactKey = lowerKey;
+    compactKey.remove('_');
+    compactKey.remove('-');
+    compactKey.remove(' ');
+
     return lowerKey == "password"
         || lowerKey == "api_key"
         || lowerKey == "vpn_key"
@@ -35,6 +40,13 @@ bool isSensitiveConfigKey(const QString &key)
         || lowerKey == "pre_shared_key"
         || lowerKey == "auth-token"
         || lowerKey == "auth_token"
+        || compactKey == "apikey"
+        || compactKey == "vpnkey"
+        || compactKey == "clientprivkey"
+        || compactKey == "serverprivkey"
+        || compactKey == "pskkey"
+        || compactKey == "presharedkey"
+        || compactKey == "authtoken"
         || (lowerKey.contains("private") && lowerKey.contains("key"))
         || lowerKey.contains("secret")
         || lowerKey.contains("token");
