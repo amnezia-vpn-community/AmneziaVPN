@@ -2,6 +2,7 @@
 
 #include <QDataStream>
 #include <QDebug>
+#include <QIODevice>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -66,6 +67,27 @@ namespace
         }
 
         return result;
+    }
+
+    bool readBoundedSerializedByteArray(QDataStream &stream, QByteArray &data)
+    {
+        quint32 size = 0;
+        stream >> size;
+        if (stream.status() != QDataStream::Ok || exceedsImportPayloadLimit(size)) {
+            return false;
+        }
+
+        auto *device = stream.device();
+        if (!device || size > static_cast<quint32>(device->bytesAvailable())) {
+            return false;
+        }
+
+        data.resize(static_cast<qsizetype>(size));
+        if (size == 0) {
+            return true;
+        }
+
+        return stream.readRawData(data.data(), static_cast<int>(size)) == static_cast<int>(size);
     }
 
     ConfigTypes checkConfigFormat(const QString &config)
@@ -385,13 +407,14 @@ ImportController::QrParseResult ImportController::parseQrCodeChunk(const QString
 
         quint8 chunkId;
         s >> chunkId;
-        s >> m_qrCodeChunks[chunkId];
-        if (exceedsImportPayloadLimit(m_qrCodeChunks[chunkId].size())) {
+        QByteArray chunkData;
+        if (!readBoundedSerializedByteArray(s, chunkData)) {
             m_qrCodeChunks.clear();
             m_totalQrCodeChunksCount = 0;
             m_receivedQrCodeChunksCount = 0;
             return parseResult;
         }
+        m_qrCodeChunks[chunkId] = chunkData;
         m_receivedQrCodeChunksCount = m_qrCodeChunks.size();
         parseResult.chunksReceived = m_receivedQrCodeChunksCount;
         parseResult.chunksTotal = m_totalQrCodeChunksCount;
