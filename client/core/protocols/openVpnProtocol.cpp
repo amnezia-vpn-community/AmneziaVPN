@@ -257,7 +257,8 @@ ErrorCode OpenVpnProtocol::start()
     });
     m_openVpnProcess->setArguments(arguments);
 
-    qDebug() << arguments.join(" ");
+    qDebug() << "OpenVpnProtocol::start privileged process arguments set,"
+             << "argumentCount=" << arguments.size();
     connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred,
             [&](QProcess::ProcessError error) { qDebug() << "PrivilegedProcess errorOccurred" << error; });
 
