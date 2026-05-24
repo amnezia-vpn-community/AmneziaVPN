@@ -6,9 +6,11 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonParseError>
 #include <QJsonValue>
 #include <QMutex>
 #include <QRegularExpression>
+#include <QStringList>
 
 #include "systemController.h"
 
@@ -55,6 +57,52 @@ bool isSensitiveConfigKey(const QString &key)
         || lowerKey.contains("token");
 }
 
+bool isSensitiveInlineConfigLine(const QString &line)
+{
+    static const QRegularExpression sensitiveOptionPattern(
+            QStringLiteral(R"(^\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*(:|=|\s+).*)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    return sensitiveOptionPattern.match(line).hasMatch();
+}
+
+QString redactNativeConfigTextForDisplay(QString configText)
+{
+    static const QRegularExpression sensitiveBlockStartPattern(
+            QStringLiteral(R"(^\s*<(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression sensitiveBlockEndPattern(
+            QStringLiteral(R"(^\s*</(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    QStringList lines = configText.replace("\r", "").split("\n");
+    QStringList redactedLines;
+    redactedLines.reserve(lines.size());
+
+    bool redactingSensitiveBlock = false;
+    for (const QString &line : lines) {
+        if (redactingSensitiveBlock) {
+            if (sensitiveBlockEndPattern.match(line).hasMatch()) {
+                redactingSensitiveBlock = false;
+                redactedLines.append(line);
+            } else {
+                redactedLines.append(QStringLiteral("[hidden]"));
+            }
+            continue;
+        }
+
+        if (sensitiveBlockStartPattern.match(line).hasMatch()) {
+            redactingSensitiveBlock = true;
+            redactedLines.append(line);
+            continue;
+        }
+
+        redactedLines.append(isSensitiveInlineConfigLine(line) ? QStringLiteral("[hidden]") : line);
+    }
+
+    return redactedLines.join('\n');
+}
+
 QString redactSensitiveStringForDisplay(QString value)
 {
     if (value.startsWith("vpn://", Qt::CaseInsensitive)) {
@@ -77,16 +125,11 @@ QString redactSensitiveStringForDisplay(QString value)
         }
     }
 
-    static const QRegularExpression sensitiveLinePattern(
-            QStringLiteral(R"((^|\n)(\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*[:=]\s*)[^\n\r]*)"),
-            QRegularExpression::CaseInsensitiveOption);
-    value.replace(sensitiveLinePattern, QStringLiteral("\\1\\2[hidden]"));
-
     static const QRegularExpression privateKeyBlockPattern(
             QStringLiteral(R"(-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----)"));
     value.replace(privateKeyBlockPattern, QStringLiteral("[hidden private key]"));
 
-    return value;
+    return redactNativeConfigTextForDisplay(value);
 }
 
 QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key)
