@@ -36,7 +36,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string (visible in process list; prefer --import-stdin or --import-file)"), QStringLiteral("data")),
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Deprecated unsafe import source; use --import-stdin or --import-file"), QStringLiteral("data")),
       m_optImportFile({QStringLiteral("import-file")}, QStringLiteral("Import configuration from a local file"), QStringLiteral("path")),
       m_optImportStdin({QStringLiteral("import-stdin")}, QStringLiteral("Import configuration from standard input"))
 {
@@ -158,6 +158,12 @@ void AmneziaApplication::init()
     }
     if (hasImportStdin) {
         ++importSourceCount;
+    }
+
+    if (hasImportData) {
+        qWarning() << "Cannot import profile: --import <data> exposes configuration material in process arguments; use --import-stdin or --import-file";
+        QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+        return;
     }
 
     if (importSourceCount > 1) {
