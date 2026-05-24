@@ -1,0 +1,57 @@
+name: OpenVPN Log Redaction Check
+
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'client/core/protocols/openVpnProtocol.cpp'
+      - '.github/workflows/openvpn-log-redaction-check.yml'
+  push:
+    branches: [dev]
+    paths:
+      - 'client/core/protocols/openVpnProtocol.cpp'
+      - '.github/workflows/openvpn-log-redaction-check.yml'
+  workflow_dispatch:
+
+jobs:
+  openvpn-log-redaction-lint:
+    name: Check OpenVPN management log redaction
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Reject raw OpenVPN management log sinks
+        shell: python3 {0}
+        run: |
+          import re
+          import sys
+          from pathlib import Path
+
+          source = Path('client/core/protocols/openVpnProtocol.cpp')
+          text = source.read_text(encoding='utf-8')
+
+          failures = []
+
+          if 'redactOpenVpnManagementLogLine' not in text:
+              failures.append('missing redactOpenVpnManagementLogLine helper')
+
+          raw_sink = re.search(r'qDebug\(\)\.noquote\(\)\s*<<\s*line\s*;', text)
+          if raw_sink:
+              failures.append('raw management line is logged without redaction')
+
+          redacted_sink = re.search(
+              r'qDebug\(\)\.noquote\(\)\s*<<\s*redactOpenVpnManagementLogLine\s*\(\s*line\s*\)\s*;',
+              text,
+          )
+          if not redacted_sink:
+              failures.append('management log sink does not call redactOpenVpnManagementLogLine(line)')
+
+          if 'm_managementServer.writeCommand("log on")' in text and failures:
+              print('::error::OpenVPN management logging is enabled, but log redaction guard failed:')
+              for failure in failures:
+                  print(f'  - {failure}')
+              sys.exit(1)
+
+          print('OpenVPN management log redaction guard passed.')
