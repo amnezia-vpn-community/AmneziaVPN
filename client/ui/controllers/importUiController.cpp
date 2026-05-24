@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QMutex>
+#include <QRegularExpression>
 
 #include "systemController.h"
 
@@ -22,6 +23,8 @@ static QMutex qrDecodeMutex;
 
 namespace
 {
+QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key = {});
+
 bool isSensitiveConfigKey(const QString &key)
 {
     const QString lowerKey = key.toLower();
@@ -52,14 +55,48 @@ bool isSensitiveConfigKey(const QString &key)
         || lowerKey.contains("token");
 }
 
-QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key = {})
+QString redactSensitiveStringForDisplay(QString value)
+{
+    if (value.startsWith("vpn://", Qt::CaseInsensitive)) {
+        return QStringLiteral("[hidden]");
+    }
+
+    QJsonParseError parseError;
+    const QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(), &parseError);
+    if (parseError.error == QJsonParseError::NoError && !document.isNull()) {
+        if (document.isObject()) {
+            return QString::fromUtf8(QJsonDocument(redactConfigForDisplay(document.object()).toObject()).toJson(QJsonDocument::Compact));
+        }
+        if (document.isArray()) {
+            QJsonArray redactedArray;
+            const QJsonArray array = document.array();
+            for (const auto &item : array) {
+                redactedArray.append(redactConfigForDisplay(item));
+            }
+            return QString::fromUtf8(QJsonDocument(redactedArray).toJson(QJsonDocument::Compact));
+        }
+    }
+
+    static const QRegularExpression sensitiveLinePattern(
+            QStringLiteral(R"((^|\n)(\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*[:=]\s*)[^\n\r]*)"),
+            QRegularExpression::CaseInsensitiveOption);
+    value.replace(sensitiveLinePattern, QStringLiteral("\\1\\2[hidden]"));
+
+    static const QRegularExpression privateKeyBlockPattern(
+            QStringLiteral(R"(-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----)"));
+    value.replace(privateKeyBlockPattern, QStringLiteral("[hidden private key]"));
+
+    return value;
+}
+
+QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key)
 {
     if (isSensitiveConfigKey(key)) {
         return QStringLiteral("[hidden]");
     }
 
-    if (value.isString() && value.toString().startsWith("vpn://", Qt::CaseInsensitive)) {
-        return QStringLiteral("[hidden]");
+    if (value.isString()) {
+        return redactSensitiveStringForDisplay(value.toString());
     }
 
     if (value.isObject()) {
