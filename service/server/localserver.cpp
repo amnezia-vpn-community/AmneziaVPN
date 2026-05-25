@@ -35,7 +35,14 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     QObject::connect(m_server.data(), &QLocalServer::newConnection, this, [this]() {
         qDebug() << "LocalServer new connection";
-        m_serverNode.addHostSideConnection(m_server->nextPendingConnection());
+        auto *socket = m_server->nextPendingConnection();
+        if (!amnezia::authorizeLocalIpcSocket(socket, "service")) {
+            if (socket) {
+                socket->deleteLater();
+            }
+            return;
+        }
+        m_serverNode.addHostSideConnection(socket);
 
         if (!m_isRemotingEnabled) {
             m_isRemotingEnabled = true;
@@ -77,4 +84,3 @@ LocalServer::~LocalServer()
 {
     qDebug() << "Local server stopped";
 }
-
