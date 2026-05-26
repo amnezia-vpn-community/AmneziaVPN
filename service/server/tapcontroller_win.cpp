@@ -1,3 +1,4 @@
+#include <QByteArray>
 #include <QProcess>
 #include <QDebug>
 #include <QRegularExpression>
@@ -350,8 +351,11 @@ bool TapController::setupDriver()
 
 
     tapInstallProc.waitForFinished();
-    qDebug() << "TapController: setupDriver args" << tapInstallProc.arguments().join(" ");
-    qDebug() << "TapController: setupDriver output" << tapInstallProc.readAll();
+    const QByteArray tapInstallOutput = tapInstallProc.readAll();
+    qDebug() << "TapController: setupDriver finished"
+             << "exitCode" << tapInstallProc.exitCode()
+             << "exitStatus" << tapInstallProc.exitStatus()
+             << "outputBytes" << tapInstallOutput.size();
 
     /// check again
     tapList = getTapList();
@@ -380,4 +384,3 @@ bool TapController::setupDriverCertificate()
     qDebug() << "TapController: OpenVPN certificate installed:" << certOutput;
     return true;
 }
-
