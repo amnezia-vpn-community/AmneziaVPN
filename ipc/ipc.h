@@ -71,12 +71,13 @@ inline bool authorizeLocalIpcSocket(QLocalSocket *socket, const char *scope)
         return false;
     }
 
+#ifdef Q_OS_LINUX
     const QByteArray allowedUid = qgetenv("AMNEZIAVPN_IPC_AUTH_UID");
     if (allowedUid.isEmpty()) {
-        return true;
+        qWarning() << "Rejected IPC socket for" << scope << "because AMNEZIAVPN_IPC_AUTH_UID is not configured";
+        return false;
     }
 
-#ifdef Q_OS_LINUX
     bool ok = false;
     const qulonglong expectedUid = allowedUid.toULongLong(&ok);
     if (!ok) {
@@ -104,8 +105,7 @@ inline bool authorizeLocalIpcSocket(QLocalSocket *socket, const char *scope)
 
     return true;
 #else
-    qWarning() << "Rejected IPC socket for" << scope << "because AMNEZIAVPN_IPC_AUTH_UID is only supported on Linux";
-    return false;
+    return true;
 #endif
 }
 

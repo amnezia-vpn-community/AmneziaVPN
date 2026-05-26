@@ -4,6 +4,27 @@ APP_NAME=AmneziaVPN
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/opt/$APP_NAME
+CONFIG_FOLDER=/etc/$APP_NAME
+IPC_AUTH_ENV_FILE="$CONFIG_FOLDER/ipc-auth.env"
+
+resolve_ipc_auth_uid() {
+        for uid in "${SUDO_UID:-}" "${PKEXEC_UID:-}" "${DOAS_UID:-}"; do
+                if [[ "$uid" =~ ^[0-9]+$ ]] && [[ "$uid" != "0" ]]; then
+                        echo "$uid"
+                        return 0
+                fi
+        done
+
+        if command -v loginctl &> /dev/null; then
+                uid=$(loginctl list-users --no-legend 2>/dev/null | awk '$1 != "0" { print $1; exit }')
+                if [[ "$uid" =~ ^[0-9]+$ ]] && [[ "$uid" != "0" ]]; then
+                        echo "$uid"
+                        return 0
+                fi
+        fi
+
+        return 1
+}
 
 if ! test -f $LOG_FOLDER; then
         sudo mkdir $LOG_FOLDER
@@ -33,6 +54,16 @@ fi
 sudo chmod -R a-w $APP_PATH/
 
 sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
+
+IPC_AUTH_UID=$(resolve_ipc_auth_uid)
+if [[ ! "$IPC_AUTH_UID" =~ ^[0-9]+$ ]] || [[ "$IPC_AUTH_UID" == "0" ]]; then
+        echo "Failed to resolve non-root IPC auth uid; refusing to start service" >> $LOG_FILE
+        exit 1
+fi
+
+sudo mkdir -p "$CONFIG_FOLDER" >> $LOG_FILE
+printf 'AMNEZIAVPN_IPC_AUTH_UID=%s\n' "$IPC_AUTH_UID" | sudo tee "$IPC_AUTH_ENV_FILE" > /dev/null
+sudo chmod 600 "$IPC_AUTH_ENV_FILE" >> $LOG_FILE
 
 sudo systemctl start $APP_NAME >> $LOG_FILE
 sudo systemctl enable $APP_NAME >> $LOG_FILE
