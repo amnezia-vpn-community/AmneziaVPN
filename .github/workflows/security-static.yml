@@ -8,6 +8,9 @@ on:
       - 'ipc/ipcserver.cpp'
       - 'ipc/ipc.h'
       - 'client/core/utils/ipcClient.cpp'
+      - 'client/daemon/daemonlocalserver.cpp'
+      - 'deploy/data/linux/AmneziaVPN.service'
+      - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
       - '.github/workflows/security-static.yml'
   push:
@@ -17,6 +20,9 @@ on:
       - 'ipc/ipcserver.cpp'
       - 'ipc/ipc.h'
       - 'client/core/utils/ipcClient.cpp'
+      - 'client/daemon/daemonlocalserver.cpp'
+      - 'deploy/data/linux/AmneziaVPN.service'
+      - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
       - '.github/workflows/security-static.yml'
   workflow_dispatch:
