@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QLoggingCategory>
+#include <QRegularExpression>
 #include "core/utils/networkUtilities.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -23,6 +24,31 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
+
+namespace {
+QString shellSingleQuote(const QString &value)
+{
+    QString escaped = value;
+    escaped.replace(QLatin1Char('\''), QLatin1String("'\\''"));
+    return QLatin1Char('\'') + escaped + QLatin1Char('\'');
+}
+
+QString sanitizedPort(const QString &value, const QString &fallback)
+{
+    static const QRegularExpression portPattern(QStringLiteral("^[0-9]{1,5}$"));
+    if (!portPattern.match(value).hasMatch()) {
+        return fallback;
+    }
+
+    bool ok = false;
+    const int port = value.toInt(&ok);
+    if (!ok || port < 1 || port > 65535) {
+        return fallback;
+    }
+
+    return value;
+}
+}
 
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
@@ -261,9 +287,10 @@ amnezia::ScriptVars amnezia::genSftpVars(const ContainerConfig &containerConfig)
     ScriptVars vars;
     
     if (auto* sftpProtocolConfig = containerConfig.getSftpProtocolConfig()) {
-        vars.append({ { "$SFTP_PORT", sftpProtocolConfig->port.isEmpty() ? QString::number(ProtocolUtils::defaultPort(Proto::Sftp)) : sftpProtocolConfig->port } });
-        vars.append({ { "$SFTP_USER", sftpProtocolConfig->userName } });
-        vars.append({ { "$SFTP_PASSWORD", sftpProtocolConfig->password } });
+        const QString defaultPort = QString::number(ProtocolUtils::defaultPort(Proto::Sftp));
+        vars.append({ { "$SFTP_PORT", sanitizedPort(sftpProtocolConfig->port, defaultPort) } });
+        vars.append({ { "$SFTP_USER", shellSingleQuote(sftpProtocolConfig->userName) } });
+        vars.append({ { "$SFTP_PASSWORD", shellSingleQuote(sftpProtocolConfig->password) } });
     }
     
     return vars;
@@ -274,9 +301,9 @@ amnezia::ScriptVars amnezia::genSocks5ProxyVars(const ContainerConfig &container
     ScriptVars vars;
     
     if (auto* socks5ProxyProtocolConfig = containerConfig.getSocks5ProxyProtocolConfig()) {
-        vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyProtocolConfig->port.isEmpty() ? protocols::socks5Proxy::defaultPort : socks5ProxyProtocolConfig->port } });
-        QString socks5user = (!socks5ProxyProtocolConfig->userName.isEmpty() && !socks5ProxyProtocolConfig->password.isEmpty()) 
-            ? QString("users %1:CL:%2").arg(socks5ProxyProtocolConfig->userName, socks5ProxyProtocolConfig->password) 
+        vars.append({ { "$SOCKS5_PROXY_PORT", sanitizedPort(socks5ProxyProtocolConfig->port, protocols::socks5Proxy::defaultPort) } });
+        const QString socks5user = (!socks5ProxyProtocolConfig->userName.isEmpty() && !socks5ProxyProtocolConfig->password.isEmpty())
+            ? shellSingleQuote(QString("users %1:CL:%2").arg(socks5ProxyProtocolConfig->userName, socks5ProxyProtocolConfig->password))
             : "";
         vars.append({ { "$SOCKS5_USER", socks5user } });
         vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
