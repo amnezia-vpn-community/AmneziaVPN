@@ -3,17 +3,12 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGETS = [
-    ROOT / "service/server/localserver.cpp",
-    ROOT / "ipc/ipcserver.cpp",
-    ROOT / "ipc/ipc.h",
-    ROOT / "client/core/utils/ipcClient.cpp",
-    ROOT / "client/daemon/daemonlocalserver.cpp",
-]
+SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".mm"}
 
 
 def extract_function_body(text: str, name: str) -> str | None:
@@ -34,6 +29,22 @@ def extract_function_body(text: str, name: str) -> str | None:
     return None
 
 
+def tracked_source_paths() -> list[Path]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        paths = (ROOT / line for line in result.stdout.splitlines())
+    except (OSError, subprocess.CalledProcessError):
+        paths = ROOT.rglob("*")
+
+    return sorted(path for path in paths if path.suffix in SOURCE_SUFFIXES and path.is_file())
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -47,21 +58,20 @@ def main() -> int:
     ):
         errors.append("ipc/ipc.h: authorizeLocalIpcSocket defaults open when AMNEZIAVPN_IPC_AUTH_UID is empty")
 
-    raw_handoff = re.compile(r"addHostSideConnection\s*\(\s*[^;\n]*nextPendingConnection\s*\(")
-    for path in TARGETS:
+    raw_handoff = re.compile(r"addHostSideConnection\s*\(\s*[\s\S]{0,200}?nextPendingConnection\s*\(")
+    world_access_sources: list[Path] = []
+    for path in tracked_source_paths():
         rel = path.relative_to(ROOT)
         text = path.read_text(encoding="utf-8")
         if raw_handoff.search(text):
             errors.append(f"{rel}: raw nextPendingConnection() handoff to QtRO")
+        if "WorldAccessOption" in text:
+            world_access_sources.append(path)
+            if "authorizeLocalIpcSocket" not in text:
+                errors.append(f"{rel}: WorldAccessOption listener lacks IPC auth gate")
 
-    for rel in ("service/server/localserver.cpp", "ipc/ipcserver.cpp"):
-        text = (ROOT / rel).read_text(encoding="utf-8")
-        if "WorldAccessOption" in text and "authorizeLocalIpcSocket" not in text:
-            errors.append(f"{rel}: WorldAccessOption listener lacks IPC auth gate")
-
-    daemon_server = (ROOT / "client/daemon/daemonlocalserver.cpp").read_text(encoding="utf-8")
-    if "WorldAccessOption" in daemon_server and "authorizeLocalIpcSocket" not in daemon_server:
-        errors.append("client/daemon/daemonlocalserver.cpp: WorldAccessOption listener lacks IPC auth gate")
+    if not world_access_sources:
+        errors.append("missing WorldAccessOption IPC listeners to guard")
 
     service_unit = (ROOT / "deploy/data/linux/AmneziaVPN.service").read_text(encoding="utf-8")
     if "EnvironmentFile=/etc/AmneziaVPN/ipc-auth.env" not in service_unit:
