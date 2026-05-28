@@ -1,0 +1,40 @@
+name: Security Static Checks
+
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'service/server/localserver.cpp'
+      - 'ipc/ipcserver.cpp'
+      - 'ipc/ipc.h'
+      - 'client/core/utils/ipcClient.cpp'
+      - 'client/daemon/daemonlocalserver.cpp'
+      - 'deploy/data/linux/AmneziaVPN.service'
+      - 'deploy/data/linux/post_install.sh'
+      - 'tools/security/check_ipc_auth_gate.py'
+      - '.github/workflows/security-static.yml'
+  push:
+    branches: [dev]
+    paths:
+      - 'service/server/localserver.cpp'
+      - 'ipc/ipcserver.cpp'
+      - 'ipc/ipc.h'
+      - 'client/core/utils/ipcClient.cpp'
+      - 'client/daemon/daemonlocalserver.cpp'
+      - 'deploy/data/linux/AmneziaVPN.service'
+      - 'deploy/data/linux/post_install.sh'
+      - 'tools/security/check_ipc_auth_gate.py'
+      - '.github/workflows/security-static.yml'
+  workflow_dispatch:
+
+jobs:
+  ipc-auth-gate:
+    name: IPC auth gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check privileged IPC handoff guard
+        run: python3 tools/security/check_ipc_auth_gate.py

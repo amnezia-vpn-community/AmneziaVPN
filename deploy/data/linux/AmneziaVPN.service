@@ -7,6 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
+EnvironmentFile=/etc/AmneziaVPN/ipc-auth.env
 ExecStart=/opt/AmneziaVPN/bin/AmneziaVPN-service
 
 [Install]
