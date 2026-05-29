@@ -3,8 +3,14 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
-#include <QMutex>
+#include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
+#include <QJsonValue>
+#include <QMutex>
+#include <QRegularExpression>
+#include <QStringList>
 
 #include "systemController.h"
 
@@ -16,6 +22,147 @@
 ImportUiController* ImportUiController::mInstance = nullptr;
 static QMutex qrDecodeMutex;
 #endif
+
+namespace
+{
+QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key = {});
+
+bool isSensitiveConfigKey(const QString &key)
+{
+    const QString lowerKey = key.toLower();
+    QString compactKey = lowerKey;
+    compactKey.remove('_');
+    compactKey.remove('-');
+    compactKey.remove(' ');
+
+    return lowerKey == "password"
+        || lowerKey == "api_key"
+        || lowerKey == "vpn_key"
+        || lowerKey == "client_priv_key"
+        || lowerKey == "server_priv_key"
+        || lowerKey == "psk_key"
+        || lowerKey == "presharedkey"
+        || lowerKey == "pre_shared_key"
+        || lowerKey == "auth-token"
+        || lowerKey == "auth_token"
+        || compactKey == "apikey"
+        || compactKey == "vpnkey"
+        || compactKey == "clientprivkey"
+        || compactKey == "serverprivkey"
+        || compactKey == "pskkey"
+        || compactKey == "presharedkey"
+        || compactKey == "authtoken"
+        || (lowerKey.contains("private") && lowerKey.contains("key"))
+        || lowerKey.contains("secret")
+        || lowerKey.contains("token");
+}
+
+bool isSensitiveInlineConfigLine(const QString &line)
+{
+    static const QRegularExpression sensitiveOptionPattern(
+            QStringLiteral(R"(^\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*(:|=|\s+).*)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    return sensitiveOptionPattern.match(line).hasMatch();
+}
+
+QString redactNativeConfigTextForDisplay(QString configText)
+{
+    static const QRegularExpression sensitiveBlockStartPattern(
+            QStringLiteral(R"(^\s*<(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression sensitiveBlockEndPattern(
+            QStringLiteral(R"(^\s*</(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    QStringList lines = configText.replace("\r", "").split("\n");
+    QStringList redactedLines;
+    redactedLines.reserve(lines.size());
+
+    bool redactingSensitiveBlock = false;
+    for (const QString &line : lines) {
+        if (redactingSensitiveBlock) {
+            if (sensitiveBlockEndPattern.match(line).hasMatch()) {
+                redactingSensitiveBlock = false;
+                redactedLines.append(line);
+            } else {
+                redactedLines.append(QStringLiteral("[hidden]"));
+            }
+            continue;
+        }
+
+        if (sensitiveBlockStartPattern.match(line).hasMatch()) {
+            redactingSensitiveBlock = true;
+            redactedLines.append(line);
+            continue;
+        }
+
+        redactedLines.append(isSensitiveInlineConfigLine(line) ? QStringLiteral("[hidden]") : line);
+    }
+
+    return redactedLines.join('\n');
+}
+
+QString redactSensitiveStringForDisplay(QString value)
+{
+    if (value.startsWith("vpn://", Qt::CaseInsensitive)) {
+        return QStringLiteral("[hidden]");
+    }
+
+    QJsonParseError parseError;
+    const QJsonDocument document = QJsonDocument::fromJson(value.toUtf8(), &parseError);
+    if (parseError.error == QJsonParseError::NoError && !document.isNull()) {
+        if (document.isObject()) {
+            return QString::fromUtf8(QJsonDocument(redactConfigForDisplay(document.object()).toObject()).toJson(QJsonDocument::Compact));
+        }
+        if (document.isArray()) {
+            QJsonArray redactedArray;
+            const QJsonArray array = document.array();
+            for (const auto &item : array) {
+                redactedArray.append(redactConfigForDisplay(item));
+            }
+            return QString::fromUtf8(QJsonDocument(redactedArray).toJson(QJsonDocument::Compact));
+        }
+    }
+
+    static const QRegularExpression privateKeyBlockPattern(
+            QStringLiteral(R"(-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----)"));
+    value.replace(privateKeyBlockPattern, QStringLiteral("[hidden private key]"));
+
+    return redactNativeConfigTextForDisplay(value);
+}
+
+QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key)
+{
+    if (isSensitiveConfigKey(key)) {
+        return QStringLiteral("[hidden]");
+    }
+
+    if (value.isString()) {
+        return redactSensitiveStringForDisplay(value.toString());
+    }
+
+    if (value.isObject()) {
+        QJsonObject redactedObject;
+        const QJsonObject object = value.toObject();
+        for (auto it = object.constBegin(); it != object.constEnd(); ++it) {
+            redactedObject.insert(it.key(), redactConfigForDisplay(it.value(), it.key()));
+        }
+        return redactedObject;
+    }
+
+    if (value.isArray()) {
+        QJsonArray redactedArray;
+        const QJsonArray array = value.toArray();
+        for (const auto &item : array) {
+            redactedArray.append(redactConfigForDisplay(item));
+        }
+        return redactedArray;
+    }
+
+    return value;
+}
+}
 
 ImportUiController::ImportUiController(ImportController* importController, QObject *parent)
     : QObject(parent),
@@ -100,7 +247,7 @@ bool ImportUiController::extractConfigFromQr(const QByteArray &data)
 
 QString ImportUiController::getConfig()
 {
-    return QJsonDocument(m_config).toJson(QJsonDocument::Indented);
+    return QJsonDocument(redactConfigForDisplay(m_config).toObject()).toJson(QJsonDocument::Indented);
 }
 
 QString ImportUiController::getConfigFileName()

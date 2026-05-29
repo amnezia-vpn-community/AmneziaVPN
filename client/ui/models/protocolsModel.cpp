@@ -11,7 +11,59 @@
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
 
+#include <QRegularExpression>
+#include <QStringList>
+
 using namespace ProtocolUtils;
+
+namespace
+{
+bool isSensitiveInlineConfigLine(const QString &line)
+{
+    static const QRegularExpression sensitiveOptionPattern(
+            QStringLiteral(R"(^\s*(PrivateKey|PresharedKey|PreSharedKey|client_priv_key|server_priv_key|psk_key|password|api_key|vpn_key|auth-token|auth_token)\s*(:|=|\s+).*)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    return sensitiveOptionPattern.match(line).hasMatch();
+}
+
+QString redactNativeConfigForDisplay(QString configString)
+{
+    static const QRegularExpression sensitiveBlockStartPattern(
+            QStringLiteral(R"(^\s*<(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression sensitiveBlockEndPattern(
+            QStringLiteral(R"(^\s*</(key|tls-auth|auth-user-pass)>\s*$)"),
+            QRegularExpression::CaseInsensitiveOption);
+
+    QStringList lines = configString.replace("\r", "").split("\n");
+    QStringList redactedLines;
+    redactedLines.reserve(lines.size());
+
+    bool redactingSensitiveBlock = false;
+    for (const QString &line : lines) {
+        if (redactingSensitiveBlock) {
+            if (sensitiveBlockEndPattern.match(line).hasMatch()) {
+                redactingSensitiveBlock = false;
+                redactedLines.append(line);
+            } else {
+                redactedLines.append(QStringLiteral("[hidden]"));
+            }
+            continue;
+        }
+
+        if (sensitiveBlockStartPattern.match(line).hasMatch()) {
+            redactingSensitiveBlock = true;
+            redactedLines.append(line);
+            continue;
+        }
+
+        redactedLines.append(isSensitiveInlineConfigLine(line) ? QStringLiteral("[hidden]") : line);
+    }
+
+    return redactedLines.join('\n');
+}
+}
 
 ProtocolsModel::ProtocolsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -94,14 +146,7 @@ Proto ProtocolsModel::getProtocolType() const
 
 QString ProtocolsModel::getRawConfig() const
 {
-    QString configString = m_containerConfig.protocolConfig.nativeConfig();
-    
-    QStringList lines = configString.replace("\r", "").split("\n");
-    QString rawConfig;
-    for (const QString &l : lines) {
-        rawConfig.append(l + "\n");
-    }
-    return rawConfig;
+    return redactNativeConfigForDisplay(m_containerConfig.protocolConfig.nativeConfig()) + "\n";
 }
 
 bool ProtocolsModel::isClientProtocolExists() const

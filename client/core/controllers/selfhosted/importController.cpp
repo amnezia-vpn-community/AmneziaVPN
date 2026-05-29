@@ -726,7 +726,7 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig,
             if (!maliciousStrings.isEmpty()) {
                 warningText += "<br>In the imported configuration, potentially dangerous lines were found:";
                 for (const auto &string : maliciousStrings) {
-                    warningText += QString("<br><i>%1</i>").arg(string);
+                    warningText += QString("<br><i>%1</i>").arg(string.toHtmlEscaped());
                 }
             }
         }

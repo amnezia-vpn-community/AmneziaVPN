@@ -22,11 +22,13 @@ PageType {
     Accessible.name: qsTr("Subscription Key")
 
     property var processedServer
+    property bool showQrCode: false
 
     Connections {
         target: ServersModel
 
         function onProcessedServerChanged() {
+            root.showQrCode = false
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -163,6 +165,31 @@ PageType {
                 }
             }
 
+            BasicButtonType {
+                objectName: "settingsApiSubscriptionKeyShowQrButton"
+                Accessible.name: text
+                Accessible.role: Accessible.Button
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: SubscriptionUiController.qrCodesCount > 0
+
+                defaultColor: "transparent"
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+
+                text: root.showQrCode ? qsTr("Hide QR code") : qsTr("Show QR code")
+                leftImageSource: "qrc:/images/controls/qr-code.svg"
+
+                clickedFunc: function() {
+                    root.showQrCode = !root.showQrCode
+                }
+            }
+
             Rectangle {
                 objectName: "settingsApiSubscriptionKeyQrContainer"
                 Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
@@ -172,7 +199,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: SubscriptionUiController.qrCodesCount > 0
+                visible: root.showQrCode && SubscriptionUiController.qrCodesCount > 0
                 color: "white"
                 radius: 12
 
@@ -197,7 +224,7 @@ PageType {
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: SubscriptionUiController.qrCodesCount > 0
+                visible: root.showQrCode && SubscriptionUiController.qrCodesCount > 0
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }
