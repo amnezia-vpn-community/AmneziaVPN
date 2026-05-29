@@ -8,6 +8,10 @@
 
 #include "tapcontroller_win.h"
 
+namespace {
+constexpr auto kRedactedTapInstance = "[tap-instance-id-redacted]";
+}
+
 #define TAP_EXE_ERROR { \
     qDebug() << "TapController: Can't start tapinstall.exe"; \
     return false; \
@@ -50,7 +54,7 @@ bool TapController::enableTapAdapter(const QString &tapInstanceId)
     }
     if (output.contains("No matching devices ")) TAP_NO_MATCHING_DEVICES_ERROR ;
 
-    qDebug() << "Enabled TAP Instance id:" << tapInstanceId;
+    qDebug() << "Enabled TAP Instance id:" << kRedactedTapInstance;
     return true;
 }
 
@@ -68,7 +72,7 @@ bool TapController::disableTapAdapter(const QString &tapInstanceId)
     }
     if (output.contains("No matching devices ")) TAP_NO_MATCHING_DEVICES_ERROR ;
 
-    qDebug() << "Disabled TAP Instance id:" << tapInstanceId;
+    qDebug() << "Disabled TAP Instance id:" << kRedactedTapInstance;
     return true;
 }
 
@@ -106,9 +110,8 @@ QStringList TapController::getTapList()
 
 bool TapController::checkAndSetup()
 {
-    qDebug().noquote() << "OpenVPN path" << getOpenVpnPath();
-    qDebug().noquote() << "TapInstall path" << getTapInstallPath();
-    qDebug().noquote() << "TapDriverDir path" << getTapDriverDir();
+    qDebug() << "TapController: checking OpenVPN/TAP components"
+             << "legacyDriver" << oldDriversRequired();
     //////////////////////////////////////////////
     /// Check if OpenVPN executable ready for use
     bool isOpenVpnExeExist = checkOpenVpn();
@@ -122,13 +125,13 @@ bool TapController::checkAndSetup()
     bool isAnyAvailableTap = false;
     QStringList tapList = getTapList();
     for (const QString &tap : tapList) {
-        qDebug() << "TapController: Found TAP device" << tap << ", checking...";
+        qDebug() << "TapController: Found TAP device" << kRedactedTapInstance << ", checking...";
         if (checkDriver(tap)) {
             isAnyAvailableTap = true;
-            qDebug() << "TapController: Device" << tap << "is ready for using";
+            qDebug() << "TapController: Device" << kRedactedTapInstance << "is ready for using";
         }
         else
-            qDebug() << "TapController: Device" << tap << "is NOT ready for using";
+            qDebug() << "TapController: Device" << kRedactedTapInstance << "is NOT ready for using";
     }
 
     if (isAnyAvailableTap) {
@@ -198,25 +201,25 @@ bool TapController::checkDriver(const QString& tapInstanceId)
         if (output.contains("No matching devices ")) TAP_NO_MATCHING_DEVICES_ERROR ;
 
         if (output.contains("is running")) {
-            qDebug() << "TapController: Device" << tapInstanceId << "is active and ready";
+            qDebug() << "TapController: Device" << kRedactedTapInstance << "is active and ready";
             //return true;
         }
         else if (output.contains("is disabled")) isDisabled = true;
         else {
-            qDebug() << "TapController: Device" << tapInstanceId << "is in unknown state";
+            qDebug() << "TapController: Device" << kRedactedTapInstance << "is in unknown state";
             return false;
         }
     }
 
     /// Disable adapter if enabled
     if (!isDisabled)  {
-        qDebug() << "TapController: Device" << tapInstanceId << "is enabled. Disabling before use...";
+        qDebug() << "TapController: Device" << kRedactedTapInstance << "is enabled. Disabling before use...";
         if (!disableTapAdapter(tapInstanceId)) return false;
     }
 
     /// Enable adapter
     {
-        qDebug() << "TapController: Device" << tapInstanceId << "is disabled. Enabling...";
+        qDebug() << "TapController: Device" << kRedactedTapInstance << "is disabled. Enabling...";
         if (!enableTapAdapter(tapInstanceId)) return false;
     }
 
@@ -249,9 +252,11 @@ bool TapController::checkOpenVpn()
     }
     openVpnProc.waitForFinished(1000);
 
-    QString output = QString(openVpnProc.readAll());
-    output.replace("\r", "");
-    qDebug() << "TapController: openvpn.exe found, version:" << output;
+    const QByteArray output = openVpnProc.readAll();
+    qDebug() << "TapController: openvpn.exe found"
+             << "exitCode" << openVpnProc.exitCode()
+             << "exitStatus" << openVpnProc.exitStatus()
+             << "outputBytes" << output.size();
     return true;
 }
 
@@ -286,11 +291,11 @@ bool TapController::removeDriver(const QString& tapInstanceId)
         tapInstallProc.waitForFinished();
         QString output = QString( tapInstallProc.readAll() );
         if (output.contains("were removed")) {
-            qDebug() << "TAP device" << tapInstanceId << "successfully removed";
+            qDebug() << "TAP device" << kRedactedTapInstance << "successfully removed";
             return true;
         }
         else {
-            qDebug() << "Unable to remove TAP device" << tapInstanceId;
+            qDebug() << "Unable to remove TAP device" << kRedactedTapInstance;
             return false;
         }
     }
@@ -380,7 +385,10 @@ bool TapController::setupDriverCertificate()
 
     tapInstallProc.waitForFinished();
 
-    QString certOutput = QString(tapInstallProc.readAll());
-    qDebug() << "TapController: OpenVPN certificate installed:" << certOutput;
+    const QByteArray certOutput = tapInstallProc.readAll();
+    qDebug() << "TapController: OpenVPN certificate installed"
+             << "exitCode" << tapInstallProc.exitCode()
+             << "exitStatus" << tapInstallProc.exitStatus()
+             << "outputBytes" << certOutput.size();
     return true;
 }
