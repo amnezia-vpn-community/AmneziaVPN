@@ -25,6 +25,8 @@ static QMutex qrDecodeMutex;
 
 namespace
 {
+constexpr qint64 kMaxImportPayloadBytes = 4 * 1024 * 1024;
+
 QJsonValue redactConfigForDisplay(const QJsonValue &value, const QString &key = {});
 
 bool isSensitiveConfigKey(const QString &key)
@@ -181,7 +183,7 @@ ImportUiController::ImportUiController(ImportController* importController, QObje
 bool ImportUiController::extractConfigFromFile(const QString &fileName)
 {
     QString data;
-    if (!SystemController::readFile(fileName, data)) {
+    if (!SystemController::readFile(fileName, data, kMaxImportPayloadBytes)) {
         emit importErrorOccurred(ErrorCode::ImportOpenConfigError, false);
         return false;
     }
