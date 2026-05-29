@@ -20,6 +20,7 @@ public:
 
     static bool isValidUpdaterBaseUrl(const QString &baseUrl);
     static bool isValidUpdaterUrl(const QUrl &url);
+    static bool isUpdaterInstallerExecutionAllowed();
 
 public slots:
     void checkForUpdates();
