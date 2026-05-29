@@ -19,6 +19,7 @@
 #include <QSettings>
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
+#include <cstdio>
 
 #include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
@@ -35,8 +36,9 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string (visible in process list; prefer --import-file)"), QStringLiteral("data")),
-      m_optImportFile({QStringLiteral("import-file")}, QStringLiteral("Import configuration from a local file"), QStringLiteral("path"))
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Deprecated unsafe import source; use --import-stdin or --import-file"), QStringLiteral("data")),
+      m_optImportFile({QStringLiteral("import-file")}, QStringLiteral("Import configuration from a local file"), QStringLiteral("path")),
+      m_optImportStdin({QStringLiteral("import-stdin")}, QStringLiteral("Import configuration from standard input"))
 {
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
@@ -143,10 +145,37 @@ void AmneziaApplication::init()
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
 
-    if (m_parser.isSet(m_optImport) || m_parser.isSet(m_optImportFile)) {
+    const bool hasImportData = m_parser.isSet(m_optImport);
+    const bool hasImportFile = m_parser.isSet(m_optImportFile);
+    const bool hasImportStdin = m_parser.isSet(m_optImportStdin);
+
+    int importSourceCount = 0;
+    if (hasImportData) {
+        ++importSourceCount;
+    }
+    if (hasImportFile) {
+        ++importSourceCount;
+    }
+    if (hasImportStdin) {
+        ++importSourceCount;
+    }
+
+    if (hasImportData) {
+        qWarning() << "Cannot import profile: --import <data> exposes configuration material in process arguments; use --import-stdin or --import-file";
+        QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+        return;
+    }
+
+    if (importSourceCount > 1) {
+        qWarning() << "Cannot import profile: specify only one import source";
+        QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+        return;
+    }
+
+    if (importSourceCount == 1) {
         QString data = m_parser.value(m_optImport);
 
-        if (m_parser.isSet(m_optImportFile)) {
+        if (hasImportFile) {
             QFile importFile(m_parser.value(m_optImportFile));
             if (!importFile.open(QIODevice::ReadOnly)) {
                 qWarning() << "Cannot import profile: failed to open import file";
@@ -154,6 +183,14 @@ void AmneziaApplication::init()
                 return;
             }
             data = QString::fromUtf8(importFile.readAll());
+        } else if (hasImportStdin) {
+            QFile importStream;
+            if (!importStream.open(stdin, QIODevice::ReadOnly)) {
+                qWarning() << "Cannot import profile: failed to read standard input";
+                QTimer::singleShot(0, this, [] { QCoreApplication::exit(2); });
+                return;
+            }
+            data = QString::fromUtf8(importStream.readAll());
         }
 
         if (data.isEmpty() || !m_coreController || !m_coreController->importConfigFromData(data)) {
@@ -255,6 +292,7 @@ bool AmneziaApplication::parseCommands()
     m_parser.addOption(m_optConnect);
     m_parser.addOption(m_optImport);
     m_parser.addOption(m_optImportFile);
+    m_parser.addOption(m_optImportStdin);
     
     m_parser.process(*this);
 
