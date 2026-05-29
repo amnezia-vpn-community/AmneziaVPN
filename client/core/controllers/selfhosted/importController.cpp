@@ -496,7 +496,11 @@ void ImportController::importConfig(const QJsonObject &config)
             emit importFinished();
         }
     } else {
-        qWarning() << "Failed to import profile: unsupported config schema";
+        qWarning() << "Failed to import profile: unsupported config schema"
+                   << "top-level key count:" << config.size()
+                   << "has hostName:" << config.contains(configKey::hostName)
+                   << "has containers:" << config.contains(configKey::containers)
+                   << "has configVersion:" << config.contains(configKey::configVersion);
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
     }
 }
