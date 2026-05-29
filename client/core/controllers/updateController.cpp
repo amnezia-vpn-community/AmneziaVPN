@@ -268,6 +268,13 @@ bool UpdateController::isValidUpdaterUrl(const QUrl &url)
     return isHttpsUrlSafeForUpdater(url);
 }
 
+bool UpdateController::isUpdaterInstallerExecutionAllowed()
+{
+    // Fail closed until updater artifacts are authenticated with a signed manifest
+    // or an equivalent local verification gate before execution.
+    return false;
+}
+
 QString UpdateController::composeDownloadUrl() const
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -298,6 +305,11 @@ void UpdateController::runInstaller()
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (m_downloadUrl.isEmpty()) {
         logger.error() << "Download URL is empty";
+        return;
+    }
+
+    if (!isUpdaterInstallerExecutionAllowed()) {
+        logger.error() << "Refusing to run updater installer without artifact authenticity verification";
         return;
     }
 
@@ -491,4 +503,3 @@ int UpdateController::runLinuxInstaller(const QString &installerPath)
     return 0;
 }
 #endif
-

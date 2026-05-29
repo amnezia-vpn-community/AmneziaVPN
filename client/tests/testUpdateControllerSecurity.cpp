@@ -36,6 +36,11 @@ private slots:
     {
         QVERIFY(UpdateController::isValidUpdaterUrl(QUrl(QStringLiteral("https://updates.amnezia.org/AmneziaVPN_1.2.3_x64.exe"))));
     }
+
+    void blocksInstallerExecutionUntilArtifactsAreAuthenticated()
+    {
+        QVERIFY(!UpdateController::isUpdaterInstallerExecutionAllowed());
+    }
 };
 
 QTEST_MAIN(TestUpdateControllerSecurity)
