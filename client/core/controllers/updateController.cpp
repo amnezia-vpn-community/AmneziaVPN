@@ -12,7 +12,6 @@
 #include "logger.h"
 #include "version.h"
 #include "core/controllers/gatewayController.h"
-#include "core/utils/api/apiUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
@@ -379,7 +378,7 @@ void UpdateController::runInstaller()
                 logger.error() << errorString(ErrorCode::ApiConfigTimeoutError);
             } else {
                 QString err = reply->errorString();
-                logger.error() << apiUtils::responseBodyForLog(reply->readAll());
+                logger.error() << "Updater installer download response body omitted from logs";
                 logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
                 logger.error() << "Error message:" << err;
                 logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
