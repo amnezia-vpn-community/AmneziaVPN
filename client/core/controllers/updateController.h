@@ -50,13 +50,6 @@ private:
     QString m_downloadUrl;
     bool m_updateCheckRunning = false;
 
-#if defined(Q_OS_WINDOWS)
-    int runWindowsInstaller(const QString &installerPath);
-#elif defined(Q_OS_MACOS)
-    int runMacInstaller(const QString &installerPath);
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    int runLinuxInstaller(const QString &installerPath);
-#endif
 };
 
 #endif // UPDATECONTROLLER_H
