@@ -9,6 +9,7 @@
 #include <QLocalSocket>
 
 #include "daemonlocalserverconnection.h"
+#include "ipc.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -55,6 +56,11 @@ bool DaemonLocalServer::initialize() {
 
     QLocalSocket* socket = m_server.nextPendingConnection();
     Q_ASSERT(socket);
+
+    if (!amnezia::authorizeLocalIpcSocket(socket, "daemon")) {
+      socket->deleteLater();
+      return;
+    }
 
     DaemonLocalServerConnection* connection =
         new DaemonLocalServerConnection(&m_server, socket);

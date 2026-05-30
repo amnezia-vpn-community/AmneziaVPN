@@ -86,8 +86,6 @@ PageType {
             descriptionText: {
                 if (root.processedServer.isServerFromTelegramApi) {
                     return root.processedServer.serverDescription
-                } else if (root.processedServer.hasWriteAccess) {
-                    return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
                 } else {
                     return root.processedServer.hostName
                 }

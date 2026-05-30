@@ -65,27 +65,37 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
 #endif
 }
 
-bool SystemController::readFile(const QString &fileName, QByteArray &data)
+bool SystemController::readFile(const QString &fileName, QByteArray &data, qint64 maxSize)
 {
 #ifdef Q_OS_ANDROID
     int fd = AndroidController::instance()->getFd(fileName);
     if (fd == -1) return false;
     QFile file;
     if(!file.open(fd, QIODevice::ReadOnly)) return false;
+    if (maxSize >= 0 && file.size() > maxSize) {
+        AndroidController::instance()->closeFd();
+        return false;
+    }
     data = file.readAll();
+    if (maxSize >= 0 && data.size() > maxSize) {
+        AndroidController::instance()->closeFd();
+        return false;
+    }
     AndroidController::instance()->closeFd();
 #else
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) return false;
+    if (maxSize >= 0 && file.size() > maxSize) return false;
     data = file.readAll();
+    if (maxSize >= 0 && data.size() > maxSize) return false;
 #endif
     return true;
 }
 
-bool SystemController::readFile(const QString &fileName, QString &data)
+bool SystemController::readFile(const QString &fileName, QString &data, qint64 maxSize)
 {
     QByteArray byteArray;
-    if(!readFile(fileName, byteArray)) return false;
+    if(!readFile(fileName, byteArray, maxSize)) return false;
     data = byteArray;
     return true;
 }

@@ -1,10 +1,23 @@
 #ifndef IPC_H
 #define IPC_H
 
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+    #define _GNU_SOURCE
+#endif
+
+#include <QByteArray>
+#include <QDebug>
+#include <QLocalSocket>
 #include <QObject>
 #include <QString>
 
 #include "../client/core/utils/utilities.h"
+
+#ifdef Q_OS_LINUX
+    #include <sys/socket.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+#endif
 
 #define IPC_SERVICE_URL "local:AmneziaVpnIpcInterface"
 
@@ -48,6 +61,51 @@ inline QString getIpcProcessUrl(int pid) {
     return QString("%1_%2").arg(IPC_SERVICE_URL).arg(pid);
 #else
     return QString("/tmp/%1_%2").arg(IPC_SERVICE_URL).arg(pid);
+#endif
+}
+
+inline bool authorizeLocalIpcSocket(QLocalSocket *socket, const char *scope)
+{
+    if (!socket) {
+        qWarning() << "Rejected null IPC socket for" << scope;
+        return false;
+    }
+
+#ifdef Q_OS_LINUX
+    const QByteArray allowedUid = qgetenv("AMNEZIAVPN_IPC_AUTH_UID");
+    if (allowedUid.isEmpty()) {
+        qWarning() << "Rejected IPC socket for" << scope << "because AMNEZIAVPN_IPC_AUTH_UID is not configured";
+        return false;
+    }
+
+    bool ok = false;
+    const qulonglong expectedUid = allowedUid.toULongLong(&ok);
+    if (!ok) {
+        qWarning() << "Rejected IPC socket for" << scope << "because AMNEZIAVPN_IPC_AUTH_UID is invalid";
+        return false;
+    }
+
+    const qintptr descriptor = socket->socketDescriptor();
+    if (descriptor < 0) {
+        qWarning() << "Rejected IPC socket for" << scope << "because peer credentials are unavailable";
+        return false;
+    }
+
+    struct ucred credentials {};
+    socklen_t length = sizeof(credentials);
+    if (::getsockopt(static_cast<int>(descriptor), SOL_SOCKET, SO_PEERCRED, &credentials, &length) != 0) {
+        qWarning() << "Rejected IPC socket for" << scope << "because SO_PEERCRED failed";
+        return false;
+    }
+
+    if (static_cast<qulonglong>(credentials.uid) != expectedUid) {
+        qWarning() << "Rejected IPC socket for" << scope << "from uid" << credentials.uid;
+        return false;
+    }
+
+    return true;
+#else
+    return true;
 #endif
 }
 
