@@ -149,6 +149,15 @@ target_link_libraries(test_update_controller_security PRIVATE
     test_common
 )
 
+add_executable(test_api_utils_logging
+    testApiUtilsLogging.cpp
+)
+
+target_link_libraries(test_api_utils_logging PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -163,3 +172,4 @@ add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
 add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME UpdateControllerSecurityTest COMMAND test_update_controller_security)
+add_test(NAME ApiUtilsLoggingTest COMMAND test_api_utils_logging)
