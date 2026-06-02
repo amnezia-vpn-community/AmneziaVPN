@@ -12,7 +12,7 @@ required_conan_version = ">=2.21"
 
 class LibSSHRecipe(ConanFile):
     name = "libssh"
-    version = "0.11.3"
+    version = "0.11.4"
     user = "amnezia"
     license = "LGPL-2.1"
     homepage = "https://www.libssh.org/"
@@ -64,8 +64,8 @@ class LibSSHRecipe(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires '-o mbedtls/*:enable_threading=True' when using '-o libssh/*:crypto_backend=mbedtls'")
 
     def source(self):
-        get(self, "https://www.libssh.org/files/0.11/libssh-0.11.3.tar.xz",
-            sha256="7d8a1361bb094ec3f511964e78a5a4dba689b5986e112afabe4f4d0d6c6125c3", strip_root=True
+        get(self, "https://www.libssh.org/files/0.11/libssh-0.11.4.tar.xz",
+            sha256="002ac320e3d66c9e100ec6576e3e84aa0c48949efde3bf5b40a2802992297701", strip_root=True
         )
 
     def generate(self):
