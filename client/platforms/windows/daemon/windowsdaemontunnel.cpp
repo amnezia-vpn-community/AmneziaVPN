@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include <QCoreApplication>
+#include <QFile>
 
 //#include "commandlineparser.h"
 #include "core/utils/constants.h"
@@ -38,13 +39,24 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
   QCoreApplication::setApplicationVersion(Constants::versionString());
 
   if (tokens.length() != 2) {
-    logger.error() << "Expected 1 parameter only: the config file.";
+    logger.error() << "Expected 1 parameter only: the config file path.";
     return 1;
   }
-  QString maybeConfig = tokens.at(1);
+  const QString configFilePath = tokens.at(1);
+  QFile configFile(configFilePath);
+  if (!configFile.open(QIODevice::ReadOnly)) {
+    logger.error() << "Failed to open the tunnel config file";
+    return 1;
+  }
+
+  QString maybeConfig = QString::fromUtf8(configFile.readAll());
+  configFile.close();
+  if (!QFile::remove(configFilePath)) {
+    logger.warning() << "Failed to remove the tunnel config file";
+  }
 
   if (!maybeConfig.startsWith("[Interface]")) {
-    logger.error() << "parameter Does not seem to be a config";
+    logger.error() << "parameter does not seem to be a config";
     return 1;
   }
   // This process will be used by the wireguard tunnel. No need to call

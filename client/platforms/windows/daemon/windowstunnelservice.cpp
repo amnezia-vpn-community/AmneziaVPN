@@ -7,7 +7,10 @@
 #include <Windows.h>
 
 #include <QDateTime>
+#include <QDir>
+#include <QFile>
 #include <QScopeGuard>
+#include <QTemporaryFile>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -23,6 +26,34 @@ constexpr uint32_t WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC = 2000;
 
 namespace {
 Logger logger("WindowsTunnelService");
+
+QString writeTunnelConfigFile(const QString& configData) {
+  QTemporaryFile configFile(QDir::temp().filePath("amneziawg-tunnel-XXXXXX.conf"));
+  configFile.setAutoRemove(false);
+
+  if (!configFile.open()) {
+    logger.error() << "Failed to create the tunnel config file";
+    return QString();
+  }
+
+  const QString configFilePath = configFile.fileName();
+  auto cleanup = qScopeGuard([&] { QFile::remove(configFilePath); });
+
+  const QByteArray configBytes = configData.toUtf8();
+  if (configFile.write(configBytes) != configBytes.size()) {
+    logger.error() << "Failed to write the tunnel config file";
+    return QString();
+  }
+
+  if (!configFile.flush()) {
+    logger.error() << "Failed to flush the tunnel config file";
+    return QString();
+  }
+
+  configFile.close();
+  cleanup.dismiss();
+  return configFilePath;
+}
 }  // namespace
 
 static bool stopAndDeleteTunnelService(SC_HANDLE service);
@@ -139,11 +170,17 @@ bool WindowsTunnelService::start(const QString& configData) {
     service = nullptr;
   }
 
+  const QString configFilePath = writeTunnelConfigFile(configData);
+  if (configFilePath.isEmpty()) {
+    return false;
+  }
+  auto configFileGuard = qScopeGuard([&] { QFile::remove(configFilePath); });
+
   QString serviceCmdline;
   {
     QTextStream out(&serviceCmdline);
     out << "\"" << qApp->applicationFilePath() << "\" tunneldaemon \""
-        << configData << "\"";
+        << QDir::toNativeSeparators(configFilePath) << "\"";
   }
 
   logger.debug() << "Service:" << qApp->applicationFilePath();
@@ -181,6 +218,7 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   if (waitForServiceStatus(service, SERVICE_RUNNING)) {
     logger.debug() << "The tunnel service is up and running";
+    configFileGuard.dismiss();
     guard.dismiss();
     m_service = service;
     m_timer.start(WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC);
