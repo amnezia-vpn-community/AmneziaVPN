@@ -12,6 +12,7 @@ on:
       - 'deploy/data/linux/AmneziaVPN.service'
       - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
+      - 'tools/security/check_command_sink_inventory.py'
       - '.github/workflows/security-static.yml'
   push:
     branches: [dev]
@@ -24,6 +25,7 @@ on:
       - 'deploy/data/linux/AmneziaVPN.service'
       - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
+      - 'tools/security/check_command_sink_inventory.py'
       - '.github/workflows/security-static.yml'
   workflow_dispatch:
 
@@ -38,3 +40,6 @@ jobs:
 
       - name: Check privileged IPC handoff guard
         run: python3 tools/security/check_ipc_auth_gate.py
+
+      - name: Check command sink inventory
+        run: python3 tools/security/check_command_sink_inventory.py
