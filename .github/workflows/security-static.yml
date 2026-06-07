@@ -9,10 +9,15 @@ on:
       - 'ipc/ipc.h'
       - 'client/core/utils/ipcClient.cpp'
       - 'client/daemon/daemonlocalserver.cpp'
+      - 'client/ui/controllers/importUiController.cpp'
+      - 'client/ui/models/protocolsModel.cpp'
+      - 'client/ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml'
+      - 'client/ui/qml/Pages2/PageSettingsServerInfo.qml'
       - 'deploy/data/linux/AmneziaVPN.service'
       - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
       - 'tools/security/check_command_sink_inventory.py'
+      - 'tools/security/check_qml_diagnostic_redaction.py'
       - '.github/workflows/security-static.yml'
   push:
     branches: [dev]
@@ -22,10 +27,15 @@ on:
       - 'ipc/ipc.h'
       - 'client/core/utils/ipcClient.cpp'
       - 'client/daemon/daemonlocalserver.cpp'
+      - 'client/ui/controllers/importUiController.cpp'
+      - 'client/ui/models/protocolsModel.cpp'
+      - 'client/ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml'
+      - 'client/ui/qml/Pages2/PageSettingsServerInfo.qml'
       - 'deploy/data/linux/AmneziaVPN.service'
       - 'deploy/data/linux/post_install.sh'
       - 'tools/security/check_ipc_auth_gate.py'
       - 'tools/security/check_command_sink_inventory.py'
+      - 'tools/security/check_qml_diagnostic_redaction.py'
       - '.github/workflows/security-static.yml'
   workflow_dispatch:
 
@@ -43,3 +53,14 @@ jobs:
 
       - name: Check command sink inventory
         run: python3 tools/security/check_command_sink_inventory.py
+
+  qml-diagnostic-redaction:
+    name: QML diagnostic redaction
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check QML diagnostic credential redaction
+        run: python3 tools/security/check_qml_diagnostic_redaction.py
