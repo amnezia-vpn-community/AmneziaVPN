@@ -75,6 +75,7 @@ jobs:
             -v "${{ github.workspace }}/test-suites:/workspace" \
             -v "${{ github.workspace }}/AmneziaVPN_Linux_Installer.bin:/workspace/AmneziaVPN_Linux_Installer.bin" \
             -e AMNEZIABIN=/workspace/AmneziaVPN_Linux_Installer.bin \
+            -e AMNEZIA_BUILD_URL=/workspace/AmneziaVPN_Linux_Installer.bin \
             -e AMNEZIA_TEST_VERSION="$AMNEZIA_TEST_VERSION" \
             -e AMNEZIA_BUILD_SHA256="$AMNEZIA_BUILD_SHA256" \
             -e DISPLAY=:99 \
