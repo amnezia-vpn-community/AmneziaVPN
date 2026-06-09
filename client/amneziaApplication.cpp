@@ -173,7 +173,7 @@ void AmneziaApplication::init()
     }
 
     if (importSourceCount == 1) {
-        QString data = m_parser.value(m_optImport);
+        QString data;
 
         if (hasImportFile) {
             QFile importFile(m_parser.value(m_optImportFile));
