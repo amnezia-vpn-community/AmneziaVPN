@@ -407,7 +407,8 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
                 }
             } catch (...) {
                 Utils::logException();
-                qCritical() << "error loading private key from environment variables or decrypting payload" << encryptedResponseBody;
+                qCritical() << "error loading private key from environment variables or decrypting payload"
+                            << apiUtils::responseBodyForLog(encryptedResponseBody);
                 continue;
             }
 
